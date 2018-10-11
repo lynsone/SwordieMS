@@ -9,6 +9,7 @@ import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.AccountType;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -33,8 +34,9 @@ public class Account {
     private int id;
     private String name;
     private String password;
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "accountTypeMask")
-    private int accountType;
+    private AccountType accountType;
     private int age;
     private int vipGrade;
     private int nBlockReason;
@@ -80,7 +82,7 @@ public class Account {
     private FileTime banExpireDate = FileTime.fromType(FileTime.Type.ZERO_TIME);
     private String banReason;
 
-    public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String name, String password, int accountId, String pic, AccountType accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
                    byte gradeCode, String censoredNxLoginID, int characterSlots, FileTime creationDate) {
         this.name = name;
@@ -104,13 +106,12 @@ public class Account {
         this.monsterCollection = new MonsterCollection();
         this.friends = new HashSet<>();
         this.trunk = new Trunk((byte) 20);
-        setManager();
     }
 
     public Account(String id, int accountId) {
-        this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
-                0, false, (byte) 0, "", 16,
-                FileTime.currentTime());
+        this(id, null, accountId, null, AccountType.Player, 0, 0, 0,
+                (byte) 0, (byte) 0, (byte) 0, (byte) 3, 0, false, (byte) 0,
+                "", 16, FileTime.currentTime());
     }
 
     public Account(){
@@ -132,32 +133,8 @@ public class Account {
         return id;
     }
 
-    public int getAccountType() {
+    public AccountType getAccountType() {
         return accountType;
-    }
-
-    public void setManager() {
-        accountType |= 1 << 4;
-    }
-
-    public boolean isManager() {
-        return accountType >> 4 == 1;
-    }
-
-    public void setTester() {
-        accountType |= 1 << 5;
-    }
-
-    public boolean isTester() {
-        return accountType >> 5 == 1;
-    }
-
-    public void setSubTester() {
-        accountType |= 1 << 13;
-    }
-
-    public boolean isSubTester() {
-        return accountType >> 13 == 1;
     }
 
     public int getAge() {
@@ -212,7 +189,7 @@ public class Account {
         return nBlockReason;
     }
 
-    public void setAccountType(int accountType) {
+    public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
     }
 

@@ -8,6 +8,7 @@ import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
+import net.swordie.ms.client.character.commands.Command;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.potential.CharacterPotential;
@@ -252,22 +253,32 @@ public class WorldHandler {
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
             }
-        } else if (msg.charAt(0) == AdminCommand.getPrefix()) {
+        } else if (msg.charAt(0) == AdminCommand.getPrefix()
+                && chr.getAccount().getAccountType().ordinal() > AccountType.Player.ordinal()) {
             boolean executed = false;
-            String command = msg.split(" ")[0];
+            String command = msg.split(" ")[0].replace("!", "");
             for (Class clazz : AdminCommands.class.getClasses()) {
-                if (!(AdminCommand.getPrefix() + clazz.getSimpleName()).equalsIgnoreCase(command)) {
-                    continue;
+                Command cmd = (Command) clazz.getAnnotation(Command.class);
+                boolean matchingCommand = false;
+                for (String name : cmd.names()) {
+                    if (name.equalsIgnoreCase(command)
+                            && chr.getAccount().getAccountType().ordinal() >= cmd.requiredType().ordinal()) {
+                        matchingCommand = true;
+                        break;
+                    }
                 }
-                executed = true;
-                String[] split = null;
-                try {
-                    AdminCommand adminCommand = (AdminCommand) clazz.getConstructor().newInstance();
-                    Method method = clazz.getDeclaredMethod("execute", Char.class, String[].class);
-                    split = msg.split(" ");
-                    method.invoke(adminCommand, c.getChr(), split);
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                    e.printStackTrace();
+                if (matchingCommand) {
+                    executed = true;
+                    String[] split = null;
+                    try {
+                        AdminCommand adminCommand = (AdminCommand) clazz.getConstructor().newInstance();
+                        Method method = clazz.getDeclaredMethod("execute", Char.class, String[].class);
+                        split = msg.split(" ");
+                        method.invoke(adminCommand, c.getChr(), split);
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException
+                            | InstantiationException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if (!executed) {
@@ -3243,6 +3254,33 @@ public class WorldHandler {
         c.getChr().getMacros().addAll(macros); // don't set macros directly, as a new row will be made in the DB
     }
 
+    public static void handleUserAntiMacroQuestionResult(Client c, InPacket inPacket) {
+        short length = inPacket.decodeShort();
+        Char chr = c.getChr();
+
+        if (length > 0) {
+            String answer = inPacket.decodeString(length);
+
+            if (answer.length() < 6 || !answer.equalsIgnoreCase(chr.getLieDetectorAnswer())) {
+                chr.failedLieDetector();
+            } else {
+                chr.passedLieDetector();
+            }
+        } else {
+            chr.failedLieDetector();
+            chr.dispose();
+        }
+    }
+
+    public static void handleUserAntiMacroRefreshResult(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+
+        // attempting to refresh while there's no LD
+        if (chr.getLieDetectorAnswer().length() > 0) {
+            chr.sendLieDetector(true);
+        }
+    }
+
     public static void handleUserCreateHolidomRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
@@ -3933,6 +3971,7 @@ public class WorldHandler {
     }
 
     public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
+        c.getChr().punishLieDetectorEvasion();
         CashShop cs = Server.getInstance().getCashShop();
         c.write(Stage.setCashShop(c.getChr(), cs));
         c.write(CCashShop.loadLockerDone(c.getChr().getAccount()));
@@ -4881,9 +4920,10 @@ public class WorldHandler {
     }
 
     public static void handleUserMapTransferRequest(Char chr, InPacket inPacket) {
+        chr.punishLieDetectorEvasion();
+
         byte mtType = inPacket.decodeByte();
         byte itemType = inPacket.decodeByte();
-
 
         MapTransferType mapTransferType = MapTransferType.getByVal(mtType);
         switch (mapTransferType) {

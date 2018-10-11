@@ -25,6 +25,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.util.AntiMacro;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import org.apache.log4j.LogManager;
@@ -958,6 +959,34 @@ public class WvsContext {
         outPacket.encodeInt(type.getVal());
         outPacket.encodeInt(arg1);
         outPacket.encodeInt(arg2);
+
+        return outPacket;
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType) {
+        return antiMacroResult(image, notificationType, antiMacroType, (byte) 0, (byte) 1);
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType, byte first, byte refreshAntiMacroCount) {
+        OutPacket outPacket = new OutPacket(OutHeader.ANTI_MACRO_RESULT);
+
+        outPacket.encodeByte(notificationType);
+        outPacket.encodeByte(antiMacroType);
+
+        if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes.getVal()) {
+            outPacket.encodeByte(first);
+            outPacket.encodeByte(refreshAntiMacroCount);
+
+            if (image == null) {
+                outPacket.encodeInt(0);
+            } else {
+                outPacket.encodeInt(image.length);
+                outPacket.encodeArr(image);
+            }
+        } else if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Fail.getVal() ||
+                notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Success.getVal()) {
+            outPacket.encodeString(""); // unused?
+        }
 
         return outPacket;
     }

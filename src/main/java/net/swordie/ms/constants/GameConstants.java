@@ -316,11 +316,17 @@ public class GameConstants {
             } else if (level <= 117) {
                 return 10;
             } else if (level <= 127) {
+                // v197 introduced 25 stars system
                 return ServerConstants.VERSION >= 197 ? 15 : 12;
             } else if (level <= 137) {
                 return ServerConstants.VERSION >= 197 ? 20 : 13;
             } else {
-                return ServerConstants.VERSION >= 197 ? 25 : 15;
+                // v199 capped badges to 22 stars
+                if (ItemConstants.isBadge(equip.getItemId()) && ServerConstants.VERSION >= 199) {
+                    return 22;
+                } else {
+                    return ServerConstants.VERSION >= 197 ? 25 : 15;
+                }
             }
         }
     }

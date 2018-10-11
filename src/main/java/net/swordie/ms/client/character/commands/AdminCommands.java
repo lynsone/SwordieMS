@@ -41,6 +41,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
+import static net.swordie.ms.enums.AccountType.*;
 import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
 
@@ -50,6 +51,7 @@ import static net.swordie.ms.enums.InventoryOperation.ADD;
 public class AdminCommands {
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
+    @Command(names = {"test"}, requiredType = Admin)
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -61,6 +63,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"showinvinfo", "invinfo"}, requiredType = Tester)
     public static class ShowInvInfo extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -78,6 +81,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testcts", "cts"}, requiredType = Admin)
     public static class TestCTS extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -140,12 +144,14 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"checkid","getid","charid"}, requiredType = Tester)
     public static class CheckID extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             chr.chatMessage(SpeakerChannel, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
         }
     }
 
+    @Command(names = {"getphantomstolenskills"}, requiredType = Tester)
     public static class GetPhantomStolenSkills extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -155,6 +161,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"stealskilllist"}, requiredType = Tester)
     public static class StealSkillList extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -430,6 +437,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"np", "nearestportal"}, requiredType = Tester)
     public static class NP extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             Rect rect = new Rect(
@@ -455,6 +463,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"stats"}, requiredType = Tester)
     public static class Stats extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int strength = chr.getStat(Stat.str);
@@ -474,6 +483,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"spawn"}, requiredType = GameMaster)
     public static class Spawn extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -510,6 +520,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"npc", "spawnnpc"}, requiredType = GameMaster)
     public static class NPC extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -534,6 +545,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testdrop"}, requiredType = Tester)
     public static class TestDrop extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -566,6 +578,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"proitem"}, requiredType = GameMaster)
     public static class ProItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
@@ -596,6 +609,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getitem"}, requiredType = GameMaster)
     public static class GetItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (Util.isNumber(args[1])) {
@@ -660,6 +674,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getprojectiles"}, requiredType = Tester)
     public static class GetProjectiles extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] projectiles = new int[]{
@@ -678,6 +693,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"done"}, requiredType = Tester)
     public static class Done extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] projectiles = new int[]{
@@ -721,6 +737,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"hypertp"}, requiredType = Tester)
     public static class HyperTP extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int hyperTP = 5040004;
@@ -731,6 +748,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"job", "setjob"}, requiredType = Tester)
     public static class Job extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             short id = Short.parseShort(args[1]);
@@ -744,6 +762,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"sp", "setsp"}, requiredType = Tester)
     public static class Sp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -756,6 +775,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"ap", "setap"}, requiredType = Tester)
     public static class Ap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -768,6 +788,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"hp", "sethp"}, requiredType = Tester)
     public static class Hp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -782,6 +803,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mp", "setmp"}, requiredType = Tester)
     public static class Mp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -796,6 +818,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"str", "setstr"}, requiredType = Tester)
     public static class Str extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -808,6 +831,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"dex", "setdex"}, requiredType = Tester)
     public static class Dex extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -820,6 +844,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"int", "setint"}, requiredType = Tester)
     public static class SetInt extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -832,6 +857,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"luk", "setluk"}, requiredType = Tester)
     public static class Luk extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -844,6 +870,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"level", "setlevel", "lvl", "lv"}, requiredType = Tester)
     public static class Level extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -858,6 +885,8 @@ public class AdminCommands {
             }
         }
     }
+
+    @Command(names = {"leveluntil", "levelupuntil"}, requiredType = Tester)
     public static class LevelUntil extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -875,6 +904,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"heal"}, requiredType = Tester)
     public static class Heal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int maxHp = chr.getTotalStat(BaseStat.mhp);
@@ -888,6 +918,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"curhp"}, requiredType = Tester)
     public static class CurHp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -900,6 +931,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"curmp"}, requiredType = Tester)
     public static class CurMp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -912,6 +944,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"invincible"}, requiredType = Tester)
     public static class Invincible extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             Client c = chr.getClient();
@@ -929,6 +962,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"morph"}, requiredType = Tester)
     public static class Morph extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int morphID = Integer.parseInt(args[1]);
@@ -944,6 +978,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mount"}, requiredType = Tester)
     public static class Mount extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int mountID = Integer.parseInt(args[1]);
@@ -959,6 +994,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testtempstat"}, requiredType = Admin)
     public static class TestTempStat extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             List<Life> lifes = new ArrayList<>(chr.getField().getLifes().values());
@@ -971,6 +1007,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"setmap"}, requiredType = Tester)
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length > 1 && Util.isNumber(args[1])) {
@@ -986,6 +1023,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"setportal"}, requiredType = Tester)
     public static class SetPortal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int portalID = Integer.parseInt(args[1]);
@@ -999,6 +1037,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"atom"}, requiredType = Admin)
     public static class Atom extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int charID = chr.getId();
@@ -1020,6 +1059,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getskill"}, requiredType = Tester)
     public static class GetSkill extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 4) {
@@ -1033,6 +1073,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"maxskills"}, requiredType = Tester)
     public static class MaxSkills extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             for (Skill skill : chr.getSkills()) {
@@ -1047,6 +1088,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"lookup", "find"}, requiredType = Tester)
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
@@ -1164,6 +1206,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mesos", "money"}, requiredType = GameMaster)
     public static class Mesos extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             long mesos = Long.parseLong(args[1]);
@@ -1171,6 +1214,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"goto"}, requiredType = Tester)
     public static class GoTo extends AdminCommand {
         public static void execute(Char chr, String[] args) {
 
@@ -1269,6 +1313,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"clearcache"}, requiredType = Admin)
     public static class ClearCache extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             chr.getScriptManager().dispose(false);
@@ -1277,6 +1322,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"savemap"}, requiredType = Tester)
     public static class SaveMap extends AdminCommand {
         private static HashMap<String, Integer> quickmaps = new HashMap<>();
 
@@ -1312,6 +1358,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"warriorequips"}, requiredType = Tester)
     public static class WarriorEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] warEquips = new int[]{
@@ -1338,6 +1385,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mageequips"}, requiredType = Tester)
     public static class MageEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] mageEquips = new int[]{
@@ -1357,6 +1405,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"archerequips"}, requiredType = Tester)
     public static class ArcherEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] archerEquips = new int[]{
@@ -1374,6 +1423,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"thiefequips"}, requiredType = Tester)
     public static class ThiefEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] thiefEquips = new int[]{
@@ -1393,6 +1443,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"pirateequips"}, requiredType = Tester)
     public static class PirateEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] pirateEquips = new int[]{
@@ -1413,6 +1464,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"clearinv"}, requiredType = Tester)
     public static class ClearInv extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
@@ -1429,6 +1481,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mobinfo"}, requiredType = Tester)
     public static class MobInfo extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1458,6 +1511,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"completequest"}, requiredType = Tester)
     public static class CompleteQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1465,6 +1519,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"removequest"}, requiredType = Tester)
     public static class RemoveQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1472,6 +1527,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getphantomstolenskills"}, requiredType = Tester)
     public static class SetHonor extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1485,6 +1541,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"startquest"}, requiredType = Tester)
     public static class StartQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1501,6 +1558,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"bypassskillcd", "ignoreskillcd", "bypasskillcd"}, requiredType = Tester)
     public static class BypassSkillCD extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1515,6 +1573,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"toggledamagecap"}, requiredType = Tester)
     public static class ToggleDamageCap extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1528,6 +1587,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"shop"}, requiredType = Tester)
     public static class Shop extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1535,6 +1595,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"reloadcs"}, requiredType = Admin)
     public static class ReloadCS extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1542,11 +1603,42 @@ public class AdminCommands {
         }
     }
 
+    // lie detector
+    @Command(names = {"ld", "liedetector"}, requiredType = GameMaster)
+    public static class LD extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 1) {
+                chr.chatMessage(SpeakerChannel, "Not enough args! Use !ld <name> or !ld @me to test.");
+                return;
+            }
+
+            String name = args[1];
+            Char chrToLD = chr;
+
+            if (!name.equals("@me")) {
+                chrToLD = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
+
+                if (chrToLD == null) {
+                    chr.chatMessage(SpeakerChannel, String.format("Character '%s' is not online.", name));
+                    return;
+                }
+            }
+
+            if (chrToLD.sendLieDetector()) {
+                chr.chatMessage(SpeakerChannel, String.format("Sent lie detector to '%s'.", chrToLD.getName()));
+            } else {
+                chr.chatMessage(SpeakerChannel, "Lie detector failed.");
+            }
+        }
+    }
+
+    @Command(names = {"ban"}, requiredType = GameMaster)
     public static class Ban extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
                 chr.chatMessage(SpeakerChannel, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+                return;
             }
             String name = args[1];
             int amount = Integer.parseInt(args[2]);
@@ -1607,6 +1699,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"killmobs"}, requiredType = GameMaster)
     public static class KillMobs extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1617,10 +1710,12 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"fp", "findportal"}, requiredType = Tester)
     public static class FP extends AdminCommand { // FindPortal
         public static void execute(Char chr, String[] args) {
             if (args.length < 1) {
                 chr.chatMessage(SpeakerChannel, "Invalid args. Use !findportal <id/name>");
+                return;
             }
             Field field = chr.getField();
             Portal portal;
@@ -1644,6 +1739,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"showbuffs"}, requiredType = Tester)
     public static class showBuffs extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1667,6 +1763,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"tohex"}, requiredType = Tester)
     public static class toHex extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1680,6 +1777,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"fromhex"}, requiredType = Tester)
     public static class fromHex extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {

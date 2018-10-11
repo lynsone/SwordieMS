@@ -1,18 +1,10 @@
 package net.swordie.ms.client.character.commands;
 
-import net.swordie.ms.client.character.Char;
+import net.swordie.ms.enums.AccountType;
 
-/**
- * Created on 12/22/2017.
- */
-public interface Command {
+public @interface Command {
 
-    char prefix = '@';
-    static void execute(Char chr, String[] args){
+    String[] names();
+    AccountType requiredType();
 
-    }
-
-	static char getPrefix() {
-        return prefix;
-    }
 }
