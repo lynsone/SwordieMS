@@ -69,7 +69,7 @@ public class Login {
             outPacket.encodeInt(account.getId());
             outPacket.encodeByte(account.getGender());
             outPacket.encodeByte(account.getMsg2());
-            outPacket.encodeInt(account.getAccountType());
+            outPacket.encodeInt(account.getAccountType().getVal());
             outPacket.encodeInt(account.getAge());
             outPacket.encodeByte(!account.hasCensoredNxLoginID());
             if(account.hasCensoredNxLoginID()) {
@@ -163,7 +163,7 @@ public class Login {
         outPacket.encodeInt(account.getId());
         outPacket.encodeByte(account.getGender());
         outPacket.encodeByte(account.getGradeCode());
-        outPacket.encodeInt(account.getAccountType());
+        outPacket.encodeInt(account.getAccountType().getVal());
         outPacket.encodeInt(account.getVipGrade());
 //        outPacket.encodeInt(account.getAge());
         outPacket.encodeByte(account.getPurchaseExp());
