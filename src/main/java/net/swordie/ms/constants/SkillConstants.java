@@ -1280,4 +1280,14 @@ public class SkillConstants {
         }
         return false;
     }
+
+    public static boolean isMatching(int rootId, int job) {
+        boolean matchingStart = job / 100 == rootId / 100;
+        boolean matching = matchingStart;
+        if (matchingStart && rootId % 100 != 0) {
+            // job path must match
+            matching = (rootId % 100) / 10 == (job % 100) / 10;
+        }
+        return matching;
+    }
 }

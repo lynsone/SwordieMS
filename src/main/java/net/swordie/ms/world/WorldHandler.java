@@ -554,15 +554,17 @@ public class WorldHandler {
         }
 
         Skill skill = chr.getSkill(skillID, true);
-        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
-        if (isPassive) {
-            chr.removeFromBaseStatCache(skill);
-        }
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
         if (JobConstants.isZero((short) skill.getRootId())) {
             jobLevel = JobConstants.getJobLevelByZeroSkillID(skillID);
         }
         Map<Stat, Object> stats = null;
+        int rootId = skill.getRootId();
+        if (!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) {
+            log.error(String.format("Character %d tried adding an invalid skill (job %d, skill id %d)",
+                    chr.getId(), skillID, rootId));
+            return;
+        }
         if (JobConstants.isExtendSpJob(chr.getJob())) {
             // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
@@ -575,6 +577,11 @@ public class WorldHandler {
                 esp.setSpToJobLevel(jobLevel, currentSp - amount);
                 stats = new HashMap<>();
                 stats.put(sp, esp);
+            } else {
+                log.error(String.format("Character %d tried adding a skill without having the required amount of sp" +
+                                " (required %d, has %d)",
+                        chr.getId(), currentSp, amount));
+                return;
             }
         } else {
             int currentSp = chr.getAvatarData().getCharacterStat().getSp();
@@ -586,7 +593,16 @@ public class WorldHandler {
                 chr.getAvatarData().getCharacterStat().setSp(currentSp - amount);
                 stats = new HashMap<>();
                 stats.put(sp, chr.getAvatarData().getCharacterStat().getSp());
+            } else {
+                log.error(String.format("Character %d tried adding a skill without having the required amount of sp" +
+                                " (required %d, has %d)",
+                        chr.getId(), currentSp, amount));
+                return;
             }
+        }
+        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
+        if (isPassive) {
+            chr.removeFromBaseStatCache(skill);
         }
         if (stats != null) {
             c.write(WvsContext.statChanged(stats));
