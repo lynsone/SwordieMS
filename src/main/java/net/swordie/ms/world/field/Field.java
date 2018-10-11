@@ -92,8 +92,8 @@ public class Field {
         this.footholds = new HashSet<>();
         this.lifes = new ConcurrentHashMap<>();
         this.chars = new CopyOnWriteArrayList<>();
-        this.lifeToControllers = new ConcurrentHashMap<>();
-        this.lifeSchedules = new ConcurrentHashMap<>();
+        this.lifeToControllers = new HashMap<>();
+        this.lifeSchedules = new HashMap<>();
         this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
     }
