@@ -8,6 +8,7 @@ import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
+import net.swordie.ms.client.character.commands.Command;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.client.character.potential.CharacterPotential;
@@ -252,22 +253,32 @@ public class WorldHandler {
             } else if (msg.equalsIgnoreCase("@save")) {
                 DatabaseManager.saveToDB(chr);
             }
-        } else if (msg.charAt(0) == AdminCommand.getPrefix()) {
+        } else if (msg.charAt(0) == AdminCommand.getPrefix()
+                && chr.getAccount().getAccountType().ordinal() > AccountType.Player.ordinal()) {
             boolean executed = false;
-            String command = msg.split(" ")[0];
+            String command = msg.split(" ")[0].replace("!", "");
             for (Class clazz : AdminCommands.class.getClasses()) {
-                if (!(AdminCommand.getPrefix() + clazz.getSimpleName()).equalsIgnoreCase(command)) {
-                    continue;
+                Command cmd = (Command) clazz.getAnnotation(Command.class);
+                boolean matchingCommand = false;
+                for (String name : cmd.names()) {
+                    if (name.equalsIgnoreCase(command)
+                            && chr.getAccount().getAccountType().ordinal() >= cmd.requiredType().ordinal()) {
+                        matchingCommand = true;
+                        break;
+                    }
                 }
-                executed = true;
-                String[] split = null;
-                try {
-                    AdminCommand adminCommand = (AdminCommand) clazz.getConstructor().newInstance();
-                    Method method = clazz.getDeclaredMethod("execute", Char.class, String[].class);
-                    split = msg.split(" ");
-                    method.invoke(adminCommand, c.getChr(), split);
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                    e.printStackTrace();
+                if (matchingCommand) {
+                    executed = true;
+                    String[] split = null;
+                    try {
+                        AdminCommand adminCommand = (AdminCommand) clazz.getConstructor().newInstance();
+                        Method method = clazz.getDeclaredMethod("execute", Char.class, String[].class);
+                        split = msg.split(" ");
+                        method.invoke(adminCommand, c.getChr(), split);
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException
+                            | InstantiationException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if (!executed) {
