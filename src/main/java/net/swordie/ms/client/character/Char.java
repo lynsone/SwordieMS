@@ -2084,11 +2084,22 @@ public class Char {
 		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
-		if (getTemporaryStatManager().hasStat(SoulMP)) {
+		if (getTemporaryStatManager().hasStat(SoulMP) && ItemConstants.isWeapon(item.getItemId())) {
 			getTemporaryStatManager().removeStat(SoulMP, false);
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
 		}
+        List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(item.getItemId()).getItemSkills()) {
+            Skill skill = getSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(0);
+            removeSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(-1); // workaround to remove skill from window without a cc
+            skills.add(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 	}
 
 	/**
@@ -2096,10 +2107,10 @@ public class Char {
 	 *
 	 * @param item The Item to equip.
 	 */
-	public void equip(Item item) {
+	public boolean equip(Item item) {
 		Equip equip = (Equip) item;
 		if (equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
-			return;
+			return false;
 		}
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
@@ -2122,9 +2133,25 @@ public class Char {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
 			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
+		List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(equip.getItemId()).getItemSkills()) {
+            Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
+            byte slv = itemSkill.getSlv();
+            // support for Tower of Oz rings
+            if (equip.getLevel() > 0) {
+                slv = (byte) Math.min(equip.getLevel(), skill.getMaxLevel());
+            }
+            skill.setCurrentLevel(slv);
+            skills.add(skill);
+            addSkill(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
+		return true;
 	}
 
 	public TemporaryStatManager getTemporaryStatManager() {

@@ -571,13 +571,13 @@ public class WorldHandler {
         }
         Map<Stat, Object> stats = null;
         int rootId = skill.getRootId();
-        if (!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) {
+        // TODO: add better checks as currently you can PE whatever skill in beginner tab, except for item skills
+        if ((!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) || SkillConstants.isSkillFromItem(skillID)) {
             log.error(String.format("Character %d tried adding an invalid skill (job %d, skill id %d)",
                     chr.getId(), skillID, rootId));
             return;
         }
         if (JobConstants.isExtendSpJob(chr.getJob())) {
-            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -3625,11 +3625,11 @@ public class WorldHandler {
                         equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
                         equip.updateToChar(chr);
                         c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
-                        if (!equip.isSuperiorEqp()) {
-                            equip.setChuc((short) Math.min(12, equip.getChuc()));
-                        } else {
-                            equip.setChuc((short) 0);
-                        }
+                    }
+                    if (!equip.isSuperiorEqp()) {
+                        equip.setChuc((short) Math.min(12, equip.getChuc()));
+                    } else {
+                        equip.setChuc((short) 0);
                     }
                 } else if (canDegrade) {
                     equip.setChuc((short) (equip.getChuc() - 1));
@@ -3693,7 +3693,7 @@ public class WorldHandler {
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
+                c.write(CField.hyperUpgradeDisplay(equip, equip.isSuperiorEqp() ? equip.getChuc() > 0 : equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
                         GameConstants.getEnchantmentMesoCost(equip.getrLevel() + equip.getiIncReq(), equip.getChuc(), equip.isSuperiorEqp()),
                         0, GameConstants.getEnchantmentSuccessRate(equip),
                         GameConstants.getEnchantmentDestroyRate(equip), equip.getDropStreak() >= 2));
@@ -4859,6 +4859,7 @@ public class WorldHandler {
                 if (skill != null) {
                     skill.setCurrentLevel(0);
                     skills.add(skill);
+                    chr.addSkill(skill);
                 }
             }
             chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));

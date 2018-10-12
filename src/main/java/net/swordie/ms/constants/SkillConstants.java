@@ -1246,4 +1246,38 @@ public class SkillConstants {
         }
         return matching;
     }
+
+    // is_skill_from_item(signed int nSkillID)
+    public static boolean isSkillFromItem(int skillID) {
+        switch (skillID) {
+            case 80011123: // New Destiny
+            case 80011247: // Dawn Shield
+            case 80011248: // Dawn Shield
+            case 80011249: // Divine Guardian
+            case 80011250: // Divine Shield
+            case 80011251: // Divine Brilliance
+            case 80011261: // Monolith
+            case 80011295: // Scouter
+            case 80011346: // Ribbit Ring
+            case 80011347: // Krrr Ring
+            case 80011348: // Rawr Ring
+            case 80011349: // Pew Pew Ring
+            case 80011475: // Elunarium Power (ATT & M. ATT)
+            case 80011476: // Elunarium Power (Skill EXP)
+            case 80011477: // Elunarium Power (Boss Damage)
+            case 80011478: // Elunarium Power (Ignore Enemy DEF)
+            case 80011479: // Elunarium Power (Crit Rate)
+            case 80011480: // Elunarium Power (Crit Damage)
+            case 80011481: // Elunarium Power (Status Resistance)
+            case 80011482: // Elunarium Power (All Stats)
+            case 80011492: // Firestarter Ring
+            case 80001768: // Rope Lift
+            case 80001705: // Rope Lift
+            case 80001941: // Scouter
+            case 80010040: // Altered Fate
+                return true;
+        }
+        // Tower of Oz skill rings
+        return (skillID >= 80001455 && skillID <= 80001479);
+    }
 }
