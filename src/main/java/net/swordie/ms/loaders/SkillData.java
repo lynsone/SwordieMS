@@ -24,6 +24,7 @@ public class SkillData {
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void saveSkills(String dir) {
+        Util.makeDirIfAbsent(dir);
         for (Map.Entry<Integer, SkillInfo> entry : skills.entrySet()) {
             SkillInfo si = entry.getValue();
             File file = new File(String.format("%s/%d.dat", dir, si.getSkillId()));
