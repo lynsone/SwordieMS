@@ -244,11 +244,11 @@ public class SkillData {
                                             skill.addRect(new Rect(left, top, right, bottom));
                                         } else {
                                             SkillStat skillStat = SkillStat.getSkillStatByString(nodeName);
-                                            if (skillStat == null && !unkVals.contains(nodeName)) {
+                                            if (skillStat != null) {
+                                                skill.addSkillStatInfo(skillStat, commonAttr.get("value"));
+                                            } else if (!unkVals.contains(nodeName)) {
                                                 log.warn("Unknown SkillStat " + nodeName);
                                                 unkVals.add(nodeName);
-                                            } else {
-                                                skill.addSkillStatInfo(skillStat, commonAttr.get("value"));
                                             }
                                         }
                                     }
