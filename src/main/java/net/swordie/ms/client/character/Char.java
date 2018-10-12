@@ -2054,7 +2054,7 @@ public class Char {
 		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
-		if (getTemporaryStatManager().hasStat(SoulMP)) {
+		if (getTemporaryStatManager().hasStat(SoulMP) && ItemConstants.isWeapon(item.getItemId())) {
 			getTemporaryStatManager().removeStat(SoulMP, false);
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
