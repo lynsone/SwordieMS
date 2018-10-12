@@ -44,6 +44,7 @@ public class SkillData {
                 dataOutputStream.writeInt(si.getReqTierPoint());
                 dataOutputStream.writeBoolean(si.isNotCooltimeReset());
                 dataOutputStream.writeBoolean(si.isNotIncBuffDuration());
+                dataOutputStream.writeBoolean(si.isPsd());
                 dataOutputStream.writeShort(si.getSkillStatInfo().size());
                 for(Map.Entry<SkillStat, String> ssEntry : si.getSkillStatInfo().entrySet()) {
                     dataOutputStream.writeUTF(ssEntry.getKey().toString());
@@ -100,6 +101,7 @@ public class SkillData {
                     skillInfo.setReqTierPoint(dataInputStream.readInt());
                     skillInfo.setNotCooltimeReset(dataInputStream.readBoolean());
                     skillInfo.setNotIncBuffDuration(dataInputStream.readBoolean());
+                    skillInfo.setPsd(dataInputStream.readBoolean());
                     short ssSize = dataInputStream.readShort();
                     for (int j = 0; j < ssSize; j++) {
                         skillInfo.addSkillStatInfo(SkillStat.getSkillStatByString(
@@ -134,149 +136,125 @@ public class SkillData {
         File dir = new File(wzDir);
         File[] files = dir.listFiles();
         for (File file : files) {
-            Document doc = XMLApi.getRoot(file);
-            Node node = doc;
+            if (file.getName().contains("Dragon")) {
+                continue;
+            }
+            Node node = XMLApi.getRoot(file);
             if(node == null) {
                 continue;
             }
             List<Node> nodes = XMLApi.getAllChildren(node);
             for (Node mainNode : nodes) {
                 Map<String, String> attributes = XMLApi.getAttributes(mainNode);
-                String name = attributes.get("name").replace(".img","");
+                String rootIdStr = attributes.get("name").replace(".img","");
                 int rootId;
-                if(Util.isNumber(name)) {
-                    rootId = Integer.parseInt(name);
+                if(Util.isNumber(rootIdStr)) {
+                    rootId = Integer.parseInt(rootIdStr);
                 } else {
-                    log.error(name + " is not a number.");
                     continue;
                 }
+                Set<String> unkVals = new HashSet<>();
                 Node skillChild = XMLApi.getFirstChildByNameBF(mainNode, "skill");
                 for(Node skillNode : XMLApi.getAllChildren(skillChild)) {
                     Map<String, String> skillAttributes = XMLApi.getAttributes(skillNode);
-                    String skillIdName = skillAttributes.get("name").replace(".img","");
+                    String skillIdStr = skillAttributes.get("name").replace(".img","");
                     int skillId;
-                    if(Util.isNumber(skillIdName)) {
+                    if(Util.isNumber(skillIdStr)) {
                         SkillInfo skill = new SkillInfo();
                         skill.setRootId(rootId);
-                        if(Util.isNumber(skillIdName)) {
-                            skillId = Integer.parseInt(skillIdName);
+                        if(Util.isNumber(skillIdStr)) {
+                            skillId = Integer.parseInt(skillIdStr);
                             skill.setSkillId(skillId);
                         } else {
-                            log.error(name + " is not a number.");
+                            log.error(skillIdStr + " is not a number.");
                             continue;
                         }
-                        // start main level info
-                        Node masterLevel = XMLApi.getFirstChildByNameBF(skillNode, "masterLevel");
-                        int masterLevelInt = -1;
-                        if(masterLevel != null) {
-                            masterLevelInt = Integer.parseInt(XMLApi.getAttributes(masterLevel).get("value"));
-                        }
-                        skill.setMasterLevel(masterLevelInt);
-                        Node fixLv = XMLApi.getFirstChildByNameBF(skillNode, "fixLevel");
-                        int fixLevel = -1;
-                        if(fixLv != null) {
-                            fixLevel = Integer.parseInt(XMLApi.getAttributes(fixLv).get("value"));
-                        }
-                        skill.setFixLevel(fixLevel);
-                        Node invis = XMLApi.getFirstChildByNameBF(skillNode, "invisible");
-                        boolean invisible = false;
-                        if(invis != null) {
-                            invisible = Integer.parseInt(XMLApi.getAttributes(invis).get("value")) == 1;
-                        }
-                        skill.setInvisible(invisible);
-                        Node massSpellNode = XMLApi.getFirstChildByNameBF(skillNode, "massSpell");
-                        boolean massSpell = false;
-                        if(massSpellNode != null) {
-                            massSpell = Integer.parseInt(XMLApi.getAttributes(massSpellNode).get("value")) == 1;
-                        }
-                        skill.setMassSpell(massSpell);
-                        Node typeNode = XMLApi.getFirstChildByNameBF(skillNode, "type");
-                        int type = 0;
-                        if(typeNode != null) {
-                            type = Integer.parseInt(XMLApi.getAttributes(typeNode).get("value"));
-                        }
-                        skill.setType(type);
-                        Node topPsdSkillNode = XMLApi.getFirstChildByNameBF(skillNode, "psdSkill");
-                        if(topPsdSkillNode != null) {
-                            for (Node psdSkillNode : XMLApi.getAllChildren(topPsdSkillNode)) {
-                                skill.addPsdSkill(Integer.parseInt(XMLApi.getAttributes(psdSkillNode).get("name")));
+                        for (Node mainLevelNode : XMLApi.getAllChildren(skillNode)) {
+                            String mainName = XMLApi.getNamedAttribute(mainLevelNode, "name");
+                            String mainValue = XMLApi.getNamedAttribute(mainLevelNode, "value");
+                            int intVal = -1337;
+                            if (mainValue != null && Util.isNumber(mainValue)) {
+                                intVal = Integer.parseInt(mainValue);
+                            }
+                            switch (mainName) {
+                                case "masterLevel":
+                                    skill.setMasterLevel(intVal);
+                                    break;
+                                case "fixLevel":
+                                    skill.setFixLevel(intVal);
+                                    break;
+                                case "invisible":
+                                    skill.setInvisible(intVal != 0);
+                                    break;
+                                case "massSpell":
+                                    skill.setMassSpell(intVal != 0);
+                                    break;
+                                case "type":
+                                    skill.setType(intVal);
+                                    break;
+                                case "psd":
+                                    skill.setPsd(intVal != 0);
+                                    break;
+                                case "psdSkill":
+                                    for (Node psdSkillNode : XMLApi.getAllChildren(mainLevelNode)) {
+                                        skill.addPsdSkill(Integer.parseInt(XMLApi.getAttributes(psdSkillNode).get("name")));
+                                    }
+                                    break;
+                                case "elemAttr":
+                                    skill.setElemAttr(mainValue);
+                                    break;
+                                case "hyper":
+                                    skill.setHyper(intVal);
+                                    break;
+                                case "hyperStat":
+                                    skill.setHyperStat(intVal);
+                                    break;
+                                case "vehicleID":
+                                    skill.setVehicleId(intVal);
+                                    break;
+                                case "notCooltimeReset":
+                                    skill.setNotCooltimeReset(intVal != 0);
+                                    break;
+                                case "notIncBuffDuration":
+                                    skill.setNotIncBuffDuration(intVal != 0);
+                                    break;
+                                case "req":
+                                    for (Node reqChild : XMLApi.getAllChildren(mainLevelNode)) {
+                                        String childName = XMLApi.getNamedAttribute(reqChild, "name");
+                                        String childValue = XMLApi.getNamedAttribute(reqChild, "value");
+                                        if ("reqTierPoint".equalsIgnoreCase(childName)) {
+                                            skill.setReqTierPoint(Integer.parseInt(childValue));
+                                        } else if (Util.isNumber(childName)) {
+                                            skill.addReqSkill(Integer.parseInt(childName), Integer.parseInt(childValue));
+                                        }
+                                    }
+                                    break;
+                                case "common":
+                                    for(Node commonNode : XMLApi.getAllChildren(mainLevelNode)) {
+                                        Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
+                                        String nodeName = commonAttr.get("name");
+                                        if (nodeName.equals("maxLevel")) {
+                                            skill.setMaxLevel(Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "value")));
+                                        } else if(nodeName.contains("lt") && nodeName.length() <= 3) {
+                                            Node rbNode = XMLApi.getFirstChildByNameBF(mainLevelNode, nodeName.replace("lt", "rb"));
+                                            int left = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "x"));
+                                            int top = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "y"));
+                                            int right = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "x"));
+                                            int bottom = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "y"));
+                                            skill.addRect(new Rect(left, top, right, bottom));
+                                        } else {
+                                            SkillStat skillStat = SkillStat.getSkillStatByString(nodeName);
+                                            if (skillStat == null && !unkVals.contains(nodeName)) {
+                                                log.warn("Unknown SkillStat " + nodeName);
+                                                unkVals.add(nodeName);
+                                            } else {
+                                                skill.addSkillStatInfo(skillStat, commonAttr.get("value"));
+                                            }
+                                        }
+                                    }
+                                    break;
                             }
                         }
-                        Node elemAttrNode = XMLApi.getFirstChildByNameBF(skillNode, "elemAttr");
-                        if(elemAttrNode != null) {
-                            skill.setElemAttr(XMLApi.getNamedAttribute(elemAttrNode, "value"));
-                        } else {
-                            skill.setElemAttr("");
-                        }
-                        Node hyperNode = XMLApi.getFirstChildByNameBF(skillNode, "hyper");
-                        if(hyperNode != null) {
-                            skill.setHyper(Integer.parseInt(XMLApi.getNamedAttribute(hyperNode, "value")));
-                        }
-                        Node hyperStatNode = XMLApi.getFirstChildByNameBF(skillNode, "hyperStat");
-                        if(hyperStatNode != null) {
-                            skill.setHyperStat(Integer.parseInt(XMLApi.getNamedAttribute(hyperStatNode, "value")));
-                        }
-                        Node vehicle = XMLApi.getFirstChildByNameBF(skillNode, "vehicleID");
-                        int vehicleId = 0;
-                        if(vehicle != null) {
-                            vehicleId = Integer.parseInt(XMLApi.getAttributes(vehicle).get("value"));
-                        }
-                        skill.setVehicleId(vehicleId);
-                        Node notCooltimeResetNode = XMLApi.getFirstChildByNameBF(skillNode, "notCooltimeReset");
-                        if(notCooltimeResetNode != null) {
-                            skill.setNotCooltimeReset(Integer.parseInt(XMLApi.getAttributes(notCooltimeResetNode).get("value")) != 0);
-                        }
-                        Node notIncBuffDurationNode = XMLApi.getFirstChildByNameBF(skillNode, "notIncBuffDuration");
-                        if(notIncBuffDurationNode != null) {
-                            skill.setNotIncBuffDuration(Integer.parseInt(XMLApi.getAttributes(notIncBuffDurationNode).get("value")) != 0);
-                        }
-                        Node reqNode = XMLApi.getFirstChildByNameBF(skillNode, "req");
-                        if (reqNode != null) {
-                            for (Node reqChild : XMLApi.getAllChildren(reqNode)) {
-                                String childName = XMLApi.getNamedAttribute(reqChild, "name");
-                                String childValue = XMLApi.getNamedAttribute(reqChild, "value");
-                                if ("reqTierPoint".equalsIgnoreCase(childName)) {
-                                    skill.setReqTierPoint(Integer.parseInt(childValue));
-                                } else if (Util.isNumber(childName)) {
-                                    skill.addReqSkill(Integer.parseInt(childName), Integer.parseInt(childValue));
-                                }
-                            }
-                        }
-                        // end main level info
-                        // start "common" level info
-                        Node common = XMLApi.getFirstChildByNameBF(skillNode, "common");
-                        Map<String, String> values = new HashMap<>();
-                        if(common != null) {
-                            for(Node commonNode : XMLApi.getAllChildren(common)) {
-                                Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
-                                String nodeName = commonAttr.get("name");
-                                if(nodeName.contains("lt") && nodeName.length() <= 3) {
-                                    Node rbNode = XMLApi.getFirstChildByNameBF(common, nodeName.replace("lt", "rb"));
-                                    int left = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "x"));
-                                    int top = Integer.parseInt(XMLApi.getNamedAttribute(commonNode, "y"));
-                                    int right = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "x"));
-                                    int bottom = Integer.parseInt(XMLApi.getNamedAttribute(rbNode, "y"));
-                                    skill.addRect(new Rect(left, top, right, bottom));
-                                } else {
-                                    values.put(commonAttr.get("name"), commonAttr.get("value"));
-                                }
-                            }
-                        }
-                        for(Map.Entry<String, String> entry : values.entrySet()) {
-                            String statName = entry.getKey();
-                            String statValue = entry.getValue();
-                            if(statName.equals("maxLevel")) {
-                                skill.setMaxLevel(Integer.parseInt(statValue));
-                            } else {
-                                SkillStat skillStat = SkillStat.getSkillStatByString(statName);
-                                if(skillStat == null) {
-                                    log.warn("Unknown SkillStat " + statName);
-                                } else {
-                                    skill.addSkillStatInfo(skillStat, statValue);
-                                }
-                            }
-                        }
-                        // end "common" level info
                         skills.put(skillId, skill);
                     }
                 }
@@ -844,7 +822,7 @@ public class SkillData {
     }
 
     public static void main(String[] args) {
-        generateDatFiles();
+        loadSkillsFromWz();
     }
 
     public static void clear() {

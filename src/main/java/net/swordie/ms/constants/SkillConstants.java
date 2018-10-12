@@ -1075,51 +1075,7 @@ public class SkillConstants {
 
     public static boolean isPassiveSkill(int skillId) {
         SkillInfo si = SkillData.getSkillInfoById(skillId);
-        return si != null && si.getPsdSkills().size()  == 0
-                && !isActiveSkillWithPassiveType(skillId)
-                && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_PASSIVE_EX.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_MOVE_JUMP.getVal())
-                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId)
-                ;
-    }
-
-    private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
-        switch (skillId) {
-            //Warrior
-            case 1000003: // Iron Body
-            case 1120014: // Power Stance --v
-            case 1220017:
-            case 1320017: // Power Stance --^
-
-
-
-            //Thief
-            case 4110008: // Enveloping Darkness --v
-            case 4330008:
-            case 14110026:
-            case 4210013:
-            case 14110009: // Enveloping Darkness --^
-            case 4120014: // Dark Harmony
-            case 4310005: // Channel Karma
-            case 4200009: // Channel Karma
-            case 4200010: // Shield Mastery (Shad)
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Helper function for a list of skills that have type 50 (passive), but are actually buffs.
-     * @param skillId the skill id to check
-     * @return if the skill is active, while having a passive type
-     */
-    private static boolean isActiveSkillWithPassiveType(int skillId) {
-        switch (skillId) {
-            case 25121131: // Spirit bond max
-                return true;
-        }
-        return false;
+        return si != null && si.isPsd() && si.getPsdSkills().size() == 0;
     }
 
     public static boolean isHyperstatSkill(int skillID) {
