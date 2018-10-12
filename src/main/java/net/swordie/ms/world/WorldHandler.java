@@ -3625,11 +3625,11 @@ public class WorldHandler {
                         equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
                         equip.updateToChar(chr);
                         c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
-                        if (!equip.isSuperiorEqp()) {
-                            equip.setChuc((short) Math.min(12, equip.getChuc()));
-                        } else {
-                            equip.setChuc((short) 0);
-                        }
+                    }
+                    if (!equip.isSuperiorEqp()) {
+                        equip.setChuc((short) Math.min(12, equip.getChuc()));
+                    } else {
+                        equip.setChuc((short) 0);
                     }
                 } else if (canDegrade) {
                     equip.setChuc((short) (equip.getChuc() - 1));
