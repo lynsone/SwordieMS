@@ -32,7 +32,7 @@ public class SkillInfo {
     private boolean massSpell;
     private int type;
     private Set<Integer> psdSkills = new HashSet<>();
-    private String elemAttr;
+    private String elemAttr = "";
     private int hyper;
     private int hyperstat;
     private int vehicleId;
