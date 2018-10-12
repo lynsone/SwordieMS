@@ -2093,8 +2093,9 @@ public class Char {
         for (ItemSkill itemSkill : ItemData.getEquipById(item.getItemId()).getItemSkills()) {
             Skill skill = getSkill(itemSkill.getSkill());
             skill.setCurrentLevel(0);
+            removeSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(-1); // workaround to remove skill from window without a cc
             skills.add(skill);
-            addSkill(skill);
         }
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
