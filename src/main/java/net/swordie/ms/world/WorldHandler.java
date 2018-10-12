@@ -3693,7 +3693,7 @@ public class WorldHandler {
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
+                c.write(CField.hyperUpgradeDisplay(equip, equip.isSuperiorEqp() ? equip.getChuc() > 0 : equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
                         GameConstants.getEnchantmentMesoCost(equip.getrLevel() + equip.getiIncReq(), equip.getChuc(), equip.isSuperiorEqp()),
                         0, GameConstants.getEnchantmentSuccessRate(equip),
                         GameConstants.getEnchantmentDestroyRate(equip), equip.getDropStreak() >= 2));
