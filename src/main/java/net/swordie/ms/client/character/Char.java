@@ -2059,15 +2059,14 @@ public class Char {
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
 		}
-        Equip equip = (Equip) item;
-        if (equip.getItemSkills().size() > 0) {
-            List<Skill> skills = new ArrayList<>();
-            for (ItemSkill itemSkill : equip.getItemSkills()) {
-                Skill skill = getSkill(itemSkill.getSkill());
-                skill.setCurrentLevel(0);
-                skills.add(skill);
-                addSkill(skill);
-            }
+        List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(item.getItemId()).getItemSkills()) {
+            Skill skill = getSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(0);
+            skills.add(skill);
+            addSkill(skill);
+        }
+        if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
 	}
@@ -2103,14 +2102,19 @@ public class Char {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
 			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
-		if (equip.getItemSkills().size() > 0) {
-            List<Skill> skills = new ArrayList<>();
-            for (ItemSkill itemSkill : equip.getItemSkills()) {
-                Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
-                skill.setCurrentLevel(itemSkill.getSlv());
-                skills.add(skill);
-                addSkill(skill);
+		List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(equip.getItemId()).getItemSkills()) {
+            Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
+            byte slv = itemSkill.getSlv();
+            // support for Tower of Oz rings
+            if (equip.getLevel() > 0) {
+                slv = (byte) Math.min(equip.getLevel(), skill.getMaxLevel());
             }
+            skill.setCurrentLevel(slv);
+            skills.add(skill);
+            addSkill(skill);
+        }
+        if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();

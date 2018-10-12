@@ -379,7 +379,6 @@ public class ItemData {
                                     equip.setCharmEXP(Integer.parseInt(value));
                                     break;
                                 case "level":
-                                    // equips that grant skills
                                     Node levelCase = XMLApi.getFirstChildByNameBF(n, "case");
                                     if (levelCase != null) {
                                         Node case0 = XMLApi.getFirstChildByNameBF(levelCase, "0");

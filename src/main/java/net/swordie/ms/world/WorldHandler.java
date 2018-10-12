@@ -571,13 +571,13 @@ public class WorldHandler {
         }
         Map<Stat, Object> stats = null;
         int rootId = skill.getRootId();
-        if (!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) {
+        // TODO: add better checks as currently you can PE whatever skill in beginner tab, except for item skills
+        if ((!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) || SkillConstants.isSkillFromItem(skillID)) {
             log.error(String.format("Character %d tried adding an invalid skill (job %d, skill id %d)",
                     chr.getId(), skillID, rootId));
             return;
         }
         if (JobConstants.isExtendSpJob(chr.getJob())) {
-            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
