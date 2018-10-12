@@ -4859,6 +4859,7 @@ public class WorldHandler {
                 if (skill != null) {
                     skill.setCurrentLevel(0);
                     skills.add(skill);
+                    chr.addSkill(skill);
                 }
             }
             chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));

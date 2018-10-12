@@ -2059,6 +2059,17 @@ public class Char {
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
 		}
+        Equip equip = (Equip) item;
+        if (equip.getItemSkills().size() > 0) {
+            List<Skill> skills = new ArrayList<>();
+            for (ItemSkill itemSkill : equip.getItemSkills()) {
+                Skill skill = getSkill(itemSkill.getSkill());
+                skill.setCurrentLevel(0);
+                skills.add(skill);
+                addSkill(skill);
+            }
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 	}
 
 	/**
@@ -2066,10 +2077,10 @@ public class Char {
 	 *
 	 * @param item The Item to equip.
 	 */
-	public void equip(Item item) {
+	public boolean equip(Item item) {
 		Equip equip = (Equip) item;
 		if (equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
-			return;
+			return false;
 		}
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
@@ -2092,9 +2103,20 @@ public class Char {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
 			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
+		if (equip.getItemSkills().size() > 0) {
+            List<Skill> skills = new ArrayList<>();
+            for (ItemSkill itemSkill : equip.getItemSkills()) {
+                Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
+                skill.setCurrentLevel(itemSkill.getSlv());
+                skills.add(skill);
+                addSkill(skill);
+            }
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
+		return true;
 	}
 
 	public TemporaryStatManager getTemporaryStatManager() {
