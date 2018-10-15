@@ -4843,6 +4843,7 @@ public class WorldHandler {
         chr.addToBaseStatCache(skill);
         List<Skill> skills = new ArrayList<>();
         skills.add(skill);
+        chr.addSkill(skill);
         chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
     }
 
