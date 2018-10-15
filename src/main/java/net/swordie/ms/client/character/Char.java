@@ -1626,7 +1626,7 @@ public class Char {
 	public void addSpToJobByCurrentLevel(int num) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		if (JobConstants.isExtendSpJob(getJob())) {
-			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getLevel());
+			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getJob(), getLevel());
 			num += cs.getExtendSP().getSpByJobLevel(jobLevel);
 			getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
 		} else {

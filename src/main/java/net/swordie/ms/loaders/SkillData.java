@@ -76,6 +76,16 @@ public class SkillData {
         }
     }
 
+    private static void loadSkillsOfJob(int job) {
+        String dir = ServerConstants.DAT_DIR + "/skills";
+        File folder = new File(dir);
+        for (File f : folder.listFiles()) {
+            if (f.getName().matches(String.format("^%d(.)*", job))) {
+                loadSkill(f);
+            }
+        }
+    }
+
     public static void loadSkill(File file) {
         try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
             SkillInfo skillInfo = new SkillInfo();
@@ -291,12 +301,20 @@ public class SkillData {
     }
 
     public static List<Skill> getSkillsByJob(short id) {
+        return getSkillsByJob(id, false);
+    }
+
+    private static List<Skill> getSkillsByJob(short id, boolean rec) {
         List<Skill> res = new ArrayList<>();
         getSkillInfos().forEach((key, si) -> {
-            if (si.getRootId() == id && !si.isInvisible()) {
+            if (si.getRootId() == id) {
                 res.add(getSkillDeepCopyById(key));
             }
         });
+        if (!rec && res.size() == 0) {
+            loadSkillsOfJob(id);
+            return getSkillsByJob(id, true);
+        }
         return res;
     }
 
