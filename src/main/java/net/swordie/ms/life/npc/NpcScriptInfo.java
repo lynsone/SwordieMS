@@ -35,6 +35,7 @@ public class NpcScriptInfo {
 	public NpcScriptInfo deepCopy() {
 		NpcScriptInfo nsi = new NpcScriptInfo();
 		if (options != null) {
+			nsi.options = new int[options.length];
 			System.arraycopy(options, 0, nsi.options, 0, options.length);
 		}
 		nsi.speakerType = speakerType;

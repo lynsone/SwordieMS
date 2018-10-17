@@ -32,7 +32,7 @@ public class SkillInfo {
     private boolean massSpell;
     private int type;
     private Set<Integer> psdSkills = new HashSet<>();
-    private String elemAttr;
+    private String elemAttr = "";
     private int hyper;
     private int hyperstat;
     private int vehicleId;
@@ -41,6 +41,7 @@ public class SkillInfo {
     private boolean notCooltimeReset;
     private boolean notIncBuffDuration;
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
+    private boolean psd;
 
     public int getSkillId() {
         return skillId;
@@ -298,5 +299,13 @@ public class SkillInfo {
 
     public boolean isNotIncBuffDuration() {
         return notIncBuffDuration;
+    }
+
+    public void setPsd(boolean psd) {
+        this.psd = psd;
+    }
+
+    public boolean isPsd() {
+        return psd;
     }
 }

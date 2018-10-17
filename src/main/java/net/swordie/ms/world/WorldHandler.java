@@ -566,17 +566,19 @@ public class WorldHandler {
         }
 
         Skill skill = chr.getSkill(skillID, true);
-        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
-        if (isPassive) {
-            chr.removeFromBaseStatCache(skill);
-        }
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
         if (JobConstants.isZero((short) skill.getRootId())) {
             jobLevel = JobConstants.getJobLevelByZeroSkillID(skillID);
         }
         Map<Stat, Object> stats = null;
+        int rootId = skill.getRootId();
+        // TODO: add better checks as currently you can PE whatever skill in beginner tab, except for item skills
+        if ((!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) || SkillConstants.isSkillFromItem(skillID)) {
+            log.error(String.format("Character %d tried adding an invalid skill (job %d, skill id %d)",
+                    chr.getId(), skillID, rootId));
+            return;
+        }
         if (JobConstants.isExtendSpJob(chr.getJob())) {
-            // TODO: get proper sp for beginner jobs
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -587,6 +589,11 @@ public class WorldHandler {
                 esp.setSpToJobLevel(jobLevel, currentSp - amount);
                 stats = new HashMap<>();
                 stats.put(sp, esp);
+            } else {
+                log.error(String.format("Character %d tried adding a skill without having the required amount of sp" +
+                                " (required %d, has %d)",
+                        chr.getId(), currentSp, amount));
+                return;
             }
         } else {
             int currentSp = chr.getAvatarData().getCharacterStat().getSp();
@@ -598,7 +605,16 @@ public class WorldHandler {
                 chr.getAvatarData().getCharacterStat().setSp(currentSp - amount);
                 stats = new HashMap<>();
                 stats.put(sp, chr.getAvatarData().getCharacterStat().getSp());
+            } else {
+                log.error(String.format("Character %d tried adding a skill without having the required amount of sp" +
+                                " (required %d, has %d)",
+                        chr.getId(), currentSp, amount));
+                return;
             }
+        }
+        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
+        if (isPassive) {
+            chr.removeFromBaseStatCache(skill);
         }
         if (stats != null) {
             c.write(WvsContext.statChanged(stats));
@@ -1965,7 +1981,9 @@ public class WorldHandler {
             if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
                 inPacket.decodeByte();
                 hasAnswer = inPacket.decodeByte() != 0;
-                answer = inPacket.decodeByte();
+                if (hasAnswer) {
+                    answer = inPacket.decodeByte();
+                }
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
                 chr.getScriptManager().handleAction(nmt, action, ans);
@@ -3611,11 +3629,11 @@ public class WorldHandler {
                         equip.setBagIndex(chr.getEquipInventory().getFirstOpenSlot());
                         equip.updateToChar(chr);
                         c.write(WvsContext.inventoryOperation(true, false, MOVE, (short) eqpPos, (short) equip.getBagIndex(), 0, equip));
-                        if (!equip.isSuperiorEqp()) {
-                            equip.setChuc((short) Math.min(12, equip.getChuc()));
-                        } else {
-                            equip.setChuc((short) 0);
-                        }
+                    }
+                    if (!equip.isSuperiorEqp()) {
+                        equip.setChuc((short) Math.min(12, equip.getChuc()));
+                    } else {
+                        equip.setChuc((short) 0);
                     }
                 } else if (canDegrade) {
                     equip.setChuc((short) (equip.getChuc() - 1));
@@ -3679,7 +3697,7 @@ public class WorldHandler {
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
-                c.write(CField.hyperUpgradeDisplay(equip, equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
+                c.write(CField.hyperUpgradeDisplay(equip, equip.isSuperiorEqp() ? equip.getChuc() > 0 : equip.getChuc() > 5 && equip.getChuc() % 5 != 0,
                         GameConstants.getEnchantmentMesoCost(equip.getrLevel() + equip.getiIncReq(), equip.getChuc(), equip.isSuperiorEqp()),
                         0, GameConstants.getEnchantmentSuccessRate(equip),
                         GameConstants.getEnchantmentDestroyRate(equip), equip.getDropStreak() >= 2));
@@ -4829,6 +4847,7 @@ public class WorldHandler {
         chr.addToBaseStatCache(skill);
         List<Skill> skills = new ArrayList<>();
         skills.add(skill);
+        chr.addSkill(skill);
         chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
     }
 
@@ -4845,6 +4864,7 @@ public class WorldHandler {
                 if (skill != null) {
                     skill.setCurrentLevel(0);
                     skills.add(skill);
+                    chr.addSkill(skill);
                 }
             }
             chr.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
@@ -5097,13 +5117,13 @@ public class WorldHandler {
         }
         int value;
         switch (itt) {
+            // HyperSkills: both have the same requestStr. level = type * 5
             case HyperActiveSkill:
             case HyperPassiveSkill:
-                ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-                if (subType == InstanceTableType.HyperPassiveSkill.getSubType()) {
-                    value = esp.getSpByJobLevel(SkillConstants.PASSIVE_HYPER_JOB_LEVEL);
+                if (subType == InstanceTableType.HyperActiveSkill.getSubType()) {
+                    value = SkillConstants.getHyperActiveSkillSpByLv(type * 5);
                 } else {
-                    value = esp.getSpByJobLevel(SkillConstants.ACTIVE_HYPER_JOB_LEVEL);
+                    value = SkillConstants.getHyperPassiveSkillSpByLv(type * 5);
                 }
                 break;
             case HyperStatIncAmount:

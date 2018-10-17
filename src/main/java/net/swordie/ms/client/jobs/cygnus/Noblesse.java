@@ -21,13 +21,11 @@ import java.util.Map;
 public class Noblesse extends Job {
 
     public static final int ELEMENTAL_SLASH = 10001244;
-    public static final int ELEMENTAL_SHIFT_HIGH = 10001253;
-    public static final int ELEMENTAL_SHIFT_FLASH = 10001254;
+    public static final int ELEMENTAL_SHIFT_BASE = 10000252;
 
     private int[] addedSkills = {
             ELEMENTAL_SLASH,
-            ELEMENTAL_SHIFT_HIGH,
-            ELEMENTAL_SHIFT_FLASH,
+            ELEMENTAL_SHIFT_BASE
     };
 
     public Noblesse(Char chr) {

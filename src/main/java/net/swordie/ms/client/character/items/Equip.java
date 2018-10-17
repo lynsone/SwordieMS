@@ -104,6 +104,8 @@ public class Equip extends Item {
     private short[] sockets = new short[3];
     @Transient
     private int dropStreak = 0;
+    @Transient
+    private List<ItemSkill> itemSkills = new ArrayList<>();
 
     // flame stats
     // TODO: refactor these to be in a different table
@@ -225,6 +227,7 @@ public class Equip extends Item {
         ret.fDamage = fDamage;
         ret.fLevel = fLevel;
         ret.dropStreak = dropStreak;
+        ret.itemSkills = itemSkills;
         return ret;
     }
 
@@ -971,6 +974,22 @@ public class Equip extends Item {
 
     public void setDropStreak(int dropStreak) {
         this.dropStreak = dropStreak;
+    }
+
+    public List<ItemSkill> getItemSkills() {
+        return itemSkills;
+    }
+
+    public void setItemSkills(List<ItemSkill> itemSkills) {
+        this.itemSkills = itemSkills;
+    }
+
+    public void addItemSkill(ItemSkill itemSkill) {
+        this.itemSkills.add(itemSkill);
+    }
+
+    public void removeItemSkill(ItemSkill itemSkill) {
+        this.itemSkills.remove(itemSkill);
     }
 
     public void encode(OutPacket outPacket) {

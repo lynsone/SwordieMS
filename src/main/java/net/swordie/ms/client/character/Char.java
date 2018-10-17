@@ -1595,7 +1595,7 @@ public class Char {
 		getAvatarData().getCharacterStat().setJob(id);
 		setJobHandler(JobManager.getJobById((short) id, this));
 		List<Skill> skills = SkillData.getSkillsByJob((short) id);
-		skills.forEach(this::addSkill);
+		skills.forEach(skill -> addSkill(skill, true));
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
 		if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
@@ -1629,7 +1629,7 @@ public class Char {
 	public void addSpToJobByCurrentLevel(int num) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		if (JobConstants.isExtendSpJob(getJob())) {
-			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getLevel());
+			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getJob(), getLevel());
 			num += cs.getExtendSP().getSpByJobLevel(jobLevel);
 			getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
 		} else {
@@ -1648,11 +1648,27 @@ public class Char {
 
 	/**
 	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
-	 * with the same id.
+	 * with the same id. Removes the skill if the given skill's id is 0.
 	 *
 	 * @param skill The Skill this Char should get.
 	 */
 	public void addSkill(Skill skill) {
+		addSkill(skill, false);
+	}
+
+	/**
+	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
+	 * with the same id. Removes the skill if the given skill's id is 0.
+	 *
+	 * @param skill The Skill this Char should get.
+	 * @param addRegardlessOfLevel if this is true, the skill will not be removed from the char, even if the cur level
+	 *                             of the given skill is 0.
+	 */
+	public void addSkill(Skill skill, boolean addRegardlessOfLevel) {
+		if (!addRegardlessOfLevel && skill.getCurrentLevel() == 0) {
+			removeSkill(skill.getSkillId());
+			return;
+		}
 		skill.setCharId(getId());
 		boolean isPassive = SkillConstants.isPassiveSkill(skill.getSkillId());
 		boolean isChanged;
@@ -1671,6 +1687,20 @@ public class Char {
 		// Change cache accordingly
 		if (isPassive && isChanged) {
 			addToBaseStatCache(skill);
+		}
+	}
+
+	/**
+	 * Removes a Skill from this Char.
+	 * @param skillID the id of the skill that should be removed
+	 */
+	public void removeSkill(int skillID) {
+		Skill skill = Util.findWithPred(getSkills(), s -> s.getSkillId() == skillID);
+		if (skill != null) {
+			if (SkillConstants.isPassiveSkill(skillID)) {
+				removeFromBaseStatCache(skill);
+			}
+			getSkills().remove(skill);
 		}
 	}
 
@@ -1950,6 +1980,7 @@ public class Char {
 			case inte:
 			case luk:
 			case ap:
+			case subJob:
 				stats.put(charStat, (short) getStat(charStat));
 				break;
 			case hp:
@@ -2057,11 +2088,22 @@ public class Char {
 		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
-		if (getTemporaryStatManager().hasStat(SoulMP)) {
+		if (getTemporaryStatManager().hasStat(SoulMP) && ItemConstants.isWeapon(item.getItemId())) {
 			getTemporaryStatManager().removeStat(SoulMP, false);
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
 		}
+        List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(item.getItemId()).getItemSkills()) {
+            Skill skill = getSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(0);
+            removeSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(-1); // workaround to remove skill from window without a cc
+            skills.add(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 	}
 
 	/**
@@ -2069,10 +2111,10 @@ public class Char {
 	 *
 	 * @param item The Item to equip.
 	 */
-	public void equip(Item item) {
+	public boolean equip(Item item) {
 		Equip equip = (Equip) item;
 		if (equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
-			return;
+			return false;
 		}
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
@@ -2095,9 +2137,25 @@ public class Char {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
 			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
+		List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(equip.getItemId()).getItemSkills()) {
+            Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
+            byte slv = itemSkill.getSlv();
+            // support for Tower of Oz rings
+            if (equip.getLevel() > 0) {
+                slv = (byte) Math.min(equip.getLevel(), skill.getMaxLevel());
+            }
+            skill.setCurrentLevel(slv);
+            skills.add(skill);
+            addSkill(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
+		return true;
 	}
 
 	public TemporaryStatManager getTemporaryStatManager() {

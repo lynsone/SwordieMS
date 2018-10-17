@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author Itzik
  */
 public class JobConstants {
@@ -25,7 +24,7 @@ public class JobConstants {
         return job / 1000 == 11;
     }
 
-    public static boolean isPinkBean(short job){
+    public static boolean isPinkBean(short job) {
         return job == JobEnum.PINK_BEAN_0.getJobId() || job == JobEnum.PINK_BEAN_1.getJobId();
     }
 
@@ -59,7 +58,7 @@ public class JobConstants {
     }
 
     public static boolean isDualBlade(short job) {
-        return  job / 10 == 43;
+        return job / 10 == 43;
     }
 
     public static boolean isHero(short job) {
@@ -140,23 +139,17 @@ public class JobConstants {
 
     public static double getDamageConstant(short job) {
         // get_job_damage_const 
-        if ( job > 222 )
-        {
-            if ( job > 1200 )
-            {
-                if ( job >= 1210 && job <= 1212 )
+        if (job > 222) {
+            if (job > 1200) {
+                if (job >= 1210 && job <= 1212)
                     return 0.2;
-            }
-            else if ( job == 1200 || job >= 230 && job <= 232 )
-            {
+            } else if (job == 1200 || job >= 230 && job <= 232) {
                 return 0.2;
             }
             return 0.0;
         }
-        if ( job < 220 )
-        {
-            switch ( job )
-            {
+        if (job < 220) {
+            switch (job) {
                 case 110:
                 case 111:
                 case 112:
@@ -200,8 +193,8 @@ public class JobConstants {
     public static byte getJobLevelByZeroSkillID(int skillID) {
         int prefix = (skillID % 1000) / 100;
         return (byte) (prefix == 1 ? 2
-                        : prefix == 2 ? 1
-                        : 3);
+                : prefix == 2 ? 1
+                : 3);
     }
 
     public static boolean isMechanic(short id) {
@@ -210,6 +203,18 @@ public class JobConstants {
 
     public static boolean isBattleMage(short id) {
         return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
+    }
+
+    public static boolean isGmJob(short id) {
+        return isGm(id) || isSuperGm(id);
+    }
+
+    public static boolean isGm(short id) {
+        return id == JobEnum.GM.getJobId();
+    }
+
+    public static boolean isSuperGm(short id) {
+        return id == JobEnum.SUPERGM.getJobId();
     }
 
     public enum JobEnum {
@@ -420,7 +425,7 @@ public class JobConstants {
         PINK_BEAN_EMPTY_14(800019),
         PINK_BEAN_EMPTY_15(800022);
 
-	    private short jobId;
+        private short jobId;
 
         JobEnum(short jobId) {
             this.jobId = jobId;
@@ -775,7 +780,7 @@ public class JobConstants {
     public static void encode(OutPacket outPacket) {
         outPacket.encodeByte(enableJobs);
         outPacket.encodeByte(jobOrder);
-        for(LoginJob loginJobId : LoginJob.values()) {
+        for (LoginJob loginJobId : LoginJob.values()) {
             outPacket.encodeByte(loginJobId.getFlag());
             outPacket.encodeShort(loginJobId.getFlag());
         }
@@ -924,16 +929,37 @@ public class JobConstants {
         if (isEvan(jobId)) {
             return getEvanJobLevel(jobId);
         }
-        if (isDualJob(jobId)) {
-            prefix = jobId % 10 / 2;
-        }
-        else {
+        if (isDualBlade(jobId)) {
+            prefix = (jobId % 10) + 2;
+            if (prefix < 2) {
+                return 0;
+            } else if (prefix <= 6) {
+                return jobId % 10 + 2;
+            }
+        } else {
             prefix = jobId % 10;
         }
         return prefix <= 2 ? prefix + 2 : 0;
     }
 
-    public static int getJobLevelByCharLevel(int charLevel) {
+    public static int getJobLevelByCharLevel(short job, int charLevel) {
+        if (JobConstants.isDualBlade(job)) {
+            if (charLevel <= 10) {
+                return 0;
+            } else if (charLevel <= 20) {
+                return 1;
+            } else if (charLevel <= 30) {
+                return 2;
+            } else if (charLevel <= 45) {
+                return 3;
+            } else if (charLevel <= 60) {
+                return 4;
+            } else if (charLevel <= 100) {
+                return 5;
+            } else {
+                return 6;
+            }
+        }
         if (charLevel <= 10) {
             return 0;
         } else if (charLevel <= 30) {
@@ -947,13 +973,9 @@ public class JobConstants {
         }
     }
 
-    private static boolean isDualJob(short jobId) {
-        return jobId / 10 == 43;
-    }
-
     private static int getEvanJobLevel(short jobId) {
         int result;
-        switch(jobId) {
+        switch (jobId) {
             case 2200:
             case 2210:
                 result = 1;

@@ -35,12 +35,10 @@ public class Account {
     private String name;
     private String password;
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "accountTypeMask")
     private AccountType accountType;
     private int age;
     private int vipGrade;
     private int nBlockReason;
-    private int gmLevel;
     private byte gender;
     private byte msg2;
     private byte purchaseExp;
@@ -235,14 +233,6 @@ public class Account {
             picStatus = PicStatus.ENTER_PIC;
         }
         return picStatus;
-    }
-
-    public int getGmLevel() {
-        return gmLevel;
-    }
-
-    public void setGmLevel(int gmLevel) {
-        this.gmLevel = gmLevel;
     }
 
     public void setVipGrade(int vipGrade) {

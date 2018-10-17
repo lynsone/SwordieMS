@@ -13,7 +13,6 @@ public class DataClasses {
     static {
         dataClasses.addAll(Arrays.asList(
                 ItemData.class,
-                SkillData.class,
                 FieldData.class
                 )
         );
@@ -25,6 +24,7 @@ public class DataClasses {
                 NpcData.class,
                 QuestData.class,
                 ReactorData.class,
+                SkillData.class,
                 StringData.class
                 )
         );

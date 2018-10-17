@@ -787,8 +787,7 @@ create table accounts (
 	password varchar(255),
 	pic varchar(255),
 	mac varchar(255),
-	gmlevel int default 0,
-	accounttypemask int default 2,
+	accounttype int default 0,
 	age int default 0,
 	vipgrade int default 0,
 	nblockreason int default 0,
@@ -852,7 +851,7 @@ create table friends (
 );
 
 
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '111111', '40');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '4', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '4', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '4', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '4', '0', '111111', '40');

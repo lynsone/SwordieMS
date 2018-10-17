@@ -179,6 +179,9 @@ public class LoginHandler {
         DatabaseManager.saveToDB(c.getAccount());
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        if (curSelectedRace == JobConstants.LoginJob.DUAL_BLADE.getJobType()) {
+            cs.setSubJob(1);
+        }
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {

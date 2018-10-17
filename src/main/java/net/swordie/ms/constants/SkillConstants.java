@@ -1075,51 +1075,7 @@ public class SkillConstants {
 
     public static boolean isPassiveSkill(int skillId) {
         SkillInfo si = SkillData.getSkillInfoById(skillId);
-        return si != null && si.getPsdSkills().size()  == 0
-                && !isActiveSkillWithPassiveType(skillId)
-                && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_PASSIVE_EX.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_MOVE_JUMP.getVal())
-                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId)
-                ;
-    }
-
-    private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
-        switch (skillId) {
-            //Warrior
-            case 1000003: // Iron Body
-            case 1120014: // Power Stance --v
-            case 1220017:
-            case 1320017: // Power Stance --^
-
-
-
-            //Thief
-            case 4110008: // Enveloping Darkness --v
-            case 4330008:
-            case 14110026:
-            case 4210013:
-            case 14110009: // Enveloping Darkness --^
-            case 4120014: // Dark Harmony
-            case 4310005: // Channel Karma
-            case 4200009: // Channel Karma
-            case 4200010: // Shield Mastery (Shad)
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Helper function for a list of skills that have type 50 (passive), but are actually buffs.
-     * @param skillId the skill id to check
-     * @return if the skill is active, while having a passive type
-     */
-    private static boolean isActiveSkillWithPassiveType(int skillId) {
-        switch (skillId) {
-            case 25121131: // Spirit bond max
-                return true;
-        }
-        return false;
+        return si != null && si.isPsd() && si.getPsdSkills().size() == 0;
     }
 
     public static boolean isHyperstatSkill(int skillID) {
@@ -1279,5 +1235,58 @@ public class SkillConstants {
                 return true;
         }
         return false;
+    }
+
+    public static boolean isMatching(int rootId, int job) {
+        boolean matchingStart = job / 100 == rootId / 100;
+        boolean matching = matchingStart;
+        if (matchingStart && rootId % 100 != 0) {
+            // job path must match
+            matching = (rootId % 100) / 10 == (job % 100) / 10;
+        }
+        return matching;
+    }
+
+    // is_skill_from_item(signed int nSkillID)
+    public static boolean isSkillFromItem(int skillID) {
+        switch (skillID) {
+            case 80011123: // New Destiny
+            case 80011247: // Dawn Shield
+            case 80011248: // Dawn Shield
+            case 80011249: // Divine Guardian
+            case 80011250: // Divine Shield
+            case 80011251: // Divine Brilliance
+            case 80011261: // Monolith
+            case 80011295: // Scouter
+            case 80011346: // Ribbit Ring
+            case 80011347: // Krrr Ring
+            case 80011348: // Rawr Ring
+            case 80011349: // Pew Pew Ring
+            case 80011475: // Elunarium Power (ATT & M. ATT)
+            case 80011476: // Elunarium Power (Skill EXP)
+            case 80011477: // Elunarium Power (Boss Damage)
+            case 80011478: // Elunarium Power (Ignore Enemy DEF)
+            case 80011479: // Elunarium Power (Crit Rate)
+            case 80011480: // Elunarium Power (Crit Damage)
+            case 80011481: // Elunarium Power (Status Resistance)
+            case 80011482: // Elunarium Power (All Stats)
+            case 80011492: // Firestarter Ring
+            case 80001768: // Rope Lift
+            case 80001705: // Rope Lift
+            case 80001941: // Scouter
+            case 80010040: // Altered Fate
+                return true;
+        }
+        // Tower of Oz skill rings
+        return (skillID >= 80001455 && skillID <= 80001479);
+    }
+
+    public static int getHyperPassiveSkillSpByLv(int level) {
+        // 1 sp per 10 levels, starting at 140, ending at 220
+        return level >= 140 && level <= 220 && level % 10 == 0 ? 1 : 0;
+    }
+
+    public static int getHyperActiveSkillSpByLv(int level) {
+        return level == 150 || level == 170 || level == 200 ? 1 : 0;
     }
 }
