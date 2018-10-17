@@ -1,64 +1,66 @@
-drop table if exists damageskinsavedatas;
-drop table if exists friends;
-drop table if exists linkskills;
-drop table if exists accounts;
-drop table if exists monster_collection_rewards;
-drop table if exists monster_collection_mobs;
-drop table if exists monster_collection_explorations;
-drop table if exists monster_collections;
-drop table if exists macroskills;
-drop table if exists macros;
-drop table if exists familiars;
-drop table if exists stolenskills;
-drop table if exists chosenskills;
-drop table if exists hyperrockfields;
-drop table if exists characterpotentials;
-drop table if exists test;
-drop table if exists skills;
-drop table if exists characters;
-drop table if exists avatardata;
-drop table if exists alliance_gradenames;
-drop table if exists alliances;
-drop table if exists keymaps;
-drop table if exists funckeymap;
-drop table if exists characterstats;
-drop table if exists hairequips;
-drop table if exists unseenequips;
-drop table if exists petids;
-drop table if exists totems;
-drop table if exists spset;
-drop table if exists extendsp;
-drop table if exists noncombatstatdaylimit;
-drop table if exists systemtimes;
-drop table if exists charactercards;
-drop table if exists avatarlook;
-drop table if exists sockets;
-drop table if exists options;
-drop table if exists equips;
-drop table if exists petitems;
-drop table if exists items;
-drop table if exists inventories;
-drop table if exists questprogressrequirements;
-drop table if exists questprogressitemrequirements;
-drop table if exists questprogresslevelrequirements;
-drop table if exists questprogressmoneyrequirements;
-drop table if exists questprogressmobrequirements;
-drop table if exists questlists;
-drop table if exists questmanagers;
-drop table if exists quests;
-drop table if exists bbs_replies;
-drop table if exists bbs_records;
-drop table if exists guildrequestors;
-drop table if exists gradenames;
-drop table if exists guildmembers;
-drop table if exists guildrequestors;
-drop table if exists guildskills;
-drop table if exists guildskill;
-drop table if exists guilds;
-drop table if exists monsterbookcards;
-drop table if exists monsterbookinfos;
-drop table if exists trunks;
-drop table if exists cashiteminfos;
+drop table if exists damageskinsavedatas,
+friends,
+linkskills,
+accounts,
+monster_collection_rewards,
+monster_collection_mobs,
+monster_collection_explorations,
+monster_collections,
+macroskills,
+macros,
+familiars,
+stolenskills,
+chosenskills,
+hyperrockfields,
+characterpotentials,
+test,
+skills,
+characters,
+avatardata,
+alliance_gradenames,
+alliances,
+keymaps,
+funckeymap,
+offenses,
+offense_managers,
+characterstats,
+hairequips,
+unseenequips,
+petids,
+totems,
+spset,
+extendsp,
+noncombatstatdaylimit,
+systemtimes,
+charactercards,
+avatarlook,
+sockets,
+options,
+equips,
+petitems,
+items,
+inventories,
+questprogressrequirements,
+questprogressitemrequirements,
+questprogresslevelrequirements,
+questprogressmoneyrequirements,
+questprogressmobrequirements,
+questlists,
+questmanagers,
+quests,
+bbs_replies,
+bbs_records,
+guildrequestors,
+gradenames,
+guildmembers,
+guildrequestors,
+guildskills,
+guildskill,
+guilds,
+monsterbookcards,
+monsterbookinfos,
+trunks,
+cashiteminfos;
 
 create table trunks(
 	id int not null auto_increment,
@@ -549,6 +551,24 @@ create table bbs_replies (
     foreign key (recordid) references bbs_records(id) on delete cascade
 );
 
+create table offense_managers (
+    id int not null auto_increment,
+    points int,
+);
+
+create table offenses (
+    id bigint not null auto_increment,
+    manager_id int,
+    charid int,
+    accountid int,
+    msg text,
+    type varchar(255),
+    issuedate datetime(3),
+    issuerid int,
+    primary key (id),
+    foreign key (manager_id) references offense_managers(id) on delete cascade
+);
+
 create table characters (
 	id int not null auto_increment,
     accid int,
@@ -560,6 +580,7 @@ create table characters (
     installinventory int,
     cashinventory int,
     funckeymap_id int,
+    offensemanager int,
     fieldid int,
     questmanager bigint,
     guild int,
@@ -579,7 +600,8 @@ create table characters (
     foreign key (funckeymap_id) references funckeymap(id),
     foreign key (questmanager) references questmanagers(id),
     foreign key (guild) references guilds(id),
-    foreign key (monsterbook) references monsterbookinfos(id)
+    foreign key (monsterbook) references monsterbookinfos(id),
+    foreign key (offensemanager) references offense_managers(id)
 );
 
 create table familiars (

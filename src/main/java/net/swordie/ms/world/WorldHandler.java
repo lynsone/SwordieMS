@@ -5,6 +5,7 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.alliance.AllianceResult;
+import net.swordie.ms.client.anticheat.Offense;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
@@ -1355,7 +1356,8 @@ public class WorldHandler {
                         chr.dispose();
                         return;
                     } else if (equip.getBaseGrade() < ItemGrade.Rare.getVal()) {
-                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        String msg = String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId());
+                        chr.getOffenseManager().addOffense(msg);
                         chr.dispose();
                         return;
                     }
@@ -1382,7 +1384,7 @@ public class WorldHandler {
                     break;
                 case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
                     if (c.getWorld().isReboot()) {
-                        log.error(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
+                        chr.getOffenseManager().addOffense(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
                         chr.dispose();
                         return;
                     }
@@ -1393,7 +1395,7 @@ public class WorldHandler {
                         chr.chatMessage(SystemNotice, "Could not find equip.");
                         return;
                     } else if (equip.getBonusGrade() < ItemGrade.Rare.getVal()) {
-                        log.error(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to use cube (id %d) an equip without a potential (id %d)", chr.getId(), itemID, equip.getItemId()));
                         chr.dispose();
                         return;
                     }
@@ -1636,7 +1638,7 @@ public class WorldHandler {
             chr.dispose();
             return;
         } else if (!ItemConstants.canEquipHavePotential(equip)) {
-            log.error(String.format("Character %d tried to add potential an eligible item (id %d)", chr.getId(), equip.getItemId()));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to add potential an eligible item (id %d)", chr.getId(), equip.getItemId()));
             chr.dispose();
             return;
         }
@@ -2622,27 +2624,27 @@ public class WorldHandler {
                 boolean up = inPacket.decodeByte() != 0;
                 if (up) {
                     if (!SkillConstants.isGuildContentSkill(skillID) && !SkillConstants.isGuildNoblesseSkill(skillID)) {
-                        log.error(String.format("Character %d tried to add an invalid guild skill (%d)", chr.getId(), skillID));
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to add an invalid guild skill (%d)", chr.getId(), skillID));
                         chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_UseSkill_Err)));
                         return;
                     }
                     int spentSp = guild.getSpentSp();
                     if (SkillConstants.isGuildContentSkill(skillID)) {
                         if (spentSp >= guild.getLevel() * 2) {
-                            log.error(String.format("Character %d tried to add a guild skill without enough sp (spent %d, level %d).",
+                            chr.getOffenseManager().addOffense(String.format("Character %d tried to add a guild skill without enough sp (spent %d, level %d).",
                                     chr.getId(), spentSp, guild.getLevel()));
                             chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                             return;
                         }
                     } else if (guild.getBattleSp() - guild.getSpentBattleSp() <= 0) { // Noblesse
-                        log.error(String.format("Character %d tried to add a guild battle skill without enough sp (spent %d).",
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to add a guild battle skill without enough sp (spent %d).",
                                 chr.getId(), guild.getSpentSp()));
                         chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                         return;
                     }
                     SkillInfo si = SkillData.getSkillInfoById(skillID);
                     if (spentSp < si.getReqTierPoint()) {
-                        log.error(String.format("Character %d tried to add a guild skill without enough sp spent (spent %d, needed %d).",
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to add a guild skill without enough sp spent (spent %d, needed %d).",
                                 chr.getId(), spentSp, si.getReqTierPoint()));
                         chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                         return;
@@ -2652,7 +2654,7 @@ public class WorldHandler {
                         int reqSlv = entry.getValue();
                         GuildSkill gs = guild.getSkillById(skillID);
                         if (gs == null || gs.getLevel() < reqSlv) {
-                            log.error(String.format("Character %d tried to add a guild skill without having the required " +
+                            chr.getOffenseManager().addOffense(String.format("Character %d tried to add a guild skill without having the required " +
                                             "skill first (req id %d, needed %d, has %d).",
                                     chr.getId(), reqSkillID, reqSlv, gs == null ? 0 : gs.getLevel()));
                             chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
@@ -2677,13 +2679,13 @@ public class WorldHandler {
                 } else {
                     GuildSkill gs = guild.getSkillById(skillID);
                     if (gs == null || gs.getLevel() == 0) {
-                        log.error(String.format("Character %d tried to decrement a guild skill without that skill existing (id %d).",
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to decrement a guild skill without that skill existing (id %d).",
                                 chr.getId(), skillID));
                         chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                         return;
                     }
                     if (guild.getGgp() < GameConstants.GGP_FOR_SKILL_RESET) {
-                        log.error(String.format("Character %d tried to decrement a guild skill without having enough GGP (needed %d, has %d).",
+                        chr.getOffenseManager().addOffense(String.format("Character %d tried to decrement a guild skill without having enough GGP (needed %d, has %d).",
                                 chr.getId(), GameConstants.GGP_FOR_SKILL_RESET, guild.getGgp()));
                         chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                         return;
@@ -2710,7 +2712,7 @@ public class WorldHandler {
                 }
                 GuildSkill gs = guild.getSkillById(skillID);
                 if (gs == null || gs.getLevel() == 0) {
-                    log.error(String.format("Character %d tried to use a guild skill without having it (id %d).",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to use a guild skill without having it (id %d).",
                             chr.getId(), skillID));
                     chr.write(WvsContext.guildResult(GuildResult.msg(GuildType.Res_SetSkill_LevelSet_Unknown)));
                     return;
@@ -3275,7 +3277,7 @@ public class WorldHandler {
         inPacket.decodeInt(); //unk
 
         if (field.getAffectedAreas().stream().noneMatch(ss -> ss.getSkillID() == skillID)) {
-            log.error(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to heal from Holy Fountain (%d) whilst there isn't any on the field.", chr.getId(), skillID));
             return;
         }
         c.getChr().heal((int) (c.getChr().getMaxHP() / ((double) 100 / 40)));
@@ -3531,14 +3533,14 @@ public class WorldHandler {
                 Equip equip = (Equip) inv.getItemBySlot(pos);
                 Equip prevEquip = equip.deepCopy();
                 if (equip == null || equip.getBaseStat(tuc) <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
-                    log.error(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to enchant a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), pos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
                 }
                 List<ScrollUpgradeInfo> suis = ItemConstants.getScrollUpgradeInfosByEquip(equip);
                 if (scrollID < 0 || scrollID >= suis.size()) {
-                    log.error(String.format("Characer %d tried to spell trace scroll with an invalid scoll ID (%d, " +
+                    chr.getOffenseManager().addOffense(String.format("Characer %d tried to spell trace scroll with an invalid scoll ID (%d, " +
                             "itemID %d).", chr.getId(), scrollID, equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
@@ -3650,13 +3652,13 @@ public class WorldHandler {
                 ePos = Math.abs(ePos);
                 equip = (Equip) inv.getItemBySlot((short) ePos);
                 if (c.getWorld().isReboot()) {
-                    log.error(String.format("Character %d attempted to scroll in reboot world (pos %d, itemid %d).",
+                    chr.getOffenseManager().addOffense(String.format("Character %d attempted to scroll in reboot world (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
                     return;
                 }
                 if (equip == null || equip.getBaseStat(tuc) <= 0 || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
-                    log.error(String.format("Character %d tried to scroll a non-scrollable equip (pos %d, itemid %d).",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to scroll a non-scrollable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.dispose();
                     return;
@@ -3672,7 +3674,7 @@ public class WorldHandler {
                 ePos = Math.abs(ePos);
                 equip = (Equip) inv.getItemBySlot((short) ePos);
                 if (equip == null || equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige) || !ItemConstants.isUpgradable(equip.getItemId())) {
-                    log.error(String.format("Character %d tried to enchant a non-enchantable equip (pos %d, itemid %d).",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to enchant a non-enchantable equip (pos %d, itemid %d).",
                             chr.getId(), ePos, equip == null ? 0 : equip.getItemId()));
                     chr.write(CField.showUnknownEnchantFailResult((byte) 0));
                     return;
@@ -3878,7 +3880,7 @@ public class WorldHandler {
             return;
         }
         if (!ItemConstants.nebuliteFitsEquip(equip, item)) {
-            log.error(String.format("Character %d attempted to use a nebulite (%d) that doesn't fit an equip (%d).", chr.getId(), item.getItemId(), equip.getItemId()));
+            chr.getOffenseManager().addOffense(String.format("Character %d attempted to use a nebulite (%d) that doesn't fit an equip (%d).", chr.getId(), item.getItemId(), equip.getItemId()));
             chr.chatMessage("The nebulite cannot be mounted on this equip.");
             chr.dispose();
             return;
@@ -4119,7 +4121,7 @@ public class WorldHandler {
                 chr.consumeItem(buffProtector);
                 chr.write(UserLocal.setBuffProtector(buffProtector.getItemId(), true));
             } else {
-                log.error(String.format("Character id %d tried to use a buff without having the appropriate item.", chr.getId()));
+                chr.getOffenseManager().addOffense(String.format("Character id %d tried to use a buff without having the appropriate item.", chr.getId()));
             }
         }
     }
@@ -4253,7 +4255,7 @@ public class WorldHandler {
         }
         if (cost > chr.getHonorExp()) {
             chr.chatMessage("You do not have enough honor exp for that action.");
-            log.warn(String.format("Character %d tried to reset honor without having enough exp (required %d, has %d)",
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to reset honor without having enough exp (required %d, has %d)",
                     chr.getId(), cost, chr.getHonorExp()));
             return;
         }
@@ -4379,7 +4381,7 @@ public class WorldHandler {
         Item item = chr.getConsumeInventory().getItemBySlot(slot);
         if (item == null || item.getItemId() != itemID || !ItemConstants.isFamiliar(itemID)) {
             chr.chatMessage("Could not find that item.");
-            log.error(String.format("Character %d tried to add a familiar it doesn't have. (item id %d)", chr.getId(), itemID));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to add a familiar it doesn't have. (item id %d)", chr.getId(), itemID));
         }
         int suffix = itemID % 10000;
         int familiarID = (ItemConstants.FAMILIAR_PREFIX * 10000) + suffix;
@@ -4485,7 +4487,7 @@ public class WorldHandler {
         Skill skill = chr.getSkill(SkillConstants.getLinkedSkill(skillID));
         int slv = skill == null ? 0 : skill.getCurrentLevel();
         if (slv == 0) {
-            log.error(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to make a grenade with a skill they do not possess (id %d)", chr.getId(), skillID));
         } else {
             boolean success = true;
             if (SkillData.getSkillInfoById(skillID).hasCooltime()) {
@@ -5045,7 +5047,7 @@ public class WorldHandler {
 
             if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
                     hammer == null || !ItemConstants.isGoldHammer(hammer)) {
-                log.error(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
+                chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                         chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
                 chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
                 return;
@@ -5055,7 +5057,7 @@ public class WorldHandler {
 
             if (vals.size() > 0) {
                 if (equip.getBaseStat(iuc) >= ItemConstants.MAX_HAMMER_SLOTS) {
-                    log.error(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
                             chr.getId(), equip == null ? 0 : equip.getItemId()));
                     chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, 0));
                     return;
@@ -5200,11 +5202,11 @@ public class WorldHandler {
 
                 Item item = chr.getInventoryByType(InvType.getInvTypeByVal(invType)).getItemBySlot(bagIndex);
                 if (item.getQuantity() < quantity) {
-                    log.warn(String.format("Character {%d} tried to trade an item {%d} with a higher quantity {%s} than the item has {%d}.", chr.getId(), item.getItemId(), quantity, item.getQuantity()));
+                    chr.getOffenseManager().addOffense(String.format("Character {%d} tried to trade an item {%d} with a higher quantity {%s} than the item has {%d}.", chr.getId(), item.getItemId(), quantity, item.getQuantity()));
                     return;
                 }
                 if (!item.isTradable()) {
-                    log.warn(String.format("Character {%d} tried to trade an item {%d} whilst it was trade blocked.", chr.getId(), item.getItemId()));
+                    chr.getOffenseManager().addOffense(String.format("Character {%d} tried to trade an item {%d} whilst it was trade blocked.", chr.getId(), item.getItemId()));
                     return;
                 }
                 if (chr.getTradeRoom() == null) {
@@ -5234,7 +5236,7 @@ public class WorldHandler {
                     return;
                 }
                 if (money < 0 || money > chr.getMoney()) {
-                    log.error(String.format("Character %d tried to add an invalid amount of mesos(%d, own money: %d)",
+                    chr.getOffenseManager().addOffense(String.format("Character %d tried to add an invalid amount of mesos(%d, own money: %d)",
                             chr.getId(), money, chr.getMoney()));
                     return;
                 }
@@ -5350,7 +5352,7 @@ public class WorldHandler {
         Field field = chr.getField();
 
         if (!chr.hasSkill(skillId)) {
-            log.warn(String.format("Character {%d} tried to use a skill {%d} they do not have.", chrId, skillId));
+            chr.getOffenseManager().addOffense(String.format("Character {%d} tried to use a skill {%d} they do not have.", chrId, skillId));
         }
 
 
@@ -5529,7 +5531,7 @@ public class WorldHandler {
         if (skillID != 0 && (si == null || pet == null || !pet.getItem().hasPetSkill(PetSkill.AUTO_BUFF) ||
                 skill == null || skill.getCurrentLevel() == 0 || coolTime > 0)) {
             chr.chatMessage("Something went wrong when adding the pet skill.");
-            log.error(String.format("Character %d tried to illegally add a pet skill (skillID = %d, skill = %s, " +
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to illegally add a pet skill (skillID = %d, skill = %s, " +
                     "pet = %s, coolTime = %d)", chr.getId(), skillID, skill, pet, coolTime));
             chr.dispose();
             return;
@@ -5556,7 +5558,8 @@ public class WorldHandler {
             chr.write(WvsContext.givePopularityResult(PopularityResultType.AlreadyDoneToday, targetChr, 0, increase));
             chr.dispose();
         } else if (targetChrId == chr.getId()) {
-            log.error(String.format("Character %d tried to fame themselves", chr.getId()));
+            chr.getOffenseManager().addOffense(Offense.Type.Warning,
+                    String.format("Character %d tried to fame themselves", chr.getId()));
         } else {
             targetChr.addStatAndSendPacket(pop, (increase ? 1 : -1));
             int curPop = targetChr.getAvatarData().getCharacterStat().getPop();
@@ -5667,7 +5670,7 @@ public class WorldHandler {
         HashMap<Item, Integer> itemMap = new HashMap<>();
 
         if (chr.getScriptManager().getQRValue(QuestConstants.SILENT_CRUSADE_WANTED_TAB_1 + tab).contains("r=1")) {
-            log.error(String.format("Character %d tried to complete Silent Crusade Chapter %d, whilst already having claimed the reward.", chr.getId(), tab + 1));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to complete Silent Crusade Chapter %d, whilst already having claimed the reward.", chr.getId(), tab + 1));
             chr.dispose();
             return;
         }
@@ -5719,16 +5722,16 @@ public class WorldHandler {
         List<Integer> itemList = Arrays.asList(1132111, 1152069, 1122157, 1012331, 1022148, 1032156, 1122208, 1132182, 2030026);
 
         if (!itemList.contains(itemId)) {
-            log.error(String.format("Character %d tried to trade an item {%d} that is not in the shop list.", chr.getId(), itemId));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to trade an item {%d} that is not in the shop list.", chr.getId(), itemId));
 
         } else if (itemList.get(itemIndexInShop) != itemId) {
-            log.error(String.format("Character %d tried to trade an item {%d} that is not in the given position {%d}.", chr.getId(), itemId, itemIndexInShop));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to trade an item {%d} that is not in the given position {%d}.", chr.getId(), itemId, itemIndexInShop));
 
         } else if (ItemConstants.isEquip(itemId) && itemQuantity > 1) {
-            log.error(String.format("Character %d tried to get a quantity {%d} that is more than 1 Silent Crusade equip {%d}.", chr.getId(), itemQuantity, itemId));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to get a quantity {%d} that is more than 1 Silent Crusade equip {%d}.", chr.getId(), itemQuantity, itemId));
 
         } else if (itemIndexInShop >= itemList.size()) {
-            log.error(String.format("Character %d tried to get an item from a shopIndex {%d} that is more than or equal to the amount of items in the shop {%d}.", chr.getId(), itemIndexInShop, itemList.size()));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to get an item from a shopIndex {%d} that is more than or equal to the amount of items in the shop {%d}.", chr.getId(), itemIndexInShop, itemList.size()));
 
         } else if (!chr.hasItemCount(crusaderCoin, (coinCostList.get(itemIndexInShop)) * itemQuantity)) {
             chr.chatMessage("You don't have enough Crusader Coins.");
@@ -5773,10 +5776,10 @@ public class WorldHandler {
                 break;
         }
         if (QuestData.getQuestInfoById(questId).getMedalItemId() != medalItemId || !(ItemConstants.isMedal(medalItemId))) {
-            log.error(String.format("Character %d tried to reissue an item {%d} that isn't a medal or tried to reissue a medal from a quest {%d} that doesn't give the given medal", chr.getId(), medalItemId, questId));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to reissue an item {%d} that isn't a medal or tried to reissue a medal from a quest {%d} that doesn't give the given medal", chr.getId(), medalItemId, questId));
 
         } else if (!sm.hasQuestCompleted(questId)) {
-            log.error(String.format("Character %d tried to reissue a medal from a quest {} which they have not completed.", chr.getId(), questId));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to reissue a medal from a quest {%d} which they have not completed.", chr.getId(), questId));
 
         } else if (ItemData.getItemDeepCopy(medalItemId) == null || QuestData.getQuestInfoById(questId) == null) {
             chr.write(UserLocal.medalReissueResult(MedalReissueResultType.Unknown, medalItemId));
