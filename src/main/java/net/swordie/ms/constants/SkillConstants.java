@@ -1280,4 +1280,13 @@ public class SkillConstants {
         // Tower of Oz skill rings
         return (skillID >= 80001455 && skillID <= 80001479);
     }
+
+    public static int getHyperPassiveSkillSpByLv(int level) {
+        // 1 sp per 10 levels, starting at 140, ending at 220
+        return level >= 140 && level <= 220 && level % 10 == 0 ? 1 : 0;
+    }
+
+    public static int getHyperActiveSkillSpByLv(int level) {
+        return level == 150 || level == 170 || level == 200 ? 1 : 0;
+    }
 }

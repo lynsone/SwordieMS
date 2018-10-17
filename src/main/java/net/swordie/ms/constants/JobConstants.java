@@ -205,6 +205,18 @@ public class JobConstants {
         return id >= JobConstants.JobEnum.BATTLE_MAGE_1.getJobId() && id <= JobConstants.JobEnum.BATTLE_MAGE_4.getJobId();
     }
 
+    public static boolean isGmJob(short id) {
+        return isGm(id) || isSuperGm(id);
+    }
+
+    public static boolean isGm(short id) {
+        return id == JobEnum.GM.getJobId();
+    }
+
+    public static boolean isSuperGm(short id) {
+        return id == JobEnum.SUPERGM.getJobId();
+    }
+
     public enum JobEnum {
         BEGINNER(0),
         WARRIOR(100),

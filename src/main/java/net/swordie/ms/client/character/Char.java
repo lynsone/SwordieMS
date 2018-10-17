@@ -1977,6 +1977,7 @@ public class Char {
 			case inte:
 			case luk:
 			case ap:
+			case subJob:
 				stats.put(charStat, (short) getStat(charStat));
 				break;
 			case hp:

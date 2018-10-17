@@ -1979,7 +1979,9 @@ public class WorldHandler {
             if (nmt == NpcMessageType.AskAvatar || nmt == NpcMessageType.AskAvatarZero) {
                 inPacket.decodeByte();
                 hasAnswer = inPacket.decodeByte() != 0;
-                answer = inPacket.decodeByte();
+                if (hasAnswer) {
+                    answer = inPacket.decodeByte();
+                }
             }
             if (nmt == NpcMessageType.AskText && action != 0) {
                 chr.getScriptManager().handleAction(nmt, action, ans);
@@ -5113,13 +5115,13 @@ public class WorldHandler {
         }
         int value;
         switch (itt) {
+            // HyperSkills: both have the same requestStr. level = type * 5
             case HyperActiveSkill:
             case HyperPassiveSkill:
-                ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
-                if (subType == InstanceTableType.HyperPassiveSkill.getSubType()) {
-                    value = esp.getSpByJobLevel(SkillConstants.PASSIVE_HYPER_JOB_LEVEL);
+                if (subType == InstanceTableType.HyperActiveSkill.getSubType()) {
+                    value = SkillConstants.getHyperActiveSkillSpByLv(type * 5);
                 } else {
-                    value = esp.getSpByJobLevel(SkillConstants.ACTIVE_HYPER_JOB_LEVEL);
+                    value = SkillConstants.getHyperPassiveSkillSpByLv(type * 5);
                 }
                 break;
             case HyperStatIncAmount:
