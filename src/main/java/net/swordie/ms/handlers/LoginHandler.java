@@ -310,4 +310,9 @@ public class LoginHandler {
         c.setAuthorized(success);
         return success;
     }
+
+    public static void handleExceptionLog(Client c, InPacket inPacket) {
+        String str = inPacket.decodeString();
+        log.error("Exception log: " + str);
+    }
 }

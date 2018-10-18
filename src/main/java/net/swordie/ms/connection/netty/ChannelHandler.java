@@ -93,6 +93,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                     c.getChr().logout();
                 }
                 break;
+            case EXCEPTION_LOG:
+                LoginHandler.handleExceptionLog(c, inPacket);
+                break;
             case USER_ACTIVATE_NICK_ITEM:
                 WorldHandler.handleUserActiveNickItem(c, inPacket);
                 break;

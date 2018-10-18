@@ -307,7 +307,7 @@ public class SkillData {
     private static List<Skill> getSkillsByJob(short id, boolean rec) {
         List<Skill> res = new ArrayList<>();
         getSkillInfos().forEach((key, si) -> {
-            if (si.getRootId() == id) {
+            if (si.getRootId() == id && !si.isInvisible()) {
                 res.add(getSkillDeepCopyById(key));
             }
         });
