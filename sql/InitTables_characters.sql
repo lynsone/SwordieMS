@@ -51,9 +51,9 @@ questmanagers,
 quests,
 bbs_replies,
 bbs_records,
-guildrequestors,
 gradenames,
 guildmembers,
+guildrequestors,
 guildskills,
 guildskill,
 guilds,
@@ -560,7 +560,7 @@ create table offense_managers (
 
 create table offenses (
     id bigint not null auto_increment,
-    offensemanager int,
+    manager_id int,
     charid int,
     accountid int,
     msg text,
@@ -568,7 +568,7 @@ create table offenses (
     issuedate datetime(3),
     issuerid int,
     primary key (id),
-    foreign key (offensemanager) references offense_managers(id) on delete cascade
+    foreign key (manager_id) references offense_managers(id) on delete cascade
 );
 
 create table characters (

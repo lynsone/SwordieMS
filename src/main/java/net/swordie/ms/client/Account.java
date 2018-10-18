@@ -489,6 +489,9 @@ public class Account {
     }
 
     public OffenseManager getOffenseManager() {
+        if (offenseManager == null) {
+            setOffenseManager(new OffenseManager());
+        }
         return offenseManager;
     }
 
