@@ -1,3 +1,4 @@
+set FOREIGN_KEY_CHECKS = 0;
 drop table if exists damageskinsavedatas,
 friends,
 linkskills,
@@ -53,7 +54,6 @@ bbs_records,
 guildrequestors,
 gradenames,
 guildmembers,
-guildrequestors,
 guildskills,
 guildskill,
 guilds,
@@ -61,6 +61,7 @@ monsterbookcards,
 monsterbookinfos,
 trunks,
 cashiteminfos;
+set FOREIGN_KEY_CHECKS = 1;
 
 create table trunks(
 	id int not null auto_increment,
@@ -554,11 +555,12 @@ create table bbs_replies (
 create table offense_managers (
     id int not null auto_increment,
     points int,
+    primary key (id)
 );
 
 create table offenses (
     id bigint not null auto_increment,
-    manager_id int,
+    offensemanager int,
     charid int,
     accountid int,
     msg text,
@@ -566,7 +568,7 @@ create table offenses (
     issuedate datetime(3),
     issuerid int,
     primary key (id),
-    foreign key (manager_id) references offense_managers(id) on delete cascade
+    foreign key (offensemanager) references offense_managers(id) on delete cascade
 );
 
 create table characters (
@@ -580,7 +582,6 @@ create table characters (
     installinventory int,
     cashinventory int,
     funckeymap_id int,
-    offensemanager int,
     fieldid int,
     questmanager bigint,
     guild int,
@@ -600,8 +601,7 @@ create table characters (
     foreign key (funckeymap_id) references funckeymap(id),
     foreign key (questmanager) references questmanagers(id),
     foreign key (guild) references guilds(id),
-    foreign key (monsterbook) references monsterbookinfos(id),
-    foreign key (offensemanager) references offense_managers(id)
+    foreign key (monsterbook) references monsterbookinfos(id)
 );
 
 create table familiars (
@@ -808,9 +808,11 @@ create table accounts (
     monstercollectionid int,
     banExpireDate datetime(3),
     banReason varchar(255),
+    offensemanager int,
 	primary key (id),
     foreign key (trunkid) references trunks(id),
-    foreign key (monstercollectionid) references monster_collections(id)
+    foreign key (monstercollectionid) references monster_collections(id),
+    foreign key (offensemanager) references offense_managers(id)
 );
 
 

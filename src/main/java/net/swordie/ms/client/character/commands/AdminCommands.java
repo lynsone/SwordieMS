@@ -1692,6 +1692,7 @@ public class AdminCommands {
             }
             banAccount.setBanExpireDate(FileTime.fromDate(banDate));
             banAccount.setBanReason(reason);
+            banAccount.getOffenseManager().addOffense(reason, chr.getId());
             chr.chatMessage(SpeakerChannel, String.format("Character %s has been banned. Expire date: %s", name, banDate));
             if (online) {
                 banChr.write(WvsContext.returnToTitle());

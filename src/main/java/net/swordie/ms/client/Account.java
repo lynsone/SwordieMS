@@ -1,6 +1,7 @@
 package net.swordie.ms.client;
 
 import net.swordie.ms.Server;
+import net.swordie.ms.client.anticheat.OffenseManager;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
@@ -79,6 +80,9 @@ public class Account {
     @Convert(converter = FileTimeConverter.class)
     private FileTime banExpireDate = FileTime.fromType(FileTime.Type.ZERO_TIME);
     private String banReason;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "offensemanager")
+    private OffenseManager offenseManager;
 
     public Account(String name, String password, int accountId, String pic, AccountType accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
@@ -482,5 +486,13 @@ public class Account {
     public void unstuck() {
         Server.getInstance().removeAccount(this);
         DatabaseManager.saveToDB(this);
+    }
+
+    public OffenseManager getOffenseManager() {
+        return offenseManager;
+    }
+
+    public void setOffenseManager(OffenseManager offenseManager) {
+        this.offenseManager = offenseManager;
     }
 }

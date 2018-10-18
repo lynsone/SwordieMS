@@ -146,8 +146,6 @@ public class Char {
 	private AvatarData avatarData;
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private FuncKeyMap funcKeyMap;
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private OffenseManager offenseManager;
 
 	@JoinColumn(name = "charId")
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -4125,10 +4123,6 @@ public class Char {
 	}
 
     public OffenseManager getOffenseManager() {
-        return offenseManager;
-    }
-
-    public void setOffenseManager(OffenseManager offenseManager) {
-        this.offenseManager = offenseManager;
+        return getAccount().getOffenseManager();
     }
 }
