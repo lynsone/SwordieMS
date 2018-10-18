@@ -50,7 +50,6 @@ questmanagers,
 quests,
 bbs_replies,
 bbs_records,
-guildrequestors,
 gradenames,
 guildmembers,
 guildrequestors,
@@ -554,6 +553,7 @@ create table bbs_replies (
 create table offense_managers (
     id int not null auto_increment,
     points int,
+    primary key(id)
 );
 
 create table offenses (
@@ -580,7 +580,7 @@ create table characters (
     installinventory int,
     cashinventory int,
     funckeymap_id int,
-    offensemanager int,
+    offensemanager_id int,
     fieldid int,
     questmanager bigint,
     guild int,
@@ -601,7 +601,7 @@ create table characters (
     foreign key (questmanager) references questmanagers(id),
     foreign key (guild) references guilds(id),
     foreign key (monsterbook) references monsterbookinfos(id),
-    foreign key (offensemanager) references offense_managers(id)
+    foreign key (offensemanager_id) references offense_managers(id)
 );
 
 create table familiars (
