@@ -167,7 +167,6 @@ public class Evan extends Job {
                 o1.rOption = skillID;
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(MagicGuard, o1);
-                c.write(CField.createDragon(chr));
                 break;
             case MAGIC_BOOSTER:
                 o1.nOption = si.getValue(x, slv);

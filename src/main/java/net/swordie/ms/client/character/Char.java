@@ -35,6 +35,7 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -2312,6 +2313,7 @@ public class Char {
 		setField(toField);
 		toField.addChar(this);
 		getAvatarData().getCharacterStat().setPortal(portal.getId());
+		setPosition(new Position(portal.getX(), portal.getY()));
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
 		if (characterData) {
@@ -2340,6 +2342,9 @@ public class Char {
 		}
 		toField.spawnLifesForChar(this);
 
+		if (JobConstants.isEvan(getJob())) {
+			((Evan) getJobHandler()).spawnMir();
+		}
 		if (tsm.hasStat(IndieEmpty)) {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
