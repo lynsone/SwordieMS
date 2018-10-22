@@ -264,14 +264,6 @@ public class Mercedes extends Job {
 
         SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
         byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
-
-        o1.nReason = random;
-        o1.nValue = 1;
-        o1.summon = summon;
-        o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = si.getValue(time, slv);
-        tsm.putCharacterStatValue(IndieEmpty, o1);
-        tsm.sendSetStatPacket();
     }
 
 

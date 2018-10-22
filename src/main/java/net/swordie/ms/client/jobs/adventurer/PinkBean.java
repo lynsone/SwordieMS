@@ -293,14 +293,6 @@ public class PinkBean extends Job {
                     summon.setPosition(mob.getPosition());
                     summon.setMoveAbility(MoveAbility.FlyRandom.getVal());
                     field.spawnAddSummon(summon);
-
-                    o1.nReason = GO_MINI_BEANS;
-                    o1.nValue = 1;
-                    o1.summon = summon;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = miniBeanInfo.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieEmpty, o1);
-                    tsm.sendSetStatPacket();
                 }
             }
         }

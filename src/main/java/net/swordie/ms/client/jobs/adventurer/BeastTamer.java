@@ -284,13 +284,6 @@ public class BeastTamer extends Job {
                 summon.setSummonTerm(si.getValue(time, slv));
                 summon.setMoveAbility(MoveAbility.Stop.getVal());
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case BEAR_ASSAULT:
                 o1.nOption = si.getValue(x, slv);
@@ -724,14 +717,6 @@ public class BeastTamer extends Job {
                     summon.setSummonTerm(si.getValue(x, slv));
                     summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
                     field.spawnAddSummon(summon);
-
-                    o1.nReason = skill.getSkillId();
-                    o1.nValue = 1;
-                    o1.summon = summon;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieEmpty, o1);
-                    tsm.sendSetStatPacket();
                 }
             }
 

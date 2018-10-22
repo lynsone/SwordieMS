@@ -2,6 +2,7 @@ package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
+
+import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.IndieEmpty;
 
 /**
  * Created on 1/6/2018.
@@ -215,6 +218,16 @@ public class Summon extends Life {
         summon.setBeforeFirstAttack(false);
         summon.setTemplateId(skillID);
         summon.setAttackActive(true);
+
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o1 = new Option();
+        o1.nReason = skillID;
+        o1.nValue = 1;
+        o1.summon = summon;
+        o1.tStart = (int) System.currentTimeMillis();
+        o1.tTerm = summon.getSummonTerm();
+        tsm.putCharacterStatValue(IndieEmpty, o1);
+        tsm.sendSetStatPacket();
         return summon;
     }
 

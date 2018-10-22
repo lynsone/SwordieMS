@@ -547,13 +547,6 @@ public class Pirate extends Beginner {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case OCTO_CANNON: //Stationary, Attacks
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -562,13 +555,6 @@ public class Pirate extends Beginner {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnAddSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
                 int[] summons = new int[] {
@@ -582,13 +568,6 @@ public class Pirate extends Beginner {
                     summon.setMoveAction((byte) 0);
                     summon.setMoveAbility((byte) 0);
                     field.spawnSummon(summon);
-
-                    o1.nReason = skillID;
-                    o1.nValue = 1;
-                    o1.summon = summon;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieEmpty, o1);
                 }
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
@@ -598,13 +577,6 @@ public class Pirate extends Beginner {
                 summon.setMoveAction((byte) 0);
                 summon.setMoveAbility((byte) 0);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
@@ -623,13 +595,6 @@ public class Pirate extends Beginner {
                 summon.setPosition(position);
                 summon.setSummonTerm(20);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
         tsm.sendSetStatPacket();
