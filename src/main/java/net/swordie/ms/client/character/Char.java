@@ -4130,4 +4130,24 @@ public class Char {
     public OffenseManager getOffenseManager() {
         return getAccount().getOffenseManager();
     }
+
+	/**
+	 * Applies the mp consumption of a skill.
+	 * @param skillID the skill's id
+	 * @param slv the current skill level
+	 * @return whether the consumption was successful (unsuccessful = not enough mp)
+	 */
+	public boolean applyMpCon(int skillID, byte slv) {
+		int curMp = getStat(Stat.mp);
+		SkillInfo si = SkillData.getSkillInfoById(skillID);
+		if (si == null) {
+			return true;
+		}
+		int mpCon = si.getValue(SkillStat.mpCon, slv);
+		boolean hasEnough = curMp >= mpCon;
+		if (hasEnough) {
+			addStatAndSendPacket(Stat.mp, -mpCon);
+		}
+		return hasEnough;
+	}
 }

@@ -381,8 +381,12 @@ public class WorldHandler {
         Char chr = c.getChr();
         chr.chatMessage(attackInfo.skillId + "");
         int skillID = attackInfo.skillId;
-        if (attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK || chr.checkAndSetSkillCooltime(skillID)
-                || chr.hasSkillCDBypass() || SkillConstants.isMultiAttackCooldownSkill(skillID)) {
+        boolean summonedAttack = attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK;
+        boolean multiAttack = SkillConstants.isMultiAttackCooldownSkill(skillID);
+        if (!summonedAttack && !multiAttack && !chr.applyMpCon(attackInfo.skillId, attackInfo.slv)) {
+            return;
+        }
+        if (summonedAttack || chr.checkAndSetSkillCooltime(skillID) || chr.hasSkillCDBypass() || multiAttack) {
             byte slv = attackInfo.slv;
             chr.chatMessage(Mob, "SkillID: " + skillID);
             Field field = c.getChr().getField();
@@ -2872,7 +2876,7 @@ public class WorldHandler {
         inPacket.decodeInt(); // crc
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
-        if (chr.checkAndSetSkillCooltime(skillID) || chr.hasSkillCDBypass()) {
+        if (chr.applyMpCon(skillID, slv) && (chr.checkAndSetSkillCooltime(skillID) || chr.hasSkillCDBypass())) {
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skillID, slv, 0)));
             log.debug("SkillID: " + skillID);
             c.getChr().chatMessage(ChatType.Mob, "SkillID: " + skillID);
