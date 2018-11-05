@@ -1666,4 +1666,11 @@ public class Mob extends Life {
     public boolean isFinishedEscort() {
         return escortDest.size() == 0;
     }
+
+    @Override
+    public void notifyControllerChange(Char controller) {
+        for (Char chr : getField().getChars()) {
+            chr.write(MobPool.changeController(this, false, controller == chr));
+        }
+    }
 }

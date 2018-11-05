@@ -443,10 +443,17 @@ public class Field {
                 controller = getLifeToControllers().get(life);
             }
             if (controller == null) {
-                controller = getChars().get(0);
-                putLifeController(life, controller);
+                setRandomController(life);
             }
             life.broadcastSpawnPacket(onlyChar);
+        }
+    }
+
+    private void setRandomController(Life life) {
+        if (getChars().size() > 0) {
+            Char controller = Util.getRandomFromCollection(getChars());
+            putLifeController(life, controller);
+            life.notifyControllerChange(controller);
         }
     }
 
@@ -491,10 +498,10 @@ public class Field {
     public void removeChar(Char chr) {
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
-        // set controllers to null
+        // change controllers for which the chr was the controller of
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
-                putLifeController(entry.getKey(), null);
+                setRandomController(entry.getKey());
             }
         }
         // remove summons of that char & remove field attacks of that char
