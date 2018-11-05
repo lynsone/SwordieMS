@@ -2349,10 +2349,7 @@ public class Char {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
 				if (summon != null) {
-					if (summon.getMoveAbility() == MoveAbility.WalkClone.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Walk.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Fly.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Jaguar.getVal()) {
+					if (summon.getMoveAbility().changeFieldWithOwner()) {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {

@@ -202,7 +202,7 @@ public class WildHunter extends Citizen {
                 summon = Summon.getSummonBy(chr, SUMMONS[chr.getWildHunterInfo().getIdx()], (byte) 1);
                 summon.setSummonTerm(0);
 
-                summon.setMoveAbility(MoveAbility.Jaguar.getVal());
+                summon.setMoveAbility(MoveAbility.Jaguar);
                 summon.setAssistType(AssistType.Attacking.getVal());
                 summon.setAttackActive(true);
 
@@ -346,7 +346,7 @@ public class WildHunter extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), DRILL_SALVO, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
         }

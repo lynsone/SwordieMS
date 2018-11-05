@@ -301,7 +301,7 @@ public class Thief extends Beginner {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
-                    summon.setMoveAbility((byte) 0);
+                    summon.setMoveAbility(MoveAbility.Stop);
                     summon.setAssistType((byte) 0);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
@@ -318,7 +318,7 @@ public class Thief extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
 

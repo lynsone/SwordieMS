@@ -545,7 +545,7 @@ public class Pirate extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case OCTO_CANNON: //Stationary, Attacks
@@ -553,7 +553,7 @@ public class Pirate extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnAddSummon(summon);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
@@ -566,7 +566,7 @@ public class Pirate extends Beginner {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
-                    summon.setMoveAbility((byte) 0);
+                    summon.setMoveAbility(MoveAbility.Stop);
                     field.spawnSummon(summon);
                 }
                 break;
@@ -575,7 +575,7 @@ public class Pirate extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case ALL_ABOARD: //Moves, Attacks
@@ -589,7 +589,7 @@ public class Pirate extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
@@ -632,7 +632,7 @@ public class Pirate extends Beginner {
             Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
             Field field = chr.getField();
             summon.setFlyMob(false);
-            summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+            summon.setMoveAbility(MoveAbility.WalkRandom);
             field.spawnSummon(summon);
 
             o3.nReason = random;

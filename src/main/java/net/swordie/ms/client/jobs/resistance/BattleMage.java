@@ -297,7 +297,7 @@ public class BattleMage extends Citizen {
         death = Summon.getSummonBy(c.getChr(), skillID, slv);
         death.setFlyMob(true);
         death.setSummonTerm(0);
-        death.setMoveAbility(MoveAbility.Walk.getVal());
+        death.setMoveAbility(MoveAbility.Walk);
         death.setAssistType(AssistType.Manual.getVal());
         death.setAttackActive(false);
         death.setBeforeFirstAttack(false);

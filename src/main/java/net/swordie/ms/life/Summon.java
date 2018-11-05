@@ -56,7 +56,7 @@ public class Summon extends Life {
     private short curFoothold;
     private AvatarLook avatarLook;
     private List<Position> teslaCoilPositions = new ArrayList<>();
-    private byte moveAbility;
+    private MoveAbility moveAbility;
     private Position[] kishinPositions = new Position[2];
     private int maxHP;
     private int hp;
@@ -193,11 +193,11 @@ public class Summon extends Life {
         this.teslaCoilPositions = teslaCoilPositions;
     }
 
-    public byte getMoveAbility() {
+    public MoveAbility getMoveAbility() {
         return moveAbility;
     }
 
-    public void setMoveAbility(byte moveAbility) {
+    public void setMoveAbility(MoveAbility moveAbility) {
         this.moveAbility = moveAbility;
     }
 
@@ -212,7 +212,7 @@ public class Summon extends Life {
         summon.setPosition(chr.getPosition().deepCopy());
         summon.setMoveAction((byte) 1);
         summon.setCurFoothold((short) chr.getField().findFootHoldBelow(summon.getPosition()).getId());
-        summon.setMoveAbility((byte) 1);
+        summon.setMoveAbility(MoveAbility.Walk);
         summon.setAssistType((byte) 1);
         summon.setEnterType((byte) 1);
         summon.setBeforeFirstAttack(false);
@@ -250,7 +250,7 @@ public class Summon extends Life {
         Position kishLeftPos = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
         kishinLeft.setPosition(kishLeftPos);
         kishinLeft.setCurFoothold((short) field.findFootHoldBelow(kishLeftPos).getId());
-        kishinLeft.setMoveAbility(MoveAbility.Stop.getVal());
+        kishinLeft.setMoveAbility(MoveAbility.Stop);
         kishinLeft.setMoveAction((byte) 0);
         kishinLeft.setKishinPositions(new Position[] {
             new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -264,7 +264,7 @@ public class Summon extends Life {
         Position kishRightPos = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
         kishinRight.setPosition(kishRightPos);
         kishinRight.setCurFoothold((short) field.findFootHoldBelow(kishRightPos).getId());
-        kishinRight.setMoveAbility(MoveAbility.Stop.getVal());
+        kishinRight.setMoveAbility(MoveAbility.Stop);
         kishinRight.setMoveAction((byte) 5);
         kishinLeft.setKishinPositions(new Position[] {
                 new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),

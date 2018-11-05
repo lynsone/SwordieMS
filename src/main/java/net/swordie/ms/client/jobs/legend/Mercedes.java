@@ -250,7 +250,7 @@ public class Mercedes extends Job {
         eleKnightSummonID = random;
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();
-        summon.setMoveAbility(MoveAbility.Fly.getVal());
+        summon.setMoveAbility(MoveAbility.Fly);
         summon.setSummonTerm(0);
 
         summonList.add(summon);

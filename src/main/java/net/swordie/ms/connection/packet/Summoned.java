@@ -66,7 +66,7 @@ public class Summoned {
         outPacket.encodePosition(summon.getPosition());
         outPacket.encodeByte(summon.getMoveAction());
         outPacket.encodeShort(summon.getCurFoothold());
-        outPacket.encodeByte(summon.getMoveAbility());
+        outPacket.encodeByte(summon.getMoveAbility().getVal());
         outPacket.encodeByte(summon.getAssistType());
         outPacket.encodeByte(summon.getEnterType());
         outPacket.encodeInt(summon.getObjectId());

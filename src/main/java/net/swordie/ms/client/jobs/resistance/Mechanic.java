@@ -240,7 +240,7 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
@@ -254,14 +254,14 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case ROCK_N_SHOCK:      //TODO TeslaCoil
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
@@ -271,7 +271,7 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 summon.setAssistType((byte) 0);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
@@ -328,7 +328,7 @@ public class Mechanic extends Citizen {
             subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
             subSummon.setPosition(position);
             subSummon.setAttackActive(false);
-            subSummon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+            subSummon.setMoveAbility(MoveAbility.WalkRandom);
 
             chr.getField().spawnAddSummon(subSummon);
 

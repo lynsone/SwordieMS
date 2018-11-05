@@ -282,7 +282,7 @@ public class BeastTamer extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setSummonTerm(si.getValue(time, slv));
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case BEAR_ASSAULT:
@@ -584,7 +584,7 @@ public class BeastTamer extends Job {
         defensiveFormation = Summon.getSummonBy(c.getChr(), DEFENSIVE_FORMATION, slv);
         defensiveFormation.setFlyMob(true);
         defensiveFormation.setSummonTerm(si.getValue(time, slv));
-        defensiveFormation.setMoveAbility(MoveAbility.Fly.getVal()); // Different MoveAbility?
+        defensiveFormation.setMoveAbility(MoveAbility.Fly); // Different MoveAbility?
         return defensiveFormation;
     }
 
@@ -715,7 +715,7 @@ public class BeastTamer extends Job {
                     summon.setFlyMob(false);
                     summon.setPosition(mob.getPosition());
                     summon.setSummonTerm(si.getValue(x, slv));
-                    summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+                    summon.setMoveAbility(MoveAbility.WalkRandom);
                     field.spawnAddSummon(summon);
                 }
             }

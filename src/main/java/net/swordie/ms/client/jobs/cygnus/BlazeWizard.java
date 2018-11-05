@@ -199,7 +199,7 @@ public class BlazeWizard extends Noblesse {
 
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 summon.setFlyMob(skillID == FIRES_OF_CREATION_FOX);
-                summon.setMoveAbility(MoveAbility.Walk.getVal());
+                summon.setMoveAbility(MoveAbility.Walk);
                 // i have to specify the summon term as the _FOX/LION skills have the time set to 0, making the summon last forever!
                 summon.setSummonTerm(SkillData.getSkillInfoById(FIRES_OF_CREATION).getValue(time, slv));
                 field.spawnSummon(summon);
@@ -232,7 +232,7 @@ public class BlazeWizard extends Noblesse {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case PHOENIX_RUN:
