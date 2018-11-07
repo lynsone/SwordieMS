@@ -504,9 +504,7 @@ public class ItemConstants {
     }
 
     public static boolean isGoldHammer(Item item) {
-        return item.getItemId() == GOLDEN_HAMMER_20 ||
-                item.getItemId() == GOLDEN_HAMMER_50 ||
-                item.getItemId() == GOLDEN_HAMMER_100;
+        return getItemPrefix(item.getItemId()) == 247;
     }
 
     /**
