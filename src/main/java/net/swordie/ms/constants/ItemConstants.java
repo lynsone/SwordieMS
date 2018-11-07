@@ -36,8 +36,11 @@ public class ItemConstants {
     public static final int PRIME_LINE_CHANCE = 15;
 
     public static final int RED_CUBE = 5062009;
-    public static final int BONUS_POT_CUBE = 5062500;
     public static final int BLACK_CUBE = 5062010;
+
+    public static final int BONUS_POT_CUBE = 5062500;
+    public static final int SPECIAL_BONUS_POT_CUBE = 5062501;
+    public static final int WHITE_BONUS_POT_CUBE = 5062503;
 
     public static final int NEBILITE_BASE_ID = 3060000;
 
@@ -45,9 +48,6 @@ public class ItemConstants {
     public static final int CHAOS_HORNTAIL_NECKLACE = 1122076;
 
     public static final short MAX_HAMMER_SLOTS = 2;
-    public static final int GOLDEN_HAMMER_20 = 2470004;
-    public static final int GOLDEN_HAMMER_50 = 2470001;
-    public static final int GOLDEN_HAMMER_100 = 2470007;
 
     private static final Integer[] soulPotList = new Integer[]{32001, 32002, 32003, 32004, 32005, 32006, 32011, 32012, // flat
             32041, 32042, 32043, 32044, 32045, 32046, 32051, 32052}; // rate
@@ -504,9 +504,7 @@ public class ItemConstants {
     }
 
     public static boolean isGoldHammer(Item item) {
-        return item.getItemId() == GOLDEN_HAMMER_20 ||
-                item.getItemId() == GOLDEN_HAMMER_50 ||
-                item.getItemId() == GOLDEN_HAMMER_100;
+        return getItemPrefix(item.getItemId()) == 247;
     }
 
     /**
@@ -653,6 +651,7 @@ public class ItemConstants {
                 res = 30;
                 break;
             case ItemConstants.BLACK_CUBE:
+            case ItemConstants.WHITE_BONUS_POT_CUBE:
                 res = 40;
                 break;
         }

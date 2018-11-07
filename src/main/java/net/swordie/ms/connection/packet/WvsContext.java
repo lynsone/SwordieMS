@@ -776,6 +776,16 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket whiteCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.WHITE_ADDTIONAL_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+        outPacket.encodeInt(equip.getBagIndex());
+
+        return outPacket;
+    }
+
     public static OutPacket broadcastMsg(BroadcastMsg broadcastMsg) {
         OutPacket outPacket = new OutPacket(OutHeader.BROADCAST_MSG);
 

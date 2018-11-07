@@ -1402,7 +1402,9 @@ public class WorldHandler {
                     }
                     equip.updateToChar(chr);
                     break;
-                case ItemConstants.BONUS_POT_CUBE: // Bonus potential cube
+                case ItemConstants.BONUS_POT_CUBE: // Bonus Potential Cube
+                case ItemConstants.SPECIAL_BONUS_POT_CUBE: // [Special] Bonus Potential Cube
+                case ItemConstants.WHITE_BONUS_POT_CUBE: // White Bonus Potential Cube
                     if (c.getWorld().isReboot()) {
                         chr.getOffenseManager().addOffense(String.format("Character %d attempted to use a bonus potential cube in reboot world.", chr.getId()));
                         chr.dispose();
@@ -1419,6 +1421,7 @@ public class WorldHandler {
                         chr.dispose();
                         return;
                     }
+                    oldEquip = equip.deepCopy();
                     tierUpChance = ItemConstants.getTierUpChance(itemID);
                     hiddenValue = ItemGrade.getHiddenGradeByVal(equip.getBonusGrade()).getVal();
                     tierUp = !(hiddenValue >= ItemGrade.HiddenLegendary.getVal()) && Util.succeedProp(tierUpChance);
@@ -1427,8 +1430,16 @@ public class WorldHandler {
                     }
                     equip.setHiddenOptionBonus(hiddenValue, ItemConstants.THIRD_LINE_CHANCE);
                     equip.releaseOptions(true);
-                    c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
-                    c.write(CField.showItemReleaseEffect(chr.getId(), ePos, false));
+                    if (itemID != ItemConstants.WHITE_BONUS_POT_CUBE) {
+                        c.write(CField.inGameCubeResult(chr.getId(), tierUp, itemID, ePos, equip));
+                        c.write(CField.showItemReleaseEffect(chr.getId(), ePos, true));
+                    } else {
+                        if (chr.getMemorialCubeInfo() == null) {
+                            chr.setMemorialCubeInfo(new MemorialCubeInfo(equip, oldEquip, itemID));
+                        }
+                        chr.getField().broadcastPacket(User.showItemMemorialEffect(chr.getId(), true, itemID));
+                        c.write(WvsContext.whiteCubeResult(equip, chr.getMemorialCubeInfo()));
+                    }
                     equip.updateToChar(chr);
                     break;
                 case 5750001: // Nebulite Diffuser
