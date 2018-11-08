@@ -40,7 +40,7 @@ public enum EquipBaseStat {
     statR(0x2, 1),
     cuttable(0x4, 1),
     exGradeOption(0x8, 1),
-    itemState(0x10, 1);
+    hyperUpgrade(0x10, 1);
 
     private int val, pos;
 
