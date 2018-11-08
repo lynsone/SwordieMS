@@ -201,6 +201,7 @@ public class WorldHandler {
         chr.checkAndRemoveExpiredItems();
         chr.initBaseStats();
         chr.setOnline(true); // v195+: respect 'invisible login' setting
+        chr.getOffenseManager().setChr(chr);
     }
 
     public static void handleUserMove(Client c, InPacket inPacket) {
