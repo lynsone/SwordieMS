@@ -62,6 +62,7 @@ public class Equip extends Item {
     private short statR;
     private short cuttable;
     private short exGradeOption;
+    private short hyperUpgrade;
     private short itemState;
     private short chuc;
     private short soulOptionId;
@@ -173,6 +174,7 @@ public class Equip extends Item {
         ret.statR = statR;
         ret.cuttable = cuttable;
         ret.exGradeOption = exGradeOption;
+        ret.hyperUpgrade = hyperUpgrade;
         ret.itemState = itemState;
         ret.chuc = chuc;
         ret.soulOptionId = soulOptionId;
@@ -570,6 +572,14 @@ public class Equip extends Item {
 
     public void setItemState(short itemState) {
         this.itemState = itemState;
+    }
+
+    public short getHyperUprade() {
+        return hyperUpgrade;
+    }
+
+    public void setHyperUpgrade(short hyperUpgrade) {
+        this.hyperUpgrade = hyperUpgrade;
     }
 
     public short getGrade() {
@@ -1116,8 +1126,8 @@ public class Equip extends Item {
         if(hasStat(EquipBaseStat.exGradeOption)) {
             outPacket.encodeLong(getExGradeOption());
         }
-        if(hasStat(EquipBaseStat.itemState)) {
-            outPacket.encodeInt(getItemState());
+        if(hasStat(EquipBaseStat.hyperUpgrade)) {
+            outPacket.encodeInt(getHyperUprade());
         }
         // GW_ItemSlotEquipOpt
         outPacket.encodeString(getOwner());
@@ -1282,8 +1292,8 @@ public class Equip extends Item {
             case exGradeOption:
                 setExGradeOption((short) amount);
                 break;
-            case itemState:
-                setItemState((short) amount);
+            case hyperUpgrade:
+                setHyperUpgrade((short) amount);
                 break;
         }
     }
@@ -1362,8 +1372,8 @@ public class Equip extends Item {
                 return getCuttable();
             case exGradeOption:
                 return getExGradeOption();
-            case itemState:
-                return getItemState();
+            case hyperUpgrade:
+                return getHyperUprade();
             default: return 0;
         }
     }
