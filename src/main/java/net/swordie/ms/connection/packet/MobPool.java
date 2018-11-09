@@ -36,69 +36,7 @@ public class MobPool {
         mob.getTemporaryStat().encode(outPacket);
         if(!hasBeenInit) {
             // CMob::Init
-            outPacket.encodePosition(mob.getPosition());
-            outPacket.encodeByte(mob.getMoveAction());
-//            outPacket.encodeByte(0); // banban boss?
-            outPacket.encodeShort(mob.getCurFoodhold().getId());
-            outPacket.encodeShort(mob.getHomeFoothold().getId());
-            byte appearType = mob.getAppearType();
-            outPacket.encodeShort(appearType);
-            if(appearType == -3 || appearType >= 0) {
-                // init -> -2, -1 else
-                outPacket.encodeInt(mob.getOption());
-            }
-            outPacket.encodeByte(mob.getTeamForMCarnival());
-            outPacket.encodeInt(mob.getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) mob.getHp());
-            outPacket.encodeInt(mob.getEffectItemID());
-            if(mob.isPatrolMob()) {
-                outPacket.encodeInt(mob.getPosition().getX() - mob.getRange());
-                outPacket.encodeInt(mob.getPosition().getX() + mob.getRange());
-                outPacket.encodeInt(mob.getDetectX());
-                outPacket.encodeInt(mob.getSenseX());
-            }
-            outPacket.encodeInt(mob.getPhase());
-            outPacket.encodeInt(mob.getCurZoneDataType());
-            outPacket.encodeInt(mob.getRefImgMobID());
-            outPacket.encodeInt(0); // ?
-            int ownerAID = mob.getLifeReleaseOwnerAID();
-            outPacket.encodeByte(ownerAID > 0);
-            if(ownerAID > 0) {
-                outPacket.encodeInt(ownerAID);
-                outPacket.encodeString(mob.getLifeReleaseOwnerName());
-                outPacket.encodeString(mob.getLifeReleaseMobName());
-            }
-            outPacket.encodeInt(mob.getAfterAttack());
-            outPacket.encodeInt(mob.getCurrentAction());
-            outPacket.encodeByte(mob.isLeft());
-            int size = 0;
-            outPacket.encodeInt(size);
-            for (int i = 0; i < size; i++) {
-                outPacket.encodeInt(0); // ?
-                outPacket.encodeInt(0); // extra time?
-            }
-            outPacket.encodeInt(mob.getScale());
-            outPacket.encodeInt(mob.getEliteGrade());
-            if(mob.getEliteGrade() >= 0) {
-                outPacket.encodeInt(mob.getEliteSkills().size());
-                for (Tuple<Integer, Integer> skill : mob.getEliteSkills()) {
-                    outPacket.encodeInt(skill.getLeft()); // skill id
-                    outPacket.encodeInt(skill.getRight()); // skill level
-                }
-                outPacket.encodeInt(mob.getEliteType()); // 1 normal, 3 elite boss probably
-            }
-            ShootingMoveStat sms = mob.getShootingMoveStat();
-            outPacket.encodeByte(sms != null);
-            if(sms != null) {
-                sms.encode(outPacket);
-            }
-            size = 0;
-            outPacket.encodeInt(size);
-            for (int i = 0; i < size; i++) {
-                outPacket.encodeInt(0); // nType
-                outPacket.encodeInt(0); // key?
-            }
-            outPacket.encodeInt(mob.getTargetUserIdFromServer());
-            outPacket.encodeInt(0);
+            mob.encodeInit(outPacket);
         }
         return outPacket;
     }
@@ -117,71 +55,7 @@ public class MobPool {
             }
             mob.getTemporaryStat().encode(outPacket);
             if(!hasBeenInit) {
-                // CMob::Init
-                outPacket.encodePosition(mob.getPosition());
-                outPacket.encodeByte(mob.getMoveAction());
-//                outPacket.encodeByte(0); // banban boss?
-                outPacket.encodeShort(mob.getCurFoodhold().getId());
-                outPacket.encodeShort(mob.getHomeFoothold().getId());
-                byte appearType = mob.getAppearType();
-                outPacket.encodeShort(appearType);
-                if(appearType == -3 || appearType >= 0) {
-                    // init -> -2, -1 else
-                    outPacket.encodeInt(mob.getOption());
-                }
-                outPacket.encodeByte(mob.getTeamForMCarnival());
-                outPacket.encodeInt(mob.getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) mob.getHp());
-                outPacket.encodeInt(mob.getEffectItemID());
-                if(mob.isPatrolMob()) {
-                    outPacket.encodeInt(mob.getPosition().getX() - mob.getRange());
-                    outPacket.encodeInt(mob.getPosition().getX() + mob.getRange());
-                    outPacket.encodeInt(mob.getDetectX());
-                    outPacket.encodeInt(mob.getSenseX());
-                }
-                outPacket.encodeInt(mob.getPhase());
-                outPacket.encodeInt(mob.getCurZoneDataType());
-                outPacket.encodeInt(mob.getRefImgMobID());
-                outPacket.encodeInt(0); // ?
-                int ownerAID = mob.getLifeReleaseOwnerAID();
-                outPacket.encodeByte(ownerAID > 0);
-                if(ownerAID > 0) {
-                    outPacket.encodeInt(ownerAID);
-                    outPacket.encodeString(mob.getLifeReleaseOwnerName());
-                    outPacket.encodeString(mob.getLifeReleaseMobName());
-                }
-                outPacket.encodeInt(mob.getAfterAttack());
-                outPacket.encodeInt(mob.getCurrentAction());
-                outPacket.encodeByte(mob.isLeft());
-                int size = 0;
-                outPacket.encodeInt(size);
-                for (int i = 0; i < size; i++) {
-                    outPacket.encodeInt(0); // ?
-                    outPacket.encodeInt(0); // extra time?
-                }
-                outPacket.encodeInt(mob.getScale());
-                outPacket.encodeInt(mob.getEliteGrade());
-                if(mob.getEliteGrade() >= 0) {
-                    size = 0;
-                    outPacket.encodeInt(size);
-                    for (int i = 0; i < size; i++) {
-                        outPacket.encodeInt(0); // first skillID?
-                        outPacket.encodeInt(0); // second skillID?
-                    }
-                    outPacket.encodeInt(mob.getEliteType()); // 1 normal, 3 elite boss probably
-                }
-                ShootingMoveStat sms = mob.getShootingMoveStat();
-                outPacket.encodeByte(sms != null);
-                if(sms != null) {
-                    sms.encode(outPacket);
-                }
-                size = 0;
-                outPacket.encodeInt(size);
-                for (int i = 0; i < size; i++) {
-                    outPacket.encodeInt(0); // nType
-                    outPacket.encodeInt(0); // key?
-                }
-                outPacket.encodeInt(mob.getTargetUserIdFromServer());
-                outPacket.encodeInt(0);
+                mob.encodeInit(outPacket);
             }
         }
 

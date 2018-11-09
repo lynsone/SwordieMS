@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.EliteState;
@@ -1672,5 +1673,85 @@ public class Mob extends Life {
         for (Char chr : getField().getChars()) {
             chr.write(MobPool.changeController(this, false, controller == chr));
         }
+    }
+
+    public void encodeInit(OutPacket outPacket) {
+        // CMob::Init
+        outPacket.encodePosition(getPosition());
+        outPacket.encodeByte(getMoveAction());
+        int tid = getTemplateId();
+        if (tid == 8910000 || tid == 8910100 || tid == 9990033) { // is_banban_boss
+            outPacket.encodeByte(0); // fake?
+        }
+        if (getCurFoodhold() == null) {
+            setCurFoodhold(getField().findFootHoldBelow(getPosition()));
+            if (getCurFoodhold() == null) {
+                setCurFoodhold(getField().getFootholdById(0));
+            }
+            if (getHomeFoothold() == null) {
+                setHomeFoothold(getCurFoodhold());
+            }
+        }
+        outPacket.encodeShort(getCurFoodhold().getId());
+        outPacket.encodeShort(getHomeFoothold().getId());
+        byte appearType = getAppearType();
+        outPacket.encodeShort(appearType);
+        if(appearType == -3 || appearType >= 0) {
+            // init -> -2, -1 else
+            outPacket.encodeInt(getOption());
+        }
+        outPacket.encodeByte(getTeamForMCarnival());
+        outPacket.encodeInt(getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) getHp());
+        outPacket.encodeInt(getEffectItemID());
+        if(isPatrolMob()) {
+            outPacket.encodeInt(getPosition().getX() - getRange());
+            outPacket.encodeInt(getPosition().getX() + getRange());
+            outPacket.encodeInt(getDetectX());
+            outPacket.encodeInt(getSenseX());
+        }
+        outPacket.encodeInt(getPhase());
+        outPacket.encodeInt(getCurZoneDataType());
+        outPacket.encodeInt(getRefImgMobID());
+        outPacket.encodeInt(0); // ?
+        int ownerAID = getLifeReleaseOwnerAID();
+        outPacket.encodeByte(ownerAID > 0);
+        if(ownerAID > 0) {
+            outPacket.encodeInt(ownerAID);
+            outPacket.encodeString(getLifeReleaseOwnerName());
+            outPacket.encodeString(getLifeReleaseMobName());
+        }
+        outPacket.encodeInt(getAfterAttack());
+        outPacket.encodeInt(getCurrentAction());
+        outPacket.encodeByte(isLeft());
+        int size = 0;
+        outPacket.encodeInt(size);
+        for (int i = 0; i < size; i++) {
+            outPacket.encodeInt(0); // ?
+            outPacket.encodeInt(0); // extra time?
+        }
+        outPacket.encodeInt(getScale());
+        outPacket.encodeInt(getEliteGrade());
+        if(getEliteGrade() >= 0) {
+            size = 0;
+            outPacket.encodeInt(size);
+            for (int i = 0; i < size; i++) {
+                outPacket.encodeInt(0); // first skillID?
+                outPacket.encodeInt(0); // second skillID?
+            }
+            outPacket.encodeInt(getEliteType()); // 1 normal, 3 elite boss probably
+        }
+        ShootingMoveStat sms = getShootingMoveStat();
+        outPacket.encodeByte(sms != null);
+        if(sms != null) {
+            sms.encode(outPacket);
+        }
+        size = 0;
+        outPacket.encodeInt(size);
+        for (int i = 0; i < size; i++) {
+            outPacket.encodeInt(0); // nType
+            outPacket.encodeInt(0); // key?
+        }
+        outPacket.encodeInt(getTargetUserIdFromServer());
+        outPacket.encodeInt(0);
     }
 }

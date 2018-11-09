@@ -208,6 +208,7 @@ create table equips (
     iincreq smallint,
     growthenchant smallint,
     psenchant smallint,
+    hyperupgrade smallint,
     bdr smallint,
     imdr smallint,
     damr smallint,
