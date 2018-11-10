@@ -28,6 +28,7 @@ public class World {
     private int partyIDCounter = 1;
     private boolean charCreateBlock;
     private boolean reboot;
+    private int channelCount;
 
     public World(int worldId, String name, int worldState, String worldEventDescription, int worldEventEXP_WSE,
                  int worldEventDrop_WSE, int boomUpEventNotice, int amountOfChannels, boolean starplanet, boolean reboot) {
@@ -45,6 +46,7 @@ public class World {
         this.channels = channelList;
         this.starplanet = starplanet;
         this.reboot = reboot;
+        this.channelCount = channelList.size();
     }
 
     public World(int worldId, String name, int amountOfChannels) {
@@ -76,7 +78,7 @@ public class World {
         return boomUpEventNotice;
     }
 
-    public boolean isStarplanet() {
+    public boolean isStarPlanet() {
         return starplanet;
     }
 
@@ -217,6 +219,10 @@ public class World {
 
     public void setReboot(boolean reboot) {
         this.reboot = reboot;
+    }
+
+    public int getChannelCount() {
+        return channelCount;
     }
 
     public boolean isFull() {

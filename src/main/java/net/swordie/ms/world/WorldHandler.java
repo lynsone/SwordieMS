@@ -309,6 +309,11 @@ public class WorldHandler {
         }
         String itemBefore = item.toString();
         if (newPos == 0) { // Drop
+            Field field = chr.getField();
+            if ((field.getFieldLimit() & FieldOption.DropLimit.getVal()) > 0) {
+                chr.dispose();
+                return;
+            }
             boolean fullDrop;
             Drop drop;
             if (!item.getInvType().isStackable() || quantity >= item.getQuantity() ||
@@ -382,6 +387,12 @@ public class WorldHandler {
         Char chr = c.getChr();
         chr.chatMessage(attackInfo.skillId + "");
         int skillID = attackInfo.skillId;
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
+            (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         boolean summonedAttack = attackInfo.attackHeader == OutHeader.SUMMONED_ATTACK;
         boolean multiAttack = SkillConstants.isMultiAttackCooldownSkill(skillID);
         if (!summonedAttack && !multiAttack && !chr.applyMpCon(attackInfo.skillId, attackInfo.slv)) {
@@ -390,7 +401,6 @@ public class WorldHandler {
         if (summonedAttack || chr.checkAndSetSkillCooltime(skillID) || chr.hasSkillCDBypass() || multiAttack) {
             byte slv = attackInfo.slv;
             chr.chatMessage(Mob, "SkillID: " + skillID);
-            Field field = c.getChr().getField();
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
             if (si != null && si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
@@ -542,6 +552,11 @@ public class WorldHandler {
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if ((chr.getField().getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
+            chr.chatMessage("You may not use a return scroll in this map.");
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); //tick
         short slot = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
@@ -890,10 +905,19 @@ public class WorldHandler {
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         short status = inPacket.decodeShort();
         if (status == 0) {
+            // TODO: verify that this map is actually valid, otherwise players can warp to pretty much anywhere they want
             int mapleGuideMapId = inPacket.decodeInt();
             Field toField = chr.getClient().getChannelInstance().getField(mapleGuideMapId);
+            if (toField == null || (toField.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+                chr.dispose();
+                return;
+            }
             chr.warp(toField);
         }
         if (status == 2) {
@@ -1017,10 +1041,14 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte channelId = (byte) (inPacket.decodeByte() + 1);
-
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
+            channelId < 1 || channelId > c.getWorld().getChannelCount()) {
+            chr.dispose();
+            return;
+        }
         Job sourceJobHandler = chr.getJobHandler();
         sourceJobHandler.handleCancelTimer(chr);
-
         chr.changeChannel(channelId);
     }
 
@@ -1328,12 +1356,16 @@ public class WorldHandler {
             String medalString = (medalInt == 0 ? "" : String.format("<%s> ", StringData.getItemStringById(medalInt)));
 
             switch (itemID) {
-
                 case 5040004: // Hyper Teleport Rock
                     short type = inPacket.decodeShort();
                     if (type == 1) {
                         int fieldId = inPacket.decodeInt();
                         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
+                        if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+                            chr.chatMessage("You may not warp to that map.");
+                            chr.dispose();
+                            return;
+                        }
                         chr.warp(field);
                     } else {
                         String targetName = inPacket.decodeString();
@@ -1345,21 +1377,24 @@ public class WorldHandler {
                         // Target doesn't exist
                         if (targetChr == null) {
                             chr.chatMessage(String.format("%s is not online.", targetName));
-
-                            // Target is in an instanced Map
-                        } else if (targetChr.getFieldInstanceType() != FieldInstanceType.CHANNEL) {
+                        }
+                        Field targetField = targetChr.getField();
+                        if (targetField == null || (targetField.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+                            chr.chatMessage("You may not warp to that map.");
+                            chr.dispose();
+                            return;
+                        }
+                        // Target is in an instanced Map
+                        if (targetChr.getFieldInstanceType() != FieldInstanceType.CHANNEL) {
                             chr.chatMessage(String.format("cannot find %s", targetName));
-
                             // Change channels & warp & teleport
                         } else if (targetChr.getClient().getChannel() != c.getChannel()) {
                             int fieldId = targetChr.getFieldID();
                             chr.changeChannelAndWarp(targetChr.getClient().getChannel(), fieldId);
-
                             // warp & teleport
                         } else if (targetChr.getFieldID() != chr.getFieldID()) {
-                            chr.warp(targetChr.getField());
+                            chr.warp(targetField);
                             chr.write(CField.teleport(targetPosition, chr));
-
                             // teleport
                         } else {
                             chr.write(CField.teleport(targetPosition, chr));
@@ -2075,6 +2110,11 @@ public class WorldHandler {
 
     public static void handleUserDropMoneyRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.DropLimit.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); // tick
         int amount = inPacket.decodeInt();
         if (chr.getMoney() > amount) {
@@ -2087,6 +2127,11 @@ public class WorldHandler {
 
     public static void handleUserStatChangeItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.StatChangeItemConsumeLimit.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         inPacket.decodeInt(); // tick
         short slot = inPacket.decodeShort();
@@ -2885,6 +2930,12 @@ public class WorldHandler {
 
     public static void handleUserSkillUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
+            (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); // crc
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
@@ -3438,6 +3489,11 @@ public class WorldHandler {
 
     public static void handleUserActivatePetRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.NoPet.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); // tick
         short slot = inPacket.decodeShort();
         Item item = chr.getCashInventory().getItemBySlot(slot);
@@ -3474,6 +3530,11 @@ public class WorldHandler {
 
     public static void handleUserPetFoodItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.NoPet.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         inPacket.decodeInt(); // tick
         short slot = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
@@ -3991,11 +4052,17 @@ public class WorldHandler {
     }
 
     public static void handleUserMigrateToCashShopRequest(Client c, InPacket inPacket) {
-        c.getChr().punishLieDetectorEvasion();
+        Char chr = c.getChr();
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
+        chr.punishLieDetectorEvasion();
         CashShop cs = Server.getInstance().getCashShop();
-        c.write(Stage.setCashShop(c.getChr(), cs));
-        c.write(CCashShop.loadLockerDone(c.getChr().getAccount()));
-        c.write(CCashShop.queryCashResult(c.getChr()));
+        c.write(Stage.setCashShop(chr, cs));
+        c.write(CCashShop.loadLockerDone(chr.getAccount()));
+        c.write(CCashShop.queryCashResult(chr));
         c.write(CCashShop.bannerInfo(cs));
         c.write(CCashShop.cartInfo(cs));
         c.write(CCashShop.featuredItemInfo(cs));
@@ -4906,6 +4973,11 @@ public class WorldHandler {
     }
 
     public static void handlePetMove(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.NoPet.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         int petID = inPacket.decodeInt();
         inPacket.decodeByte(); // ?
         MovementInfo movementInfo = new MovementInfo(inPacket);
@@ -4917,13 +4989,17 @@ public class WorldHandler {
     }
 
     public static void handlePetDropPickUpRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.NoPet.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         int petID = inPacket.decodeInt();
         byte fieldKey = inPacket.decodeByte();
         inPacket.decodeInt(); // tick
         Position pos = inPacket.decodePosition();
         int dropID = inPacket.decodeInt();
         inPacket.decodeInt(); // cliCrc
-        Field field = chr.getField();
         Life life = field.getLifeByObjectID(dropID);
         if (life instanceof Drop) {
             Drop drop = (Drop) life;
@@ -4938,6 +5014,11 @@ public class WorldHandler {
         inPacket.decodeShort();
         int fieldID = inPacket.decodeInt();
         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
+        if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+            chr.chatMessage("You may not warp to that map.");
+            chr.dispose();
+            return;
+        }
         chr.warp(field);
     }
 
@@ -4957,6 +5038,12 @@ public class WorldHandler {
 
             case RegisterListRecv: //Register request that's received
                 targetFieldID = chr.getFieldID();
+                Field field = chr.getField();
+                if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+                    chr.chatMessage("You may not warp to that map.");
+                    chr.dispose();
+                    return;
+                }
                 HyperTPRock.addFieldId(chr, targetFieldID);
                 chr.write(WvsContext.mapTransferResult(MapTransferType.RegisterListSend, itemType, chr.getHyperRockFields()));
                 break;
@@ -5045,10 +5132,18 @@ public class WorldHandler {
     }
 
     public static void handleUserFieldTransferRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0 ||
+            (field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
+            (field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
+            chr.chatMessage("You may not warp to that map.");
+            chr.dispose();
+            return;
+        }
         int fieldID = inPacket.decodeInt();
         if (fieldID == 7860) {
-            Field field = chr.getOrCreateFieldByCurrentInstanceType(910001000);
-            chr.warp(field);
+            Field ardentmill = chr.getOrCreateFieldByCurrentInstanceType(GameConstants.ARDENTMILL);
+            chr.warp(ardentmill);
         }
     }
 
@@ -5840,14 +5935,18 @@ public class WorldHandler {
     }
 
     public static void handleUserSkillPrepareRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
+                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
         int skillId = inPacket.decodeInt();
         int startTime = inPacket.decodeInt();
         int unknownInt = inPacket.decodeInt();
-
         if (!chr.hasSkill(skillId)) {
             return;
         }
-
         Skill skill = chr.getSkill(skillId);
         chr.getField().broadcastPacket(UserRemote.skillPrepare(chr, skillId, (byte) skill.getCurrentLevel()), chr);
     }

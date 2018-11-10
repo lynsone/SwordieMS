@@ -41,8 +41,4 @@ public enum FieldOption {
     public long getVal() {
         return val;
     }
-
-    public boolean hasFlag(long val) {
-        return (this.val & val) != 0;
-    }
 }

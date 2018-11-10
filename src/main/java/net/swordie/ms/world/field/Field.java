@@ -1208,7 +1208,7 @@ public class Field {
                 if (mg.canSpawnOnField(this)) {
                     mg.spawnMob(this);
                     currentMobs++;
-                    if (currentMobs > getFixedMobCapacity()) {
+                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
                         break;
                     }
                 }
