@@ -56,6 +56,7 @@ public class Field {
     private double mobRate;
     private int id;
     private FieldType fieldType;
+    private long fieldLimit;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
@@ -161,6 +162,10 @@ public class Field {
     public FieldType getFieldType() { return fieldType; }
 
     public void setFieldType(FieldType fieldType) { this.fieldType = fieldType; }
+
+    public long getFieldLimit() { return fieldLimit; }
+
+    public void setFieldLimit(long fieldLimit) { this.fieldLimit = fieldLimit; }
     
     public Set<Portal> getPortals() {
         return portals;
