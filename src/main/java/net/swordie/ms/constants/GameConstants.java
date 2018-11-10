@@ -701,21 +701,8 @@ public class GameConstants {
     }
 
     public static long applyTax(long money) {
-        // https://gamefaqs.gamespot.com/pc/924697-maplestory/answers/56187-how-many-is-the-tax-on-meso-when-trading
-        if (money >= 100_000_000) {
-            return (long) (money - (money * 0.06));
-        } else if (money >= 25_000_000) {
-            return (long) (money - (money * 0.05));
-        } else if (money >= 10_000_000) {
-            return (long) (money - (money * 0.04));
-        } else if (money >= 5_000_000) {
-            return (long) (money - (money * 0.03));
-        } else if (money >= 1_000_000) {
-            return (long) (money - (money * 0.018));
-        } else if (money >= 100_000) {
-            return (long) (money - (money * 0.008));
-        }
-        return money;
+        // 5% global tax starting from v180ish
+        return Math.round(money / 1.05);
     }
 
     public static int getExpRequiredForNextGuildLevel(int curLevel) {
