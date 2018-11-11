@@ -1043,7 +1043,7 @@ public class WorldHandler {
         byte channelId = (byte) (inPacket.decodeByte() + 1);
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
-            channelId < 1 || channelId > c.getWorld().getChannelCount()) {
+            channelId < 1 || channelId > c.getWorld().getChannels().size()) {
             chr.dispose();
             return;
         }
