@@ -2117,7 +2117,7 @@ public class WorldHandler {
         InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
-        List<Item> items = inv.getItems();
+        List<Item> items = new ArrayList<>(inv.getItems());
         items.sort(Comparator.comparingInt(Item::getBagIndex));
         for (Item item : items) {
             int firstSlot = inv.getFirstOpenSlot();
@@ -2138,7 +2138,7 @@ public class WorldHandler {
         InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
-        List<Item> items = inv.getItems();
+        List<Item> items = new ArrayList<>(inv.getItems());
         items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
             if (item.getBagIndex() != items.indexOf(item) + 1) {
