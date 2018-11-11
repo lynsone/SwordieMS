@@ -702,7 +702,7 @@ public class GameConstants {
 
     public static long applyTax(long money) {
         // 5% global tax starting from v180ish
-        return Math.round(money / 1.05);
+        return Math.round(money * 0.95);
     }
 
     public static int getExpRequiredForNextGuildLevel(int curLevel) {
