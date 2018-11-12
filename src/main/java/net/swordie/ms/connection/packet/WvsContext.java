@@ -215,6 +215,12 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket changeSkillRecordResult(Skill skill) {
+        List<Skill> skills = new ArrayList<>();
+        skills.add(skill);
+        return changeSkillRecordResult(skills, true, false, false, false);
+    }
+
     public static OutPacket changeSkillRecordResult(List<Skill> skills, boolean exclRequestSent, boolean showResult,
                                                     boolean removeLinkSkill, boolean sn) {
         OutPacket outPacket = new OutPacket(OutHeader.CHANGE_SKILL_RECORD_RESULT);
