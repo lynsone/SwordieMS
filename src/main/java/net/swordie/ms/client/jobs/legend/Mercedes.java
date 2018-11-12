@@ -124,8 +124,6 @@ public class Mercedes extends Job {
         chr.addItemToInventory(item);
         chr.getAvatarData().getCharacterStat().setPosMap(910150000);
 
-        chr.addSkill(20021166, 1, 1); // Beginner Stunning Strikes
-
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setLevel(10);
         cs.setDex(49);
