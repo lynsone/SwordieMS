@@ -59,7 +59,6 @@ public abstract class Job {
 	protected Client c;
 
 	public static final int MONOLITH = 80011261;
-	public static final int LIGHTNING_GOD = 80011178;
 	public static final int ELEMENTAL_SYLPH = 80001518;
 	public static final int FLAME_SYLPH = 80001519;
 	public static final int THUNDER_SYLPH = 80001520;
@@ -88,9 +87,17 @@ public abstract class Job {
 	public static final int DEVIL_SYLPH_2 = 80001726;
 	public static final int ANGEL_SYLPH_2 = 80001727;
 
-	public static final int WHITE_ANGEL = 40011179;
-	public static final int DARK_ANGEL = 40011087;
-	public static final int ARCHANGEL = 40011085;
+	public static final int WHITE_ANGELIC_BLESSING = 80000155;
+	public static final int WHITE_ANGELIC_BLESSING_2 = 80001154;
+	public static final int LIGHTNING_GOD_RING = 80001262;
+	public static final int LIGHTNING_GOD_RING_2 = 80011178;
+	public static final int GUARD_RING = 80011149;
+	public static final int SUN_RING = 80010067;
+	public static final int RAIN_RING = 80010068;
+	public static final int RAINBOW_RING = 80010069;
+	public static final int SNOW_RING = 80010070;
+	public static final int LIGHTNING_RING = 80010071;
+	public static final int WIND_RING = 80010072;
 
 	public static final int BOSS_SLAYERS = 91001022;
 	public static final int UNDETERRED = 91001023;
@@ -100,10 +107,6 @@ public abstract class Job {
 	public static final int REBOOT2 = 80000187;
 
 	private int[] buffs = new int[]{
-			LIGHTNING_GOD,
-			WHITE_ANGEL,
-			DARK_ANGEL,
-			ARCHANGEL,
 			BOSS_SLAYERS,
 			UNDETERRED,
 			FOR_THE_GUILD
@@ -191,7 +194,7 @@ public abstract class Job {
 		chr.chatMessage(ChatType.Mob, "SkillID: " + skillID);
 		Summon summon;
 		Field field;
-		if (isBuff(skillID)) {
+		if (inPacket != null && isBuff(skillID)) {
 			handleJoblessBuff(c, inPacket, skillID, slv);
 		} else {
 			if(chr.hasSkill(skillID) && si.getVehicleId() > 0) {
@@ -204,13 +207,37 @@ public abstract class Job {
 				tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
 				tsm.sendSetStatPacket();
 			} else {
+				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
+				boolean isSummonSkill = false;
+				int noviceSkill = SkillConstants.getNoviceSkillFromRace(skillID);
+				if (noviceSkill == 1085 || noviceSkill == 1087 || noviceSkill == 1090 || noviceSkill == 1179) {
+					summon.setMoveAction((byte) 4);
+					summon.setAssistType((byte) 2);
+					summon.setFlyMob(true);
+					isSummonSkill = true;
+				}
 				switch (skillID) {
 					case MONOLITH:
-						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						field = c.getChr().getField();
 						summon.setMoveAbility(MoveAbility.Stop);
 						field.spawnSummon(summon);
 						field.setKishin(true);
+						break;
+					case WHITE_ANGELIC_BLESSING:
+					case WHITE_ANGELIC_BLESSING_2:
+					case LIGHTNING_GOD_RING:
+					case LIGHTNING_GOD_RING_2:
+					case GUARD_RING:
+					case SUN_RING:
+					case RAIN_RING:
+					case RAINBOW_RING:
+					case SNOW_RING:
+					case LIGHTNING_RING:
+					case WIND_RING:
+						summon.setMoveAction((byte) 4);
+						summon.setAssistType((byte) 2);
+						summon.setFlyMob(true);
+						isSummonSkill = true;
 						break;
 					case ELEMENTAL_SYLPH:
 					case FLAME_SYLPH:
@@ -225,7 +252,6 @@ public abstract class Job {
 					case GNOME_SYLPH:
 					case DEVIL_SYLPH:
 					case ANGEL_SYLPH:
-
 					case ELEMENTAL_SYLPH_2:
 					case FLAME_SYLPH_2:
 					case THUNDER_SYLPH_2:
@@ -239,10 +265,12 @@ public abstract class Job {
 					case GNOME_SYLPH_2:
 					case DEVIL_SYLPH_2:
 					case ANGEL_SYLPH_2:
-						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-						field = c.getChr().getField();
-						field.spawnSummon(summon);
+						isSummonSkill = true;
 						break;
+				}
+				if (isSummonSkill) {
+					field = c.getChr().getField();
+					field.spawnSummon(summon);
 				}
 			}
 		}
@@ -283,74 +311,6 @@ public abstract class Job {
 		int curTime = (int) System.currentTimeMillis();
 		boolean sendStat = true;
 		switch (skillID) {
-			case LIGHTNING_GOD:
-				si = SkillData.getSkillInfoById(80010065); // Lightning God Buff (16 w/m att)
-				o1.nReason = skillID;
-				o1.nValue = si.getValue(indieMad, slv);
-				o1.tStart = curTime;
-				o1.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndieMAD, o1);
-				o2.nReason = skillID;
-				o2.nValue = si.getValue(indiePad, slv);
-				o2.tStart = curTime;
-				o2.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndiePAD, o2);
-
-				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-				field = c.getChr().getField();
-				field.spawnSummon(summon);
-				break;
-			case WHITE_ANGEL:
-				si = SkillData.getSkillInfoById(40020180); // White Angelic Blessing Buff (12 w/m att)
-				o1.nReason = skillID;
-				o1.nValue = si.getValue(indieMad, slv);
-				o1.tStart = curTime;
-				o1.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndieMAD, o1);
-				o2.nReason = skillID;
-				o2.nValue = si.getValue(indiePad, slv);
-				o2.tStart = curTime;
-				o2.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndiePAD, o2);
-
-				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-				field = c.getChr().getField();
-				field.spawnSummon(summon);
-				break;
-			case DARK_ANGEL:
-				si = SkillData.getSkillInfoById(50000088); // Dark Angelic Blessing Buff (10 w/m att)
-				o1.nReason = skillID;
-				o1.nValue = si.getValue(indieMad, slv);
-				o1.tStart = curTime;
-				o1.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndieMAD, o1);
-				o2.nReason = skillID;
-				o2.nValue = si.getValue(indiePad, slv);
-				o2.tStart = curTime;
-				o2.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndiePAD, o2);
-
-				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-				field = c.getChr().getField();
-				field.spawnSummon(summon);
-				break;
-			case ARCHANGEL:
-				si = SkillData.getSkillInfoById(50000086); // Angelic Blessing Buff (5 w/m att)
-				o1.nReason = skillID;
-				o1.nValue = si.getValue(indieMad, slv);
-				o1.tStart = curTime;
-				o1.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndieMAD, o1);
-				o2.nReason = skillID;
-				o2.nValue = si.getValue(indiePad, slv);
-				o2.tStart = curTime;
-				o2.tTerm = si.getValue(time, slv);
-				tsm.putCharacterStatValue(IndiePAD, o2);
-
-				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
-				field = c.getChr().getField();
-				field.spawnSummon(summon);
-				break;
 			case BOSS_SLAYERS:
 				o1.nReason = skillID;
 				o1.nValue = si.getValue(indieBDR, slv);

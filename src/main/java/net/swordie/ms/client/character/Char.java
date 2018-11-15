@@ -25,6 +25,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -2103,6 +2104,13 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(item.getItemId(), getJob());
+		if (equippedSummonSkill != 0) {
+			getField().removeSummon(equippedSummonSkill, getId());
+
+            getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
+            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(CharacterTemporaryStat.RepeatEffect).rOption);
+		}
 	}
 
 	/**
@@ -2151,6 +2159,11 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(equip.getItemId(), getJob());
+        if (equippedSummonSkill != 0) {
+			chatMessage(ChatType.Mob, "Equipped Summon Skill: " + equippedSummonSkill);
+			getJobHandler().handleSkill(getClient(), equippedSummonSkill, (byte) 1, null);
+		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();

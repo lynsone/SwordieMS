@@ -2,6 +2,7 @@ package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
@@ -17,6 +18,7 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
 import net.swordie.ms.enums.Stat;
@@ -311,9 +313,13 @@ public class Summon extends Life {
             case Mechanic.ENHANCED_SUPPORT_UNIT:
                 ((Mechanic) chr.getJobHandler()).healFromSupportUnit(this);
                 break;
-
             default:
-                chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                int buffItem = SkillConstants.getBuffSkillItem(skillId);
+                if (buffItem != 0) {
+                    ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), buffItem);
+                } else {
+                    chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                }
                 break;
         }
         chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));
