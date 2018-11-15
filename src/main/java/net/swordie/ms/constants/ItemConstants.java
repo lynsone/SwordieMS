@@ -1,5 +1,6 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.pet.PetSkill;
@@ -1208,7 +1209,7 @@ public class ItemConstants {
     }
 
     // is_tuc_ignore_item(int nItemID)
-    public static boolean isTucIgnoreItem(int itemID) {
+    static boolean isTucIgnoreItem(int itemID) {
         return (isSecondary(itemID) || isEmblem(itemID) || Arrays.asList(TUC_IGNORE_ITEMS).contains(itemID));
     }
 
@@ -1255,4 +1256,27 @@ public class ItemConstants {
         }
         return null;
     }
+
+    // Gets the hardcoded starforce capacities Nexon introduced for equips above level 137.
+    // The cap for stars is in GetHyperUpgradeCapacity (E8 ? ? ? ? 0F B6 CB 83 C4 0C, follow `call`),
+    // therefore it needs to be manually implemented on the server side.
+    // Nexon's decision was very poor, but will require client edits to revert.
+    static int getItemStarLimit(int itemID) {
+        switch (itemID) {
+            case 1072870: // Sweetwater Shoes
+            case 1082556: // Sweetwater Gloves
+            case 1102623: // Sweetwater Cape
+            case 1132247: // Sweetwater Belt
+                if (ServerConstants.VERSION >= 197) {
+                    return 15;
+                }
+            case 1182060: // Ghost Ship Exorcist
+            case 1182273: // Sengoku Hakase Badge
+                if (ServerConstants.VERSION >= 199) {
+                    return 22;
+                }
+        }
+        return ServerConstants.VERSION >= 197 ? 25 : 15;
+    }
 }
+

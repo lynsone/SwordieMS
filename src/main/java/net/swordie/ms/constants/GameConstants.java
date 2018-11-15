@@ -296,39 +296,19 @@ public class GameConstants {
     public static int getMaxStars(Equip equip) {
         int level = equip.getrLevel() + equip.getiIncReq();
         if (equip.isSuperiorEqp()) {
-            if (level <= 95) {
-                return 3;
-            } else if (level <= 107) {
-                return 5;
-            } else if (level <= 117) {
-                return 8;
-            } else if (level <= 127) {
-                return 10;
-            } else if (level <= 137) {
-                return 12;
-            } else {
-                return 15;
-            }
+            return level <= 95 ? 3 :
+                    level <= 107 ? 5 :
+                    level <= 117 ? 8 :
+                    level <= 127 ? 10 :
+                    level <= 137 ? 12 :
+                                   15;
         } else {
-            if (level <= 95) {
-                return 5;
-            } else if (level <= 107) {
-                return 8;
-            } else if (level <= 117) {
-                return 10;
-            } else if (level <= 127) {
-                // v197 introduced 25 stars system
-                return ServerConstants.VERSION >= 197 ? 15 : 12;
-            } else if (level <= 137) {
-                return ServerConstants.VERSION >= 197 ? 20 : 13;
-            } else {
-                // v199 capped badges to 22 stars
-                if (ItemConstants.isBadge(equip.getItemId()) && ServerConstants.VERSION >= 199) {
-                    return 22;
-                } else {
-                    return ServerConstants.VERSION >= 197 ? 25 : 15;
-                }
-            }
+            return level <= 95 ? 5 :
+                    level <= 107 ? 8 :
+                    level <= 117 ? 10 :
+                    level <= 127 ? (ServerConstants.VERSION >= 197 ? 15 : 12) :
+                    level <= 137 ? (ServerConstants.VERSION >= 197 ? 20 : 13) :
+                                    ItemConstants.getItemStarLimit(equip.getItemId());
         }
     }
 
