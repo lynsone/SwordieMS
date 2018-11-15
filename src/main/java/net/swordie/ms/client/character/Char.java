@@ -2161,7 +2161,6 @@ public class Char {
         }
 		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(equip.getItemId(), getJob());
         if (equippedSummonSkill != 0) {
-			chatMessage(ChatType.Mob, "Equipped Summon Skill: " + equippedSummonSkill);
 			getJobHandler().handleSkill(getClient(), equippedSummonSkill, (byte) 1, null);
 		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
