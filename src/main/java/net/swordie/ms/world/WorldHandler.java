@@ -584,15 +584,15 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-
-        Skill skill = chr.getSkill(skillID, true);
+        // seperate skill/current skills for adding stuff to the base cache if everything is succesful
+        Skill skill = SkillData.getSkillDeepCopyById(skillID);
+        Skill curSkill = chr.getSkill(skillID);
         byte jobLevel = (byte) JobConstants.getJobLevel((short) skill.getRootId());
         if (JobConstants.isZero((short) skill.getRootId())) {
             jobLevel = JobConstants.getJobLevelByZeroSkillID(skillID);
         }
-        Map<Stat, Object> stats = null;
+        Map<Stat, Object> stats;
         int rootId = skill.getRootId();
-        // TODO: add better checks as currently you can PE whatever skill in beginner tab, except for item skills
         if ((!JobConstants.isBeginnerJob((short) rootId) && !SkillConstants.isMatching(rootId, chr.getJob())) || SkillConstants.isSkillFromItem(skillID)) {
             log.error(String.format("Character %d tried adding an invalid skill (job %d, skill id %d)",
                     chr.getId(), skillID, rootId));
@@ -602,8 +602,8 @@ public class WorldHandler {
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
-                int curLevel = skill.getCurrentLevel();
-                int max = skill.getMaxLevel();
+                int curLevel = curSkill == null ? 0 : curSkill.getCurrentLevel();
+                int max = curSkill == null ? skill.getMaxLevel() : curSkill.getMaxLevel();
                 int newLevel = curLevel + amount > max ? max : curLevel + amount;
                 skill.setCurrentLevel(newLevel);
                 esp.setSpToJobLevel(jobLevel, currentSp - amount);
@@ -618,8 +618,8 @@ public class WorldHandler {
         } else {
             int currentSp = chr.getAvatarData().getCharacterStat().getSp();
             if (currentSp >= amount) {
-                int curLevel = skill.getCurrentLevel();
-                int max = skill.getMaxLevel();
+                int curLevel = curSkill == null ? 0 : curSkill.getCurrentLevel();
+                int max = curSkill == null ? skill.getMaxLevel() : curSkill.getMaxLevel();
                 int newLevel = curLevel + amount > max ? max : curLevel + amount;
                 skill.setCurrentLevel(newLevel);
                 chr.getAvatarData().getCharacterStat().setSp(currentSp - amount);
@@ -632,19 +632,10 @@ public class WorldHandler {
                 return;
             }
         }
-        boolean isPassive = SkillConstants.isPassiveSkill(skillID);
-        if (isPassive) {
-            chr.removeFromBaseStatCache(skill);
-        }
         if (stats != null) {
             c.write(WvsContext.statChanged(stats));
-            List<Skill> skills = new ArrayList<>();
-            skills.add(skill);
             chr.addSkill(skill);
-            if (isPassive) {
-                chr.addToBaseStatCache(skill);
-            }
-            c.write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+            c.write(WvsContext.changeSkillRecordResult(skill));
         } else {
             log.error(String.format("skill stats are null (%d)", skillID));
             chr.dispose();
@@ -2162,7 +2153,7 @@ public class WorldHandler {
         InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
-        List<Item> items = inv.getItems();
+        List<Item> items = new ArrayList<>(inv.getItems());
         items.sort(Comparator.comparingInt(Item::getBagIndex));
         for (Item item : items) {
             int firstSlot = inv.getFirstOpenSlot();
@@ -2183,7 +2174,7 @@ public class WorldHandler {
         InvType invType = InvType.getInvTypeByVal(inPacket.decodeByte());
         Char chr = c.getChr();
         Inventory inv = chr.getInventoryByType(invType);
-        List<Item> items = inv.getItems();
+        List<Item> items = new ArrayList<>(inv.getItems());
         items.sort(Comparator.comparingInt(Item::getItemId));
         for (Item item : items) {
             if (item.getBagIndex() != items.indexOf(item) + 1) {
