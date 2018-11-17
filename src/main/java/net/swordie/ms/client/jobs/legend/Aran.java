@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs.legend;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
@@ -116,7 +117,6 @@ public class Aran extends Job {
 
 
     private int[] addedSkills = new int[] {
-            COMBAT_STEP,
             REGAINED_MEMORY,
             RETURN_TO_RIEN,
     };
@@ -618,5 +618,12 @@ public class Aran extends Job {
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
 
         super.handleHit(c, inPacket, hitInfo);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setPosMap(914000000);
     }
 }

@@ -25,6 +25,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -371,6 +372,8 @@ public class Char {
 	@Transient
 	private long lastLieDetector = 0;
 	// TOOD: count and log lie detector passes and fails
+    @Transient
+	private boolean tutor = false;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1700,6 +1703,7 @@ public class Char {
 				removeFromBaseStatCache(skill);
 			}
 			getSkills().remove(skill);
+
 		}
 	}
 
@@ -2103,6 +2107,13 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(item.getItemId(), getJob());
+		if (equippedSummonSkill != 0) {
+			getField().removeSummon(equippedSummonSkill, getId());
+
+            getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
+            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(CharacterTemporaryStat.RepeatEffect).rOption);
+		}
 	}
 
 	/**
@@ -2151,6 +2162,10 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(equip.getItemId(), getJob());
+        if (equippedSummonSkill != 0) {
+			getJobHandler().handleSkill(getClient(), equippedSummonSkill, (byte) 1, null);
+		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
@@ -3713,7 +3728,7 @@ public class Char {
 		addSkill(skill);
 		write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
-	
+
 	public long getRuneCooldown() {
 		return runeStoneCooldown;
 	}
@@ -4146,5 +4161,39 @@ public class Char {
 			addStatAndSendPacket(Stat.mp, -mpCon);
 		}
 		return hasEnough;
+	}
+
+	public boolean hasTutor() {
+		return tutor;
+	}
+
+	public void hireTutor(boolean set) {
+		tutor = set;
+		write(UserLocal.hireTutor(set));
+	}
+
+	/**
+	 * Shows tutor automated message (the client is taking the message information from wz).
+	 * @param id the id of the message.
+	 * @param duration message duration
+	 */
+	public void tutorAutomatedMsg(int id, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(id, duration));
+	}
+
+	/**
+	 * Shows tutor custom message (you decide which message the tutor will say).
+	 * @param message your custom message
+	 * @param width size of the message box
+	 * @param duration message duration
+	 */
+	public void tutorCustomMsg(String message, int width, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(message, width, duration));
 	}
 }

@@ -17,6 +17,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -765,6 +766,19 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
+	public void removeSkill(int skillId) {
+		List<Skill> skills = new ArrayList<>();
+		Skill skill = chr.getSkill(skillId);
+		if (skill != null) {
+			chr.removeSkill(skillId);
+			skill.setCurrentLevel(-1);
+			skill.setMasterLevel(-1);
+			skills.add(skill);
+		}
+		if (skills.size() > 0) {
+			chr.getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+		}
+	}
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
 	}
@@ -2189,6 +2203,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	    chr.write(CField.blowWeather(itemID, message));
     }
 
+    public void playSound(String sound) { playSound(sound, 100); }// default
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
@@ -2329,6 +2344,16 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void ballonMsg(String message) {
 		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
 	}
+
+	public void hireTutor(boolean set) { chr.hireTutor(set); }
+
+	public void tutorAutomatedMsg(int id) { tutorAutomatedMsg(id, 10000); }
+
+	public void tutorAutomatedMsg(int id, int duration) { chr.tutorAutomatedMsg(id, duration); }
+
+	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
+
+	public boolean hasTutor() { return chr.hasTutor(); }
 
 	private ScriptMemory getMemory() {
 		return memory;

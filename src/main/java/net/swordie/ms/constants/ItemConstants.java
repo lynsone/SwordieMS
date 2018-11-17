@@ -1278,5 +1278,40 @@ public class ItemConstants {
         }
         return ServerConstants.VERSION >= 197 ? 25 : 15;
     }
+
+    public static int getEquippedSummonSkillItem(int itemID, short job) {
+        switch (itemID) {
+            case 1112585:// Angelic Blessing
+                return (SkillConstants.getNoviceSkillRoot(job) * 10000) + 1085;
+            case 1112586:// Dark Angelic Blessing
+                return (SkillConstants.getNoviceSkillRoot(job) * 10000) + 1087;
+            case 1112594:// Snowdrop Angelic Blessing
+                return (SkillConstants.getNoviceSkillRoot(job) * 10000) + 1090;
+            case 1112663:// White Angelic Blessing
+                return (SkillConstants.getNoviceSkillRoot(job) * 10000) + 1179;
+            case 1112735:// White Angelic Blessing 2
+                return 80001154;
+            case 1113020:// Lightning God Ring
+                return 80001262;
+            case 1113173:// Lightning God Ring 2
+                return 80011178;
+            // Heaven Rings
+            case 1112932:// Guard Ring
+                return 80011149;
+            case 1114232:// Sun Ring
+                return 80010067;
+            case 1114233:// Rain Ring
+                return 80010068;
+            case 1114234:// Rainbow Ring
+                return 80010069;
+            case 1114235:// Snow Ring
+                return 80010070;
+            case 1114236:// Lightning Ring
+                return 80010071;
+            case 1114237:// Wind Ring
+                return 80010072;
+        }
+        return 0;
+    }
 }
 
