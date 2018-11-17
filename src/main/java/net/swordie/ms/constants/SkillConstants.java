@@ -1290,4 +1290,91 @@ public class SkillConstants {
     public static int getHyperActiveSkillSpByLv(int level) {
         return level == 150 || level == 170 || level == 200 ? 1 : 0;
     }
+
+    public static int getNoviceSkillRoot(short job) {
+        if (job / 100 == 22 || job == 2001) {
+            return JobConstants.JobEnum.EVAN_NOOB.getJobId();
+        }
+        if (job / 100 == 23 || job == 2002) {
+            return JobConstants.JobEnum.MERCEDES.getJobId();
+        }
+        if (job / 100 == 24 || job == 2003) {
+            return JobConstants.JobEnum.PHANTOM.getJobId();
+        }
+        if (JobConstants.isDemon(job)) {
+            return JobConstants.JobEnum.DEMON_SLAYER.getJobId();
+        }
+        if (JobConstants.isMihile(job)) {
+            return JobConstants.JobEnum.NAMELESS_WARDEN.getJobId();
+        }
+        if (JobConstants.isLuminous(job)) {
+            return JobConstants.JobEnum.LUMINOUS.getJobId();
+        }
+        if (JobConstants.isAngelicBuster(job)) {
+            return JobConstants.JobEnum.ANGELIC_BUSTER.getJobId();
+        }
+        if (JobConstants.isXenon(job)) {
+            return JobConstants.JobEnum.XENON.getJobId();
+        }
+        if (JobConstants.isShade(job)) {
+            return JobConstants.JobEnum.SHADE.getJobId();
+        }
+        if (JobConstants.isKinesis(job)) {
+            return JobConstants.JobEnum.KINESIS_0.getJobId();
+        }
+        if (JobConstants.isBlaster(job)) {
+            return JobConstants.JobEnum.CITIZEN.getJobId();
+        }
+        if (JobConstants.isHayato(job)) {
+            return JobConstants.JobEnum.HAYATO.getJobId();
+        }
+        if (JobConstants.isKanna(job)) {
+            return JobConstants.JobEnum.KANNA.getJobId();
+        }
+        return 1000 * (job / 1000);
+    }
+
+    public static int getNoviceSkillFromRace(int skillID) {
+        if (skillID == 50001215 || skillID == 10001215) {
+            return 1005;
+        }
+        if (isCommonSkill(skillID) || (skillID >= 110001500 && skillID <= 110001504)) {
+            return skillID;
+        }
+        if (isNoviceSkill(skillID)) {
+            return skillID % 10000;
+        }
+        return 0;
+    }
+
+    public static int getBuffSkillItem(int buffSkillID) {
+        int novice = getNoviceSkillFromRace(buffSkillID);
+        switch (novice) {
+            // Angelic Blessing
+            case 86:
+                return 2022746;
+            // Dark Angelic Blessing
+            case 88:
+                return 2022747;
+            // Angelic Blessing
+            case 91:
+                return 2022764;
+            // White Angelic Blessing
+            case 180:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80000086:
+                return 2023189;
+            // White Angelic Blessing
+            case 80000155:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80010065:
+                return 2023189;
+            // Goddess' Guard
+            case 80011150:
+                return 1112932;
+        }
+        return 0;
+    }
 }

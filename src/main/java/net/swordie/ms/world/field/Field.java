@@ -440,6 +440,17 @@ public class Field {
         spawnLife(summon, null);
     }
 
+    public void removeSummon(int skillID, int chrID) {
+        Summon summon = (Summon) getLifes().values().stream()
+                .filter(s -> s instanceof Summon &&
+                        ((Summon) s).getChr().getId() == chrID &&
+                        ((Summon) s).getSkillID() == skillID)
+                .findFirst().orElse(null);
+        if (summon != null) {
+            removeLife(summon.getObjectId(), false);
+        }
+    }
+
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
         if (getChars().size() > 0) {

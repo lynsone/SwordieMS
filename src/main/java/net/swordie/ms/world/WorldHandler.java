@@ -500,7 +500,7 @@ public class WorldHandler {
                 }
                 chr.warp(toField, toPortal);
             }
-        } else {
+        } else if (targetField != -1 && chr.getHP() <= 0) {
             // Character is dead, respawn request
             inPacket.decodeByte(); // always 0
             byte tarfield = inPacket.decodeByte(); // ?
@@ -534,6 +534,12 @@ public class WorldHandler {
             }
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
+        } else {
+            Field toField = chr.getOrCreateFieldByCurrentInstanceType(targetField);
+            if (toField != null) {
+                // should add checks for it and try find in IDA when it called.
+                chr.warp(toField);
+            }
         }
     }
 
