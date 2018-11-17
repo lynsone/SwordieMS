@@ -372,6 +372,8 @@ public class Char {
 	@Transient
 	private long lastLieDetector = 0;
 	// TOOD: count and log lie detector passes and fails
+    @Transient
+	private boolean tutor = false;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1701,6 +1703,7 @@ public class Char {
 				removeFromBaseStatCache(skill);
 			}
 			getSkills().remove(skill);
+
 		}
 	}
 
@@ -3725,7 +3728,7 @@ public class Char {
 		addSkill(skill);
 		write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
-	
+
 	public long getRuneCooldown() {
 		return runeStoneCooldown;
 	}
@@ -4158,5 +4161,39 @@ public class Char {
 			addStatAndSendPacket(Stat.mp, -mpCon);
 		}
 		return hasEnough;
+	}
+
+	public boolean hasTutor() {
+		return tutor;
+	}
+
+	public void hireTutor(boolean set) {
+		tutor = set;
+		write(UserLocal.hireTutor(set));
+	}
+
+	/**
+	 * Shows tutor automated message (the client is taking the message information from wz).
+	 * @param id the id of the message.
+	 * @param duration message duration
+	 */
+	public void tutorAutomatedMsg(int id, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(id, duration));
+	}
+
+	/**
+	 * Shows tutor custom message (you decide which message the tutor will say).
+	 * @param message your custom message
+	 * @param width size of the message box
+	 * @param duration message duration
+	 */
+	public void tutorCustomMsg(String message, int width, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(message, width, duration));
 	}
 }

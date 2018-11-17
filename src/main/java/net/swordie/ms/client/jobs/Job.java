@@ -207,10 +207,10 @@ public abstract class Job {
 				tsm.putCharacterStatValue(RideVehicle, tsb.getOption());
 				tsm.sendSetStatPacket();
 			} else {
-				summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 				boolean isSummonSkill = false;
 				int noviceSkill = SkillConstants.getNoviceSkillFromRace(skillID);
 				if (noviceSkill == 1085 || noviceSkill == 1087 || noviceSkill == 1090 || noviceSkill == 1179) {
+					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 					summon.setMoveAction((byte) 4);
 					summon.setAssistType((byte) 2);
 					summon.setFlyMob(true);
@@ -218,6 +218,7 @@ public abstract class Job {
 				}
 				switch (skillID) {
 					case MONOLITH:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						field = c.getChr().getField();
 						summon.setMoveAbility(MoveAbility.Stop);
 						field.spawnSummon(summon);
@@ -234,6 +235,7 @@ public abstract class Job {
 					case SNOW_RING:
 					case LIGHTNING_RING:
 					case WIND_RING:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						summon.setMoveAction((byte) 4);
 						summon.setAssistType((byte) 2);
 						summon.setFlyMob(true);
@@ -265,6 +267,7 @@ public abstract class Job {
 					case GNOME_SYLPH_2:
 					case DEVIL_SYLPH_2:
 					case ANGEL_SYLPH_2:
+						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						isSummonSkill = true;
 						break;
 				}
