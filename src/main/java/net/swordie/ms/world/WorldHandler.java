@@ -500,7 +500,7 @@ public class WorldHandler {
                 }
                 chr.warp(toField, toPortal);
             }
-        } else if (targetField != -1 && chr.getHP() <= 0) {
+        } else if (chr.getHP() <= 0) {
             // Character is dead, respawn request
             inPacket.decodeByte(); // always 0
             byte tarfield = inPacket.decodeByte(); // ?
@@ -526,7 +526,8 @@ public class WorldHandler {
                     chr.getParty().clearFieldInstances(0);
                 } else {
                     if (targetField != -1) {// TODO: Add checks for that.
-                        chr.warp(chr.getOrCreateFieldByCurrentInstanceType(targetField));
+                        chr.chatMessage("Unhandled field change request.");
+                        return;
                     } else {
                         chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
                     }
@@ -535,11 +536,7 @@ public class WorldHandler {
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
         } else {
-            Field toField = chr.getOrCreateFieldByCurrentInstanceType(targetField);
-            if (toField != null) {
-                // should add checks for it and try find in IDA when it called.
-                chr.warp(toField);
-            }
+            chr.chatMessage("Unhandled field change request.");
         }
     }
 
