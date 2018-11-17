@@ -374,6 +374,10 @@ public class Char {
 	// TOOD: count and log lie detector passes and fails
     @Transient
 	private boolean tutor = false;
+	@Transient
+	private int transferField = 0;
+	@Transient
+	private int transferFieldReq = 0;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -4195,5 +4199,18 @@ public class Char {
 			hireTutor(true);
 		}
 		write(UserLocal.tutorMsg(message, width, duration));
+	}
+
+	public void setTransferField(int fieldID) {
+		this.transferField = fieldID;
+		this.transferFieldReq = fieldID == 0 ? 0 : getField().getId();
+	}
+
+	public int getTransferField() {
+		return transferField;
+	}
+
+	public int getTransferFieldReq() {
+		return transferFieldReq;
 	}
 }

@@ -15,7 +15,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
-import net.swordie.ms.client.character.scene.Scene;
+import net.swordie.ms.client.character.Scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
@@ -2240,6 +2240,16 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+
+		String[] splitted = effectPath.split("/");
+		String sceneName = splitted[splitted.length - 2];
+		String sceneNumber = splitted[splitted.length - 1];
+		String xmlPath = effectPath.replace("/" + sceneName, "").replace("/" + sceneNumber, "").replace("Effect/", "Effect.wz/");
+
+		int fieldID = new Scene(chr, xmlPath, sceneName, sceneNumber).getTransferField();
+		if (fieldID != 0) {
+			chr.setTransferField(fieldID);
+		}
 	}
 
 	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
