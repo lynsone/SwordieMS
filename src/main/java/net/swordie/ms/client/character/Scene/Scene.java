@@ -1,4 +1,4 @@
-package net.swordie.ms.client.character.scene;
+package net.swordie.ms.client.character.Scene;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.packet.CField;
@@ -34,13 +34,16 @@ public class Scene {
         this.sceneName = sceneName;
         this.sceneNumber = sceneNumber;
         this.effectInfos = new ArrayList<>();
+        loadScene();
     }
 
-    public void createScene() {
+    public void loadScene() {
         EffectData.getEffectsFromWzPath(this);
 
         effectInfos = effectInfos.stream().sorted(Comparator.comparingInt(EffectInfo::getZ)).collect(Collectors.toList());
+    }
 
+    public void createScene() {
         for (EffectInfo ei : effectInfos) {
 
             if(ei.getType() == null) {
@@ -140,4 +143,12 @@ public class Scene {
         this.chr = chr;
     }
 
+    public int getTransferField() {
+        for (EffectInfo effect : getEffectInfos()) {
+            if (effect.getField() != 0) {
+                return effect.getField();
+            }
+        }
+        return 0;
+    }
 }

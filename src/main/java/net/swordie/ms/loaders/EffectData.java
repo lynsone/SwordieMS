@@ -1,8 +1,8 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
-import net.swordie.ms.client.character.scene.EffectInfo;
-import net.swordie.ms.client.character.scene.Scene;
+import net.swordie.ms.client.character.Scene.EffectInfo;
+import net.swordie.ms.client.character.Scene.Scene;
 import net.swordie.ms.enums.SceneType;
 import net.swordie.ms.util.XMLApi;
 import org.w3c.dom.Document;

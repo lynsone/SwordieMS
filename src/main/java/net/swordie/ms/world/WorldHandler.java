@@ -525,8 +525,12 @@ public class WorldHandler {
                 if (chr.getParty() != null) {
                     chr.getParty().clearFieldInstances(0);
                 } else {
-                    if (targetField != -1) {// TODO: Add checks for that.
-                        chr.chatMessage("Unhandled field change request.");
+                    if (chr.getTransferField() == targetField && chr.getTransferFieldReq() == chr.getField().getId()) {
+                        Field toField = chr.getOrCreateFieldByCurrentInstanceType(chr.getTransferField());
+                        if (toField != null && chr.getTransferField() > 0) {
+                            chr.warp(toField);
+                        }
+                        chr.setTransferField(0);
                         return;
                     } else {
                         chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
@@ -536,7 +540,13 @@ public class WorldHandler {
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
         } else {
-            chr.chatMessage("Unhandled field change request.");
+            if (chr.getTransferField() == targetField && chr.getTransferFieldReq() == chr.getField().getId()) {
+                Field toField = chr.getOrCreateFieldByCurrentInstanceType(chr.getTransferField());
+                if (toField != null && chr.getTransferField() > 0) {
+                    chr.warp(toField);
+                }
+                chr.setTransferField(0);
+            }
         }
     }
 
