@@ -8,7 +8,11 @@ import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.movement.MovementInfo;
+import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.util.Position;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /**
  * Created on 5/21/2018.
@@ -67,8 +71,8 @@ public class Summoned {
         outPacket.encodeByte(summon.getMoveAction());
         outPacket.encodeShort(summon.getCurFoothold());
         outPacket.encodeByte(summon.getMoveAbility().getVal());
-        outPacket.encodeByte(summon.getAssistType());
-        outPacket.encodeByte(summon.getEnterType());
+        outPacket.encodeByte(summon.getAssistType().getVal());
+        outPacket.encodeByte(summon.getEnterType().getVal());
         outPacket.encodeInt(summon.getObjectId());
         outPacket.encodeByte(summon.isFlyMob());
         outPacket.encodeByte(summon.isBeforeFirstAttack());

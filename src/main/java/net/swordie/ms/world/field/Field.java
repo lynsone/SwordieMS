@@ -466,11 +466,13 @@ public class Field {
     }
 
     private void setRandomController(Life life) {
+        // No chars -> set controller to null, so a controller will be assigned next time someone enters this field
+        Char controller = null;
         if (getChars().size() > 0) {
-            Char controller = Util.getRandomFromCollection(getChars());
-            putLifeController(life, controller);
+            controller = Util.getRandomFromCollection(getChars());
             life.notifyControllerChange(controller);
         }
+        putLifeController(life, controller);
     }
 
     public void removeLife(Life life) {

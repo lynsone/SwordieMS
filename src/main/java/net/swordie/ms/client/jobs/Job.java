@@ -212,7 +212,7 @@ public abstract class Job {
 				if (noviceSkill == 1085 || noviceSkill == 1087 || noviceSkill == 1090 || noviceSkill == 1179) {
 					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 					summon.setMoveAction((byte) 4);
-					summon.setAssistType((byte) 2);
+					summon.setAssistType(AssistType.Buffing);
 					summon.setFlyMob(true);
 					field.spawnSummon(summon);
 				}
@@ -237,7 +237,7 @@ public abstract class Job {
 					case WIND_RING:
 						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						summon.setMoveAction((byte) 4);
-						summon.setAssistType((byte) 2);
+						summon.setAssistType(AssistType.Buffing);
 						summon.setFlyMob(true);
 						field.spawnSummon(summon);
 						break;

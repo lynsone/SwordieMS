@@ -203,7 +203,7 @@ public class WildHunter extends Citizen {
                 summon.setSummonTerm(0);
 
                 summon.setMoveAbility(MoveAbility.Jaguar);
-                summon.setAssistType(AssistType.Attacking.getVal());
+                summon.setAssistType(AssistType.Attacking);
                 summon.setAttackActive(true);
 
                 field = c.getChr().getField();

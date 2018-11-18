@@ -16,10 +16,7 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatType;
-import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.TSIndex;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -241,7 +238,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType((byte) 0);
+                summon.setAssistType(AssistType.Passive);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 
@@ -262,7 +259,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType((byte) 0);
+                summon.setAssistType(AssistType.Passive);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
 
@@ -272,7 +269,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType((byte) 0);
+                summon.setAssistType(AssistType.Passive);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 

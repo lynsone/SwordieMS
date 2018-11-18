@@ -15,7 +15,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
-import net.swordie.ms.client.character.Scene.Scene;
+import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
