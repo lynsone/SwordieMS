@@ -1254,7 +1254,7 @@ public class Mob extends Life {
 
                 int newMoneyMax = (int) (currentMoneyMax * ((100 + totalMesoRate) / 100D));
                 int newMoneyMin = (int) (currentMoneyMin * ((100 + totalMesoRate) / 100D));
-                if (totalMesoRate > 100) {
+                if (totalMesoRate > 0) {
                     dropInfo.setMoney(newMoneyMin + Util.getRandom(newMoneyMax - newMoneyMin));
                 }
             } else {
