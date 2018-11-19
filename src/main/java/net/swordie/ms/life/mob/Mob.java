@@ -11,6 +11,7 @@ import net.swordie.ms.client.party.PartyDamageInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
@@ -1236,6 +1237,33 @@ public class Mob extends Life {
             Foothold fhBelow = getField().findFootHoldBelow(getPosition());
             if (fhBelow != null) {
                 fhID = fhBelow.getId();
+            }
+        }
+        // DropRate & MesoRate Increases
+        Set<DropInfo> dropInfoSet = getDrops();
+        int mostDamageCharDropRate = (getMostDamageChar() != null ? getMostDamageChar().getTotalStat(BaseStat.dropR) : 0);
+        int mostDamageCharMesoRate = (getMostDamageChar() != null ? getMostDamageChar().getTotalStat(BaseStat.mesoR) : 0);
+        int dropRateMob = (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) ? getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).yOption : 0); // Item Drop Rate
+        int mesoRateMob = (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) ? getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).zOption : 0); // Meso Drop Rate
+        for(DropInfo dropInfo : dropInfoSet) {
+            if (dropInfo.isMoney()) {
+                int currentMoneyMax = dropInfo.getMaxMoney();
+                int currentMoneyMin = dropInfo.getMinMoney();
+
+                int totalMesoRate = mesoRateMob + mostDamageCharMesoRate;
+
+                int newMoneyMax = (int) (currentMoneyMax * ((100 + totalMesoRate) / 100D));
+                int newMoneyMin = (int) (currentMoneyMin * ((100 + totalMesoRate) / 100D));
+                if (totalMesoRate > 100) {
+                    dropInfo.setMoney(newMoneyMin + Util.getRandom(newMoneyMax - newMoneyMin));
+                }
+            } else {
+                int currentChance = dropInfo.getChance();
+
+                int totalDropRate = dropRateMob + mostDamageCharDropRate;
+                int newChance = (int) (currentChance * ((100 + totalDropRate) / 100D));
+
+                dropInfo.setChance(newChance);
             }
         }
         getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
