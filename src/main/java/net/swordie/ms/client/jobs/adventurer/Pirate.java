@@ -635,13 +635,6 @@ public class Pirate extends Beginner {
             summon.setMoveAbility(MoveAbility.WalkRandom);
             field.spawnSummon(summon);
 
-            o3.nReason = random;
-            o3.nValue = 1;
-            o3.summon = summon;
-            o3.tStart = (int) System.currentTimeMillis();
-            o3.tTerm = 120;
-            tsm.putCharacterStatValue(IndieEmpty, o3);
-
             switch (random) {
                 case 5210015:
                     o1.nOption = si.getValue(z, slv);

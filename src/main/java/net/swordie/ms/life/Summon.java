@@ -213,7 +213,7 @@ public class Summon extends Life {
         summon.setMoveAction((byte) 1);
         summon.setCurFoothold((short) chr.getField().findFootHoldBelow(summon.getPosition()).getId());
         summon.setMoveAbility(MoveAbility.Walk);
-        summon.setAssistType(AssistType.Attacking);
+        summon.setAssistType(AssistType.Attack);
         summon.setEnterType(EnterType.Animation);
         summon.setBeforeFirstAttack(false);
         summon.setTemplateId(skillID);
@@ -225,7 +225,7 @@ public class Summon extends Life {
         o1.nValue = 1;
         o1.summon = summon;
         o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = summon.getSummonTerm();
+        o1.tTerm = summon.getSummonTerm() / 1000;
         tsm.putCharacterStatValue(IndieEmpty, o1);
         tsm.sendSetStatPacket();
         return summon;

@@ -238,7 +238,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType(AssistType.Passive);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 
@@ -259,7 +259,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType(AssistType.Passive);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
 
@@ -269,7 +269,7 @@ public class Mechanic extends Citizen {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType(AssistType.Passive);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 

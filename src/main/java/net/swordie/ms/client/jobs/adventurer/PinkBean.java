@@ -165,7 +165,7 @@ public class PinkBean extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAbility(MoveAbility.Stop);
-                summon.setAssistType(AssistType.Passive);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
                 break;

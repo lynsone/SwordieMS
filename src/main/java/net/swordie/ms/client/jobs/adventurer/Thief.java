@@ -303,7 +303,7 @@ public class Thief extends Beginner {
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
                     summon.setMoveAbility(MoveAbility.Stop);
-                    summon.setAssistType(AssistType.Passive);
+                    summon.setAssistType(AssistType.None);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
                     summon.setMaxHP(si.getValue(x, slv));

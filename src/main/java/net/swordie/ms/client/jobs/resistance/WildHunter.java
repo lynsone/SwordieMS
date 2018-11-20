@@ -203,7 +203,7 @@ public class WildHunter extends Citizen {
                 summon.setSummonTerm(0);
 
                 summon.setMoveAbility(MoveAbility.Jaguar);
-                summon.setAssistType(AssistType.Attacking);
+                summon.setAssistType(AssistType.Attack);
                 summon.setAttackActive(true);
 
                 field = c.getChr().getField();
@@ -213,14 +213,6 @@ public class WildHunter extends Citizen {
                     tsm.removeStatsBySkill(RIDE_JAGUAR);
                     tsm.sendResetStatPacket();
                 }
-
-                c.write(UserLocal.jaguarActive(true));
-                o2.nReason = skillID;
-                o2.nValue = 1;
-                o2.summon = summon;
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = 0;
-                tsm.putCharacterStatValue(IndieEmpty, o2);
 
                 o1.nOption = 1;
                 o1.rOption = skillID;

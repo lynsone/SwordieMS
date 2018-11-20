@@ -284,7 +284,7 @@ public class WindArcher extends Noblesse {
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 summon.setAttackActive(false);
-                summon.setAssistType(AssistType.Passive);
+                summon.setAssistType(AssistType.None);
                 summon.setMaxHP(si.getValue(x, slv));
                 summon.setHp(summon.getMaxHP());
                 field.spawnSummon(summon);

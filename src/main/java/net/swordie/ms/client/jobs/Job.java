@@ -3,8 +3,6 @@ package net.swordie.ms.client.jobs;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
-import net.swordie.ms.client.character.ExtendSP;
-import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
@@ -212,7 +210,7 @@ public abstract class Job {
 				if (noviceSkill == 1085 || noviceSkill == 1087 || noviceSkill == 1090 || noviceSkill == 1179) {
 					summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 					summon.setMoveAction((byte) 4);
-					summon.setAssistType(AssistType.Buffing);
+					summon.setAssistType(AssistType.Heal);
 					summon.setFlyMob(true);
 					field.spawnSummon(summon);
 				}
@@ -237,7 +235,7 @@ public abstract class Job {
 					case WIND_RING:
 						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
 						summon.setMoveAction((byte) 4);
-						summon.setAssistType(AssistType.Buffing);
+						summon.setAssistType(AssistType.Heal);
 						summon.setFlyMob(true);
 						field.spawnSummon(summon);
 						break;
