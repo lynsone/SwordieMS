@@ -38,6 +38,7 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
@@ -2363,6 +2364,9 @@ public class Char {
 
 		if (JobConstants.isEvan(getJob())) {
 			((Evan) getJobHandler()).spawnMir();
+		}
+		if (JobConstants.isKanna(getJob())) {
+			((Kanna) getJobHandler()).spawnHaku();
 		}
 		if (tsm.hasStat(IndieEmpty)) {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {

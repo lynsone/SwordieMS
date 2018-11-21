@@ -116,7 +116,6 @@ public class Evan extends Job {
                     chr.addSkill(skill);
                 }
             }
-            //spawnMir();
         }
     }
 

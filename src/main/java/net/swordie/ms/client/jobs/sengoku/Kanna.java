@@ -3,6 +3,7 @@ package net.swordie.ms.client.jobs.sengoku;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -12,17 +13,23 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
@@ -41,7 +48,8 @@ public class Kanna extends Job {
 
     public static final int KISHIN_SHOUKAN = 42111003; //summon
     public static final int BLOSSOM_BARRIER = 42111004; //AoE
-    public static final int SOUL_SHEAR = 42111002; //Reactive Skill
+    public static final int SOUL_SHEAR = 42111002; //Reactive Skill [4033270 - soul shear balls]
+    public static final int SOUL_SHEAR_BOMB_ITEM_ID = 4033270;
 
     public static final int MONKEY_SPIRITS = 42120003; //Passive activation summon
     public static final int BELLFLOWER_BARRIER = 42121005; //AoE
@@ -72,7 +80,7 @@ public class Kanna extends Job {
 
     public Kanna(Char chr) {
         super(chr);
-        //getHakuFollow();
+
     }
 
     @Override
@@ -107,7 +115,6 @@ public class Kanna extends Job {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
-                getHakuFollow();
                 break;
             case KISHIN_SHOUKAN: //TODO
                 chr.getField().setKishin(true);
@@ -148,10 +155,8 @@ public class Kanna extends Job {
         return super.isBuff(skillID) || Arrays.stream(buffs).anyMatch(b -> b == skillID);
     }
 
-    public void getHakuFollow() {
-        //if(chr.hasSkill(HAKU)) {
+    public void spawnHaku() {
         c.write(CField.enterFieldFoxMan(chr));
-        //}
     }
 
     public static void hakuFoxFire(Char chr) {
@@ -217,6 +222,7 @@ public class Kanna extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
+        dropSoulShearBomb(attackInfo);
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -246,9 +252,42 @@ public class Kanna extends Job {
                 aa.setDelay((short) 5);
                 chr.getField().spawnAffectedArea(aa);
                 break;
+            case SOUL_SHEAR:
+                explodeSoulShearBomb();
+                break;
         }
 
         super.handleAttack(c, attackInfo);
+    }
+
+    private void dropSoulShearBomb(AttackInfo attackInfo) {
+        if (!chr.hasSkill(SOUL_SHEAR)) {
+            return;
+        }
+        Field field = chr.getField();
+        Skill skill = chr.getSkill(SOUL_SHEAR);
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int proc = si.getValue(prop, slv);
+        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+            if (Util.succeedProp(proc)) {
+                Mob mob = (Mob) field.getLifeByObjectID(mai.mobId);
+                if (mob == null) {
+                    continue;
+                }
+                Item item = ItemData.getItemDeepCopy(SOUL_SHEAR_BOMB_ITEM_ID);
+                Drop drop = new Drop(item.getItemId(), item);
+                field.drop(drop, mob.getPosition());
+            }
+        }
+    }
+
+    private void explodeSoulShearBomb() {
+        Set<Drop> soulShearBombSet = chr.getField().getDrops().stream().filter(d -> !d.isMoney() && d.getItem().getItemId() == SOUL_SHEAR_BOMB_ITEM_ID).collect(Collectors.toSet());
+        for(Drop soulShearBomb : soulShearBombSet) {
+            chr.getField().broadcastPacket(DropPool.dropExplodeField(soulShearBomb.getObjectId()));
+            soulShearBomb.broadcastLeavePacket();
+        }
     }
 
     @Override
