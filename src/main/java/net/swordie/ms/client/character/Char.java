@@ -4276,7 +4276,7 @@ public class Char {
 		int newExp = exp + amount;
 		write(UserLocal.chatMsg(ChatType.GameDesc, SkillConstants.getMakingSkillName(makingSkillID) + "'s mastery increased. (+" + amount + ")"));
 		if (newExp >= neededExp) {
-			write(UserLocal.noticeMsg("You've accumulated Herbalism/Mining mastery. See an NPC in town to level up.", true));
+			write(UserLocal.noticeMsg("You've accumulated " + SkillConstants.getMakingSkillName(makingSkillID) + " mastery. See an NPC in town to level up.", true));
 			setProfessionalExp(makingSkillID, neededExp);
 		} else {
 			setProfessionalExp(makingSkillID, newExp);
