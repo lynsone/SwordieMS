@@ -285,7 +285,16 @@ public class CField {
         if(marriage != null) {
             marriage.encode(outPacket);
         }
-        outPacket.encodeByte(0); // size(byte) of productSkill(Professions)(short); stuff like mining, herblore, etc...
+        List<Short> professionals = new ArrayList<>();
+        for (short i = 9200; i <= 9204; i++) {
+            if (chr.getProfessionalLevel(i * 10000) > 0) {
+                professionals.add(i);
+            }
+        }
+        outPacket.encodeByte(professionals.size());
+        for (Short professional : professionals) {
+            outPacket.encodeShort(professional);
+        }
         outPacket.encodeString(chr.getGuild() == null ? "-" : chr.getGuild().getName());
         outPacket.encodeString(chr.getGuild() == null || chr.getGuild().getAlliance() == null ? "-" :
                 chr.getGuild().getAlliance().getName());
@@ -885,6 +894,32 @@ public class CField {
 
         outPacket.encodeByte(animation); // Animation
         outPacket.encodeInt(townPortal.getChr().getId());
+
+        return outPacket;
+    }
+
+    public static OutPacket setOneTimeAction(int charID, int action, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_ONE_TIME_ACTION);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(action);
+        outPacket.encodeInt(duration);
+
+        return outPacket;
+    }
+
+    public static OutPacket makingSkillResult(int charID, int recipeCode, MakingSkillResult result, int createdItemID, int itemCount, int incSkillProficiency) {
+        OutPacket outPacket = new OutPacket(OutHeader.MAKING_SKILL_RESULT);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeInt(recipeCode);
+        outPacket.encodeInt(result.getVal());
+        if (result == MakingSkillResult.SUCESS_1 || result == MakingSkillResult.SUCESS_2 || result == MakingSkillResult.SUCESS_3) {
+            outPacket.encodeInt(createdItemID);
+            outPacket.encodeInt(itemCount);
+        }
+        outPacket.encodeInt(incSkillProficiency);
 
         return outPacket;
     }

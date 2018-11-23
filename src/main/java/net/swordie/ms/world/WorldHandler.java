@@ -5249,6 +5249,13 @@ public class WorldHandler {
                 // type == skill lv
                 value = SkillConstants.getNeededSpForHyperStatSkill(type);
                 break;
+            case Skill_9200:
+            case Skill_9201:
+            case Skill_9202:
+            case Skill_9203:
+            case Skill_9204:
+                value = 100;
+                break;
             default:
                 log.error(String.format("Unhandled instance table type request %s, type %d, subType %d", itt, type, subType));
                 return;
@@ -5953,5 +5960,88 @@ public class WorldHandler {
         }
         Skill skill = chr.getSkill(skillId);
         chr.getField().broadcastPacket(UserRemote.skillPrepare(chr, skillId, (byte) skill.getCurrentLevel()), chr);
+    }
+
+    public static void handleBroadcastEffectToSplit(Char chr, InPacket inPacket) {
+        String effectPath = inPacket.decodeString();
+        int duration = inPacket.decodeInt();
+        int option = inPacket.decodeInt();
+        chr.write(User.effect(Effect.effectFromWZ(effectPath, true, duration, option, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.effectFromWZ(effectPath, true, duration, option, 0)), chr);
+    }
+
+    public static void handleBroadcastOneTimeActionToSplit(Char chr, InPacket inPacket) {
+        int action = inPacket.decodeInt();
+        int duration = inPacket.decodeInt();
+        chr.getField().broadcastPacket(CField.setOneTimeAction(chr.getId(), action, duration));
+    }
+
+    public static void handleMakingSkillRequest(Char chr, InPacket inPacket) {
+        int recipeID = inPacket.decodeInt();
+        MakingSkillRecipe msr = SkillData.getRecipeById(recipeID);
+        if (chr == null || msr == null) {
+            return;
+        }
+        List<Tuple<Integer, Integer>> itemResult = new ArrayList<>();
+        for (Tuple<Integer, Integer> repice : msr.getIngredient()) {
+            int itemID = repice.getLeft();
+            int count = repice.getRight();
+            if (chr.hasItemCount(itemID, count)) {
+                chr.consumeItem(itemID, count);
+                itemResult.add(new Tuple<>(itemID, -count));
+            } else {
+                return;
+            }
+        }
+
+        MakingSkillResult result = MakingSkillResult.CRAFTING_FAILED;
+        MakingSkillRecipe.TargetElem headTarget = null;
+        boolean first = true;
+        for (MakingSkillRecipe.TargetElem target : msr.getTarget()) {
+            if (Util.succeedProp(target.getProbWeight())) {
+                int itemID = target.getItemID();
+                int count = target.getCount();
+                if (first) {
+                    headTarget = target;
+                    result = MakingSkillResult.SUCESS_3;
+                }
+                chr.addItemToInventory(itemID, count);
+                itemResult.add(new Tuple<>(itemID, count));
+            } else if (headTarget != null){
+                result = MakingSkillResult.SUCESS_2;
+            }
+            first = false;
+        }
+        if (headTarget == null) {
+            headTarget = new MakingSkillRecipe.TargetElem();
+        }
+        int incSkillProficiency = 0;
+        switch (result) {
+            case SUCESS_1:
+            case SUCESS_2:
+            case SUCESS_3:
+                incSkillProficiency = msr.getIncSkillProficiency();
+                chr.addProfessionalExp(recipeID, incSkillProficiency);
+                chr.addStatAndSendPacket(Stat.fatigue, 1);
+                int makingSkillID = SkillConstants.recipeCodeToMakingSkillCode(recipeID);
+                Stat trait = Stat.craftEXP;
+                switch (makingSkillID) {
+                    case 92000000:
+                        trait = Stat.senseEXP;
+                        break;
+                    case 92010000:
+                        trait = Stat.willEXP;
+                        break;
+                }
+                chr.addTraitExp(trait, (int) Math.pow(2, chr.getProfessionalLevel(makingSkillID) + 2));
+                break;
+            case CRAFTING_FAILED:
+                incSkillProficiency = msr.getIncSkillProficiencyOnFailure();
+                chr.addProfessionalExp(recipeID, incSkillProficiency);
+                chr.addStatAndSendPacket(Stat.fatigue, 1);
+                break;
+        }
+        chr.getField().broadcastPacket(CField.makingSkillResult(chr.getId(), recipeID, result, headTarget.getItemID(), headTarget.getCount(), incSkillProficiency));
+        chr.write(User.effect(Effect.gainQuestItem(itemResult)));
     }
 }

@@ -17,7 +17,12 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.TextEffectType;
 import net.swordie.ms.enums.UserEffectType;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static net.swordie.ms.enums.UserEffectType.*;
 
@@ -25,6 +30,7 @@ public class Effect {
 
     private UserEffectType userEffectType;
     private String string;
+    private List<Tuple<Integer, Integer>> list = new ArrayList<>();
 
     private int arg1;
     private int arg2;
@@ -36,7 +42,6 @@ public class Effect {
     private int arg8;
     private int arg9;
     private int arg10;
-
 
     public void encode(OutPacket outPacket) {
         outPacket.encodeByte(getUserEffectType().getVal());
@@ -75,9 +80,11 @@ public class Effect {
                 outPacket.encodeByte(getArg2());// slv
                 break;
             case Quest:
-                outPacket.encodeByte(1);// Count
-                outPacket.encodeInt(getArg1()); // Item ID
-                outPacket.encodeInt(getArg2()); // Quantity
+                outPacket.encodeByte(getList().size());
+                for (Tuple<Integer, Integer> item : getList()) {
+                    outPacket.encodeInt(item.getLeft()); // Item ID
+                    outPacket.encodeInt(item.getRight()); // Quantity
+                }
                 break;
             case TextEffect:
                 outPacket.encodeString(getString());
@@ -466,8 +473,16 @@ public class Effect {
         Effect effect = new Effect();
 
         effect.setUserEffectType(Quest);
-        effect.setArg1(itemID);
-        effect.setArg2(quantity);
+        effect.setList(Collections.singletonList(new Tuple<>(itemID, quantity)));
+
+        return effect;
+    }
+
+    public static Effect gainQuestItem(List<Tuple<Integer, Integer>> items) {
+        Effect effect = new Effect();
+
+        effect.setUserEffectType(Quest);
+        effect.setList(items);
 
         return effect;
     }
@@ -710,6 +725,10 @@ public class Effect {
     public String getString() {
         return string;
     }
+
+    public void setList(List<Tuple<Integer, Integer>> list) { this.list = list; }
+
+    public List<Tuple<Integer, Integer>> getList() { return list; }
 
     public int getArg1() {
         return arg1;

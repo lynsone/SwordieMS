@@ -650,6 +650,15 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_MEDAL_REISSUE_REQUEST:
                 WorldHandler.handleUserMedalReissueRequest(chr, inPacket);
                 break;
+            case BROADCAST_EFFECT_TO_SPLIT:
+                WorldHandler.handleBroadcastEffectToSplit(chr, inPacket);
+                break;
+            case BROADCAST_ONE_TIME_ACTION_TO_SPLIT:
+                WorldHandler.handleBroadcastOneTimeActionToSplit(chr, inPacket);
+                break;
+            case MAKING_SKILL_REQUEST:
+                WorldHandler.handleMakingSkillRequest(chr, inPacket);
+                break;
             default:
                 handleUnknown(inPacket, op);
                 break;

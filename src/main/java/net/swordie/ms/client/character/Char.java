@@ -69,6 +69,7 @@ import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.gach.GachaponManager;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
@@ -1570,23 +1571,6 @@ public class Char {
 		return field;
 	}
 
-	public void resetStats() {
-		int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
-		total -= 16;// 4 str, dex, luk, int
-		setStat(Stat.str, 4);
-		setStat(Stat.dex, 4);
-		setStat(Stat.inte, 4);
-		setStat(Stat.luk, 4);
-		setStat(Stat.ap, total);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.str, (short) getStat(Stat.str));
-		stats.put(Stat.dex, (short) getStat(Stat.dex));
-		stats.put(Stat.inte, (short) getStat(Stat.inte));
-		stats.put(Stat.luk, (short) getStat(Stat.luk));
-		stats.put(Stat.ap, (short) getStat(Stat.ap));
-		write(WvsContext.statChanged(stats));
-	}
-
 	/**
 	 * Sets the job of this Char with a given id. Does nothing if the id is invalid.
 	 * If it is valid, will set this Char's job, add all Skills that the job should have by default,
@@ -1605,9 +1589,6 @@ public class Char {
 		skills.forEach(skill -> addSkill(skill, true));
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
-		if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
-			resetStats();
-		}
 	}
 
 	public short getJob() {
@@ -1981,6 +1962,7 @@ public class Char {
 		switch (charStat) {
 			case level:
 			case skin:
+			case fatigue:
 				stats.put(charStat, (byte) getStat(charStat));
 				break;
 			case str:
@@ -2481,6 +2463,18 @@ public class Char {
 	 */
 	public void addExpNoMsg(long amount) {
 		addExp(amount, null);
+	}
+
+	public void addTraitExp(Stat traitStat, int amount) {
+		if (amount <= 0) {
+			return;
+		}
+		Map<Stat, Object> stats = new HashMap<>();
+		addStat(traitStat, amount);
+		stats.put(traitStat, getStat(traitStat));
+		stats.put(Stat.dayLimit, getAvatarData().getCharacterStat().getNonCombatStatDayLimit());
+		write(WvsContext.statChanged(stats));
+		write(WvsContext.incNonCombatStatEXPMessage(traitStat, amount));
 	}
 
 	/**
@@ -4216,5 +4210,100 @@ public class Char {
 
 	public int getTransferFieldReq() {
 		return transferFieldReq;
+	}
+
+	public void setProfessionalLevel(int skillID, int level) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel(((level & 0xFF) << 24) + (getProfessionalExp(skillID) & 0xFFFF));
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getProfessionalLevel(int skillID) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			int skillLevel = skill.getCurrentLevel();
+			if (skillLevel <= 0) {
+				return 0;
+			}
+			int realSLV = (skillLevel >>> 24) & 0xFF;
+			if (realSLV >= skill.getMasterLevel()) {
+				realSLV = skill.getMasterLevel();
+			}
+			return realSLV;
+		}
+		return 0;
+	}
+
+	public void setProfessionalExp(int skillID, int exp) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel(((getProfessionalLevel(skillID) & 0xFF) << 24) + (exp & 0xFFFF));
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getProfessionalExp(int skillID) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			int skillLevel = skill.getCurrentLevel();
+			if (skillLevel <= 0) {
+				return 0;
+			}
+			return skillLevel & 0xFFFF;
+		}
+		return 0;
+	}
+
+	public void addProfessionalExp(int skillID, int amount) {
+		int makingSkillID = SkillConstants.recipeCodeToMakingSkillCode(skillID);
+		int level = getProfessionalLevel(makingSkillID);
+
+		int neededExp = SkillConstants.getNeededExpForProfessional(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getProfessionalExp(makingSkillID);
+		if (exp >= neededExp) {
+			write(UserLocal.chatMsg(ChatType.GameDesc, "You can't gain any more Herbalism mastery until you level your skill."));
+			write(UserLocal.chatMsg(ChatType.GameDesc, "See the appropriate NPC in Ardentmill to level up."));
+			setProfessionalExp(makingSkillID, neededExp);
+			return;
+		}
+		int newExp = exp + amount;
+		write(UserLocal.chatMsg(ChatType.GameDesc, SkillConstants.getMakingSkillName(makingSkillID) + "'s mastery increased. (+" + amount + ")"));
+		if (newExp >= neededExp) {
+			write(UserLocal.noticeMsg("You've accumulated Herbalism/Mining mastery. See an NPC in town to level up.", true));
+			setProfessionalExp(makingSkillID, neededExp);
+		} else {
+			setProfessionalExp(makingSkillID, newExp);
+		}
+	}
+
+	public void levelUpProfessional(int skillID) {
+		int level = getProfessionalLevel(skillID);
+		int neededExp = SkillConstants.getNeededExpForProfessional(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getProfessionalExp(skillID);
+		if (exp >= neededExp) {
+			setProfessionalExp(skillID, 0);
+			setProfessionalLevel(skillID, level + 1);
+			Stat trait = Stat.craftEXP;
+			switch (skillID) {
+				case 92000000:
+					trait = Stat.senseEXP;
+					break;
+				case 92010000:
+					trait = Stat.willEXP;
+					break;
+			}
+			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
+			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+		}
 	}
 }

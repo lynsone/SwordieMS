@@ -33,6 +33,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -1579,11 +1580,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) mesos));
 	}
 
 	@Override
 	public void deductMesos(long mesos) {
 		chr.deductMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) -mesos));
 	}
 
 	@Override
@@ -2364,6 +2367,26 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
 
 	public boolean hasTutor() { return chr.hasTutor(); }
+
+	public int getProfessionalLevel(int skillID) { return chr.getProfessionalLevel(skillID); }
+
+	public void setProfessionalLevel(int skillID, int level) {
+	    chr.setProfessionalLevel(skillID, level);
+	}
+
+	public void setProfessionalExp(int skillID, int exp) {
+	    chr.setProfessionalExp(skillID, exp);
+	}
+
+	public boolean canLevelUpProfessional(int skillID) {
+		int neededExp = SkillConstants.getNeededExpForProfessional(chr.getProfessionalLevel(skillID));
+		if (neededExp <= 0) {
+			return false;
+		}
+		return chr.getProfessionalExp(skillID) >= neededExp;
+	}
+
+	public void levelUpProfessional(int skillID) { chr.levelUpProfessional(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

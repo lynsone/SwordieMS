@@ -21,6 +21,14 @@ import java.util.Set;
  * Created on 1/2/2018.
  */
 public class UserLocal {
+    public static OutPacket noticeMsg(String msg, boolean autoSeparated) {
+        OutPacket outPacket = new OutPacket(OutHeader.NOTICE_MSG);
+
+        outPacket.encodeString(msg);
+        outPacket.encodeByte(autoSeparated);
+
+        return outPacket;
+    }
 
     public static OutPacket chatMsg(ChatType colour, String msg) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT_MSG);
