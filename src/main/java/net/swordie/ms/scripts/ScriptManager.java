@@ -924,6 +924,7 @@ public interface ScriptManager extends Observer {
 	 */
 	void setPartyField();
 
+	void setChannelField();
 	/**
 	 * Checks if the {@link Char} linked to the {@link ScriptManager} is the {@link Party} leader.
 	 * Example: "if(sm.isPartyLeader()) {}"

@@ -1437,6 +1437,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setChannelField()
+	{
+		chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
+	}
+	@Override
 	public boolean isPartyLeader() {
 		return chr.getParty() != null && chr.getParty().getPartyLeaderID() == chr.getId();
 	}

@@ -35,6 +35,7 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
+import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.party.Party;
@@ -3626,7 +3627,9 @@ public class Char {
 		} else {
 			Skill skill = getSkill(skillID);
 			if (skill != null && SkillData.getSkillInfoById(skillID).hasCooltime()) {
-				setSkillCooldown(skillID, (byte) skill.getCurrentLevel());
+				if(!skillShouldBypassCD(skillID)) {
+					setSkillCooldown(skillID, (byte) skill.getCurrentLevel());
+				}
 			}
 			return true;
 		}
@@ -3646,11 +3649,31 @@ public class Char {
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
 			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
 			if (!hasSkillCDBypass()) {
-				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+				if(!skillShouldBypassCD(skillID)) {
+					write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
+				}
 			}
 		}
 	}
 
+	/**
+	 * Checks if a skill's cooldown should be bypassed
+	 **/
+	public boolean skillShouldBypassCD(int skillID)
+	{
+		switch(skillID) {
+			case 1321013:
+				if (getTemporaryStatManager().hasStat(Reincarnation) || getTemporaryStatManager().hasStatBySkillId(1321015))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+		}
+		return false;
+	}
 	public CharacterPotentialMan getPotentialMan() {
 		return potentialMan;
 	}

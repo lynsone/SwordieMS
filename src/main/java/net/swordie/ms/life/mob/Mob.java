@@ -1,5 +1,8 @@
 package net.swordie.ms.life.mob;
 
+import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
@@ -136,6 +139,7 @@ public class Mob extends Life {
     private List<EscortDest> escortDest = new ArrayList<>();
     private int currentDestIndex = 0;
     private int escortStopDuration = 0;
+    private final static Random rand = new Random();
 
     public Mob(int templateId) {
         super(templateId);
@@ -548,6 +552,11 @@ public class Mob extends Life {
 
     public long getMaxHp() {
         return getForcedMobStat().getMaxHP();
+    }
+
+    public long getExp()
+    {
+        return getForcedMobStat().getExp();
     }
 
     public void setMaxHp(long maxHp) {
@@ -1178,6 +1187,7 @@ public class Mob extends Life {
         }
         distributeExp();
         dropDrops(); // xd
+        addNxCash(100, getObjectId());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
@@ -1240,6 +1250,29 @@ public class Mob extends Life {
         getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
     }
 
+    void addNxCash(int amount, int monsterID)
+    {
+        Char chr = getMostDamageChar();
+        if (chr != null)
+        {
+            Account account = chr.getAccount();
+            if (rand.nextInt(100) < 25) // 2nd value is chance
+            {
+                account.addNXCredit(amount);
+                chr.write(User.scriptProgressMessage("You have gained " + calculateNxCash(monsterID) + " NX cash."));
+            }
+        }
+    }
+
+    int calculateNxCash(int monsterID)
+    {
+        double amount = (Math.sqrt(((getMaxHp() * 3))) / getExp() * 11) * (getExp() / 70);
+        if(amount < 1)
+        {
+            amount = 1;
+        }
+        return (int) amount;
+    }
     public Map<Char, Long> getDamageDone() {
         return damageDone;
     }
