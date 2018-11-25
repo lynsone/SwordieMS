@@ -659,6 +659,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case MAKING_SKILL_REQUEST:
                 WorldHandler.handleMakingSkillRequest(chr, inPacket);
                 break;
+            case USER_RECIPE_OPEN_ITEM_USE_REQUEST:
+                WorldHandler.handleUserRecipeOpenItemUseRequest(chr, inPacket);
+                break;
             default:
                 handleUnknown(inPacket, op);
                 break;

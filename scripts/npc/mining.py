@@ -24,15 +24,15 @@ if not sm.hasSkill(MINING_SKILL):
 else:
     selection = sm.sendSay("Now what can I do for ya?\r\n#L2##bLevel up #eMining#n.#l\r\n#L3##bTrade #t4011010#.#k#l")
     if selection == 2:
-        if sm.canLevelUpProfessional(MINING_SKILL):
-            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Mining. I'll take #b" + str(FEE[sm.getProfessionalLevel(MINING_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
+        if sm.isAbleToLevelUpMakingSkill(MINING_SKILL):
+            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Mining. I'll take #b" + str(FEE[sm.getMakingSkillLevel(MINING_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
             if levelup:
-                if sm.getMesos() < FEE[sm.getProfessionalLevel(MINING_SKILL)]:
+                if sm.getMesos() < FEE[sm.getMakingSkillLevel(MINING_SKILL)]:
                     sm.sendNext("You don't have enough mesos.")
                     sm.dispose()
-                sm.giveMesos(-FEE[sm.getProfessionalLevel(MINING_SKILL)])
-                sm.levelUpProfessional(MINING_SKILL)
-                sm.sendNext("Your Mining skill is now Lv. " + str(sm.getProfessionalLevel(MINING_SKILL)) +".")
+                sm.giveMesos(-FEE[sm.getMakingSkillLevel(MINING_SKILL)])
+                sm.makingSkillLevelUp(MINING_SKILL)
+                sm.sendNext("Your Mining skill is now Lv. " + str(sm.getMakingSkillLevel(MINING_SKILL)) +".")
             else:
                 sm.sendNext("Sure, take some time to think it over. I'll be here.")
                 sm.dispose()

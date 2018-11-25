@@ -36,16 +36,16 @@ if not sm.hasSkill(ALCHEMY_CRAFT_SKILL):
 else:
     selection = sm.sendSay("Hello. Are you interested in Alchemy?\r\n#L2##bRaise #eAlchemy#n level.#l\r\n#L3#Unlearn Alchemy.#k#l")
     if selection == 2:
-        if sm.canLevelUpProfessional(ALCHEMY_CRAFT_SKILL):
-            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Alchemy. I'll take #b" + str(FEE[sm.getProfessionalLevel(ALCHEMY_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
+        if sm.isAbleToLevelUpMakingSkill(ALCHEMY_CRAFT_SKILL):
+            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Alchemy. I'll take #b" + str(FEE[sm.getMakingSkillLevel(ALCHEMY_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
             if levelup:
-                if sm.getMesos() < FEE[sm.getProfessionalLevel(ALCHEMY_CRAFT_SKILL)]:
+                if sm.getMesos() < FEE[sm.getMakingSkillLevel(ALCHEMY_CRAFT_SKILL)]:
                     sm.sendNext("You don't have enough mesos.")
                     sm.dispose()
 
-                sm.giveMesos(-FEE[sm.getProfessionalLevel(ALCHEMY_CRAFT_SKILL)])
-                sm.levelUpProfessional(ALCHEMY_CRAFT_SKILL)
-                sm.sendNext("Your Alchemy skill is now Lv. " + str(sm.getProfessionalLevel(ALCHEMY_CRAFT_SKILL)) +".")
+                sm.giveMesos(-FEE[sm.getMakingSkillLevel(ALCHEMY_CRAFT_SKILL)])
+                sm.makingSkillLevelUp(ALCHEMY_CRAFT_SKILL)
+                sm.sendNext("Your Alchemy skill is now Lv. " + str(sm.getMakingSkillLevel(ALCHEMY_CRAFT_SKILL)) +".")
             else:
                 sm.sendNext("Sure, take some time to think it over. I'll be here.")
                 sm.dispose()

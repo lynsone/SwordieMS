@@ -23,6 +23,7 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
+import net.swordie.ms.loaders.MakingSkillRecipe;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -285,15 +286,15 @@ public class CField {
         if(marriage != null) {
             marriage.encode(outPacket);
         }
-        List<Short> professionals = new ArrayList<>();
+        List<Short> makingSkills = new ArrayList<>();
         for (short i = 9200; i <= 9204; i++) {
-            if (chr.getProfessionalLevel(i * 10000) > 0) {
-                professionals.add(i);
+            if (chr.getMakingSkillLevel(i * 10000) > 0) {
+                makingSkills.add(i);
             }
         }
-        outPacket.encodeByte(professionals.size());
-        for (Short professional : professionals) {
-            outPacket.encodeShort(professional);
+        outPacket.encodeByte(makingSkills.size());
+        for (Short makingSkill : makingSkills) {
+            outPacket.encodeShort(makingSkill);
         }
         outPacket.encodeString(chr.getGuild() == null ? "-" : chr.getGuild().getName());
         outPacket.encodeString(chr.getGuild() == null || chr.getGuild().getAlliance() == null ? "-" :
@@ -908,14 +909,30 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket makingSkillResult(int charID, int recipeCode, MakingSkillResult result, int createdItemID, int itemCount, int incSkillProficiency) {
+    public static OutPacket makingSkillResult(int charID, int recipeCode, MakingSkillResult result, MakingSkillRecipe.TargetElem target, int incSkillProficiency) {
         OutPacket outPacket = new OutPacket(OutHeader.MAKING_SKILL_RESULT);
 
         outPacket.encodeInt(charID);
 
         outPacket.encodeInt(recipeCode);
         outPacket.encodeInt(result.getVal());
-        if (result == MakingSkillResult.SUCESS_1 || result == MakingSkillResult.SUCESS_2 || result == MakingSkillResult.SUCESS_3) {
+        if (result == MakingSkillResult.SUCESS_SOSO || result == MakingSkillResult.SUCESS_GOOD || result == MakingSkillResult.SUCESS_COOL) {
+            outPacket.encodeInt(target.getItemID());
+            outPacket.encodeInt(target.getCount());
+        }
+        outPacket.encodeInt(incSkillProficiency);
+
+        return outPacket;
+    }
+
+    public static OutPacket makingSkillResult(int charID, int recipeCode, int result, int createdItemID, int itemCount, int incSkillProficiency) {
+        OutPacket outPacket = new OutPacket(OutHeader.MAKING_SKILL_RESULT);
+
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeInt(recipeCode);
+        outPacket.encodeInt(result);
+        if (result == 25 || result == 26 || result == 27) {
             outPacket.encodeInt(createdItemID);
             outPacket.encodeInt(itemCount);
         }

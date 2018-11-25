@@ -1290,4 +1290,8 @@ public class ItemConstants {
         }
         return 0;
     }
+
+    public static boolean isRecipeOpenItem(int itemID) {
+        return itemID / 10000 == 251;
+    }
 }

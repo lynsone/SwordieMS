@@ -858,6 +858,7 @@ public class SkillData {
                 MakingSkillRecipe msr = new MakingSkillRecipe();
                 int recipeID = Integer.parseInt(XMLApi.getNamedAttribute(node, "name"));
                 msr.setRecipeID(recipeID);
+                msr.setReqSkillID(10000 * (recipeID / 10000));
                 for (Node recipe : XMLApi.getAllChildren(node)) {
                     String name = XMLApi.getNamedAttribute(recipe, "name");
                     String value = XMLApi.getNamedAttribute(recipe, "value");

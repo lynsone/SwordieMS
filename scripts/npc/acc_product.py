@@ -35,15 +35,15 @@ if not sm.hasSkill(ACCESSORY_CRAFT_SKILL):
 else:
     selection = sm.sendSay("The brilliant radiance! The crystalline purity! The prismatic beauty! Are you a Jeweler too, my friend? Shall we seek the mysteries of Accessory Crafting together?\r\n#L2##bRaise #eAccessory Crafting#n level.#l\r\n#L3#Unlearn Accessory Crafting.#k#l")
     if selection == 2:
-        if sm.canLevelUpProfessional(ACCESSORY_CRAFT_SKILL):
-            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Accessory Crafting. I'll take #b" + str(FEE[sm.getProfessionalLevel(ACCESSORY_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
+        if sm.isAbleToLevelUpMakingSkill(ACCESSORY_CRAFT_SKILL):
+            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Accessory Crafting. I'll take #b" + str(FEE[sm.getMakingSkillLevel(ACCESSORY_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
             if levelup:
-                if sm.getMesos() < FEE[sm.getProfessionalLevel(ACCESSORY_CRAFT_SKILL)]:
+                if sm.getMesos() < FEE[sm.getMakingSkillLevel(ACCESSORY_CRAFT_SKILL)]:
                     sm.sendNext("You don't have enough mesos.")
                     sm.dispose()
-                sm.giveMesos(-FEE[sm.getProfessionalLevel(ACCESSORY_CRAFT_SKILL)])
-                sm.levelUpProfessional(ACCESSORY_CRAFT_SKILL)
-                sm.sendNext("Your Accessory Crafting skill is now Lv. " + str(sm.getProfessionalLevel(ACCESSORY_CRAFT_SKILL)) +".")
+                sm.giveMesos(-FEE[sm.getMakingSkillLevel(ACCESSORY_CRAFT_SKILL)])
+                sm.makingSkillLevelUp(ACCESSORY_CRAFT_SKILL)
+                sm.sendNext("Your Accessory Crafting skill is now Lv. " + str(sm.getMakingSkillLevel(ACCESSORY_CRAFT_SKILL)) +".")
             else:
                 sm.sendNext("Sure, take some time to think it over. I'll be here.")
                 sm.dispose()

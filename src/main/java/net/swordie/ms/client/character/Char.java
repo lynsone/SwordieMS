@@ -1693,6 +1693,21 @@ public class Char {
 		}
 	}
 
+    /**
+     * Removes a Skill from this Char.
+     * Sends change skill record to remove the skill from the client.
+     * @param skillID the id of the skill that should be removed
+     */
+	public void removeSkillAndSendPacket(int skillID) {
+        Skill skill = getSkill(skillID);
+        if (skill != null) {
+            removeSkill(skillID);
+            skill.setCurrentLevel(-1);
+            skill.setMasterLevel(-1);
+            write(WvsContext.changeSkillRecordResult(Collections.singletonList(skill), true, false, false, false));
+        }
+    }
+
 	/**
 	 * Initializes the BaseStat cache, by going through all the needed passive stat changers.
 	 */
@@ -1769,6 +1784,21 @@ public class Char {
 			}
 		}
 		return createIfNull ? createAndReturnSkill(id) : null;
+	}
+
+	public int getSkillLevel(int skillID) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			return skill.getCurrentLevel();
+		}
+		return 0;
+	}
+
+	public int getRemainRecipeUseCount(int recipeID) {
+		if (SkillConstants.isMakingSkillRecipe(recipeID)) {
+			return getSkillLevel(recipeID);
+		}
+		return 0;
 	}
 
 	/**
@@ -3719,7 +3749,7 @@ public class Char {
 	 */
 	public void addSkill(int skillID, int currentLevel, int masterLevel) {
 		Skill skill = SkillData.getSkillDeepCopyById(skillID);
-		if (skill == null) {
+		if (skill == null && !SkillConstants.isMakingSkillRecipe(skillID)) {
 			log.error("No such skill found.");
 			return;
 		}
@@ -4212,87 +4242,67 @@ public class Char {
 		return transferFieldReq;
 	}
 
-	public void setProfessionalLevel(int skillID, int level) {
+	public void setMakingSkillLevel(int skillID, int level) {
 		Skill skill = getSkill(skillID);
 		if (skill != null) {
-			skill.setCurrentLevel(((level & 0xFF) << 24) + (getProfessionalExp(skillID) & 0xFFFF));
+			skill.setCurrentLevel((level << 24) + getMakingSkillProficiency(skillID));
 			addSkill(skill);
 			write(WvsContext.changeSkillRecordResult(skill));
 		}
 	}
 
-	public int getProfessionalLevel(int skillID) {
-		Skill skill = getSkill(skillID);
-		if (skill != null) {
-			int skillLevel = skill.getCurrentLevel();
-			if (skillLevel <= 0) {
-				return 0;
-			}
-			int realSLV = (skillLevel >>> 24) & 0xFF;
-			if (realSLV >= skill.getMasterLevel()) {
-				realSLV = skill.getMasterLevel();
-			}
-			return realSLV;
-		}
-		return 0;
+	public int getMakingSkillLevel(int skillID) {
+		return (getSkillLevel(skillID) >> 24) <= 0 ? 0 : getSkillLevel(skillID) >> 24;
 	}
 
-	public void setProfessionalExp(int skillID, int exp) {
+	public void setMakingSkillProficiency(int skillID, int proficiency) {
 		Skill skill = getSkill(skillID);
 		if (skill != null) {
-			skill.setCurrentLevel(((getProfessionalLevel(skillID) & 0xFF) << 24) + (exp & 0xFFFF));
+			skill.setCurrentLevel((getMakingSkillLevel(skillID) << 24) + proficiency);
 			addSkill(skill);
 			write(WvsContext.changeSkillRecordResult(skill));
 		}
 	}
 
-	public int getProfessionalExp(int skillID) {
-		Skill skill = getSkill(skillID);
-		if (skill != null) {
-			int skillLevel = skill.getCurrentLevel();
-			if (skillLevel <= 0) {
-				return 0;
-			}
-			return skillLevel & 0xFFFF;
-		}
-		return 0;
+	public int getMakingSkillProficiency(int skillID) {
+		return (getSkillLevel(skillID) & 0xFFFFFF) <= 0 ? 0 : getSkillLevel(skillID) & 0xFFFFFF;
 	}
 
-	public void addProfessionalExp(int skillID, int amount) {
+	public void addMakingSkillProficiency(int skillID, int amount) {
 		int makingSkillID = SkillConstants.recipeCodeToMakingSkillCode(skillID);
-		int level = getProfessionalLevel(makingSkillID);
+		int level = getMakingSkillLevel(makingSkillID);
 
-		int neededExp = SkillConstants.getNeededExpForProfessional(level);
+		int neededExp = SkillConstants.getNeededProficiency(level);
 		if (neededExp <= 0) {
 			return;
 		}
-		int exp = getProfessionalExp(makingSkillID);
+		int exp = getMakingSkillProficiency(makingSkillID);
 		if (exp >= neededExp) {
 			write(UserLocal.chatMsg(ChatType.GameDesc, "You can't gain any more Herbalism mastery until you level your skill."));
 			write(UserLocal.chatMsg(ChatType.GameDesc, "See the appropriate NPC in Ardentmill to level up."));
-			setProfessionalExp(makingSkillID, neededExp);
+			setMakingSkillProficiency(makingSkillID, neededExp);
 			return;
 		}
 		int newExp = exp + amount;
 		write(UserLocal.chatMsg(ChatType.GameDesc, SkillConstants.getMakingSkillName(makingSkillID) + "'s mastery increased. (+" + amount + ")"));
 		if (newExp >= neededExp) {
 			write(UserLocal.noticeMsg("You've accumulated " + SkillConstants.getMakingSkillName(makingSkillID) + " mastery. See an NPC in town to level up.", true));
-			setProfessionalExp(makingSkillID, neededExp);
+			setMakingSkillProficiency(makingSkillID, neededExp);
 		} else {
-			setProfessionalExp(makingSkillID, newExp);
+			setMakingSkillProficiency(makingSkillID, newExp);
 		}
 	}
 
-	public void levelUpProfessional(int skillID) {
-		int level = getProfessionalLevel(skillID);
-		int neededExp = SkillConstants.getNeededExpForProfessional(level);
+	public void makingSkillLevelUp(int skillID) {
+		int level = getMakingSkillLevel(skillID);
+		int neededExp = SkillConstants.getNeededProficiency(level);
 		if (neededExp <= 0) {
 			return;
 		}
-		int exp = getProfessionalExp(skillID);
+		int exp = getMakingSkillProficiency(skillID);
 		if (exp >= neededExp) {
-			setProfessionalExp(skillID, 0);
-			setProfessionalLevel(skillID, level + 1);
+			setMakingSkillProficiency(skillID, 0);
+			setMakingSkillLevel(skillID, level + 1);
 			Stat trait = Stat.craftEXP;
 			switch (skillID) {
 				case 92000000:

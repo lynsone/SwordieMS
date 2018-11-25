@@ -35,16 +35,16 @@ if not sm.hasSkill(SMITHING_CRAFT_SKILL):
 else:
     selection = sm.sendSay("I am #bGere#k, master Blacksmith. What do you want?\r\n#L2##bRaise #eSmithing#n level.#l\r\n#L3#Unlearn Smithing.#k#l")
     if selection == 2:
-        if sm.canLevelUpProfessional(SMITHING_CRAFT_SKILL):
-            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Smithing. I'll take #b" + str(FEE[sm.getProfessionalLevel(SMITHING_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
+        if sm.isAbleToLevelUpMakingSkill(SMITHING_CRAFT_SKILL):
+            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Smithing. I'll take #b" + str(FEE[sm.getMakingSkillLevel(SMITHING_CRAFT_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
             if levelup:
-                if sm.getMesos() < FEE[sm.getProfessionalLevel(SMITHING_CRAFT_SKILL)]:
+                if sm.getMesos() < FEE[sm.getMakingSkillLevel(SMITHING_CRAFT_SKILL)]:
                     sm.sendNext("You don't have enough mesos.")
                     sm.dispose()
 
-                sm.giveMesos(-FEE[sm.getProfessionalLevel(SMITHING_CRAFT_SKILL)])
-                sm.levelUpProfessional(SMITHING_CRAFT_SKILL)
-                sm.sendNext("Your Smithing skill is now Lv. " + str(sm.getProfessionalLevel(SMITHING_CRAFT_SKILL)) +".")
+                sm.giveMesos(-FEE[sm.getMakingSkillLevel(SMITHING_CRAFT_SKILL)])
+                sm.makingSkillLevelUp(SMITHING_CRAFT_SKILL)
+                sm.sendNext("Your Smithing skill is now Lv. " + str(sm.getMakingSkillLevel(SMITHING_CRAFT_SKILL)) +".")
             else:
                 sm.sendNext("Sure, take some time to think it over. I'll be here.")
                 sm.dispose()

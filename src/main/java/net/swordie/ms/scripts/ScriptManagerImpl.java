@@ -768,18 +768,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
 	public void removeSkill(int skillId) {
-		List<Skill> skills = new ArrayList<>();
-		Skill skill = chr.getSkill(skillId);
-		if (skill != null) {
-			chr.removeSkill(skillId);
-			skill.setCurrentLevel(-1);
-			skill.setMasterLevel(-1);
-			skills.add(skill);
-		}
-		if (skills.size() > 0) {
-			chr.getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
-		}
+		chr.removeSkillAndSendPacket(skillId);
 	}
+
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
 	}
@@ -2368,25 +2359,17 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public boolean hasTutor() { return chr.hasTutor(); }
 
-	public int getProfessionalLevel(int skillID) { return chr.getProfessionalLevel(skillID); }
+	public int getMakingSkillLevel(int skillID) { return chr.getMakingSkillLevel(skillID); }
 
-	public void setProfessionalLevel(int skillID, int level) {
-	    chr.setProfessionalLevel(skillID, level);
-	}
-
-	public void setProfessionalExp(int skillID, int exp) {
-	    chr.setProfessionalExp(skillID, exp);
-	}
-
-	public boolean canLevelUpProfessional(int skillID) {
-		int neededExp = SkillConstants.getNeededExpForProfessional(chr.getProfessionalLevel(skillID));
-		if (neededExp <= 0) {
+	public boolean isAbleToLevelUpMakingSkill(int skillID) {
+		int neededProficiency = SkillConstants.getNeededProficiency(chr.getMakingSkillLevel(skillID));
+		if (neededProficiency <= 0) {
 			return false;
 		}
-		return chr.getProfessionalExp(skillID) >= neededExp;
+		return chr.getMakingSkillProficiency(skillID) >= neededProficiency;
 	}
 
-	public void levelUpProfessional(int skillID) { chr.levelUpProfessional(skillID); }
+	public void makingSkillLevelUp(int skillID) { chr.makingSkillLevelUp(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

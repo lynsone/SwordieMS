@@ -24,15 +24,15 @@ if not sm.hasSkill(HERBALISM_SKILL):
 else:
     selection = sm.sendSay("Hello. What can I help you with?\r\n#L2##bLevel up #eHerbalism#n.#l\r\n#L3##bTrade #t4022023#.#k#l")
     if selection == 2:
-        if sm.canLevelUpProfessional(HERBALISM_SKILL):
-            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Herbalism. I'll take #b" + str(FEE[sm.getProfessionalLevel(HERBALISM_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
+        if sm.isAbleToLevelUpMakingSkill(HERBALISM_SKILL):
+            levelup = sm.sendAskYesNo("Looks like you're ready to level up your Herbalism. I'll take #b" + str(FEE[sm.getMakingSkillLevel(HERBALISM_SKILL)]) + " Mesos#k as tuition. Ready to learn?")
             if levelup:
-                if sm.getMesos() < FEE[sm.getProfessionalLevel(HERBALISM_SKILL)]:
+                if sm.getMesos() < FEE[sm.getMakingSkillLevel(HERBALISM_SKILL)]:
                     sm.sendNext("You don't have enough mesos.")
                     sm.dispose()
-                sm.giveMesos(-FEE[sm.getProfessionalLevel(HERBALISM_SKILL)])
-                sm.levelUpProfessional(HERBALISM_SKILL)
-                sm.sendNext("Your Herbalism skill is now Lv. " + str(sm.getProfessionalLevel(HERBALISM_SKILL)) +".")
+                sm.giveMesos(-FEE[sm.getMakingSkillLevel(HERBALISM_SKILL)])
+                sm.makingSkillLevelUp(HERBALISM_SKILL)
+                sm.sendNext("Your Herbalism skill is now Lv. " + str(sm.getMakingSkillLevel(HERBALISM_SKILL)) +".")
             else:
                 sm.sendNext("Sure, take some time to think it over. I'll be here.")
                 sm.dispose()
