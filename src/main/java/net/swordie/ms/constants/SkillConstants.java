@@ -44,6 +44,10 @@ public class SkillConstants {
     public static final byte PASSIVE_HYPER_JOB_LEVEL = 6;
     public static final byte ACTIVE_HYPER_JOB_LEVEL = 7;
 
+    public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
+    public static final int MAKING_SKILL_MASTER_LEVEL = 11;
+    public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
+
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
                 || (skillId / 1000000 == 92 && (skillId % 10000 == 0))
@@ -119,7 +123,7 @@ public class SkillConstants {
         return (prefix >= 800000 && prefix <= 800099) || prefix == 8001;
     }
 
-    private static boolean isMakingSkillRecipe(int recipeId) {
+    public static boolean isMakingSkillRecipe(int recipeId) {
         boolean result = false;
         if (recipeId / 1000000 != 92 || recipeId % 10000 == 1) {
             int v1 = 10000 * (recipeId / 10000);
@@ -1376,5 +1380,56 @@ public class SkillConstants {
                 return 1112932;
         }
         return 0;
+    }
+
+    public static String getMakingSkillName(int skillID) {
+        switch (skillID) {
+            case 92000000:
+                return "Herbalism";
+            case 92010000:
+                return "Mining";
+            case 92020000:
+                return "Smithing";
+            case 92030000:
+                return "Accessory Crafting";
+            case 92040000:
+                return "Alchemy";
+        }
+        return null;
+    }
+
+    public static int recipeCodeToMakingSkillCode(int skillID) {
+        return 10000 * (skillID / 10000);
+    }
+
+    public static int getNeededProficiency(int level) {
+        if (level <= 0 || level >= MAKING_SKILL_EXPERT_LEVEL) {
+            return 0;
+        }
+        return ((100 * level * level) + (level * 400)) / 2;
+    }
+
+    public static boolean isSynthesizeRecipe(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeID % 10000 == 9001;
+    }
+
+    public static boolean isDecompositionRecipeScroll(int recipeID) {
+        return isMakingSkillRecipe(recipeID)
+                && recipeCodeToMakingSkillCode(recipeID) == 92040000
+                && recipeID - 92040000 >= 9003
+                && recipeID - 92040000 <= 9006;
+    }
+
+    public static boolean isDecompositionRecipeCube(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049002;
+    }
+
+    public static boolean isDecompositionRecipe(int recipeID) {
+        if (isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049000
+         || isDecompositionRecipeScroll(recipeID)
+         || isDecompositionRecipeScroll(recipeID)) {
+            return true;
+        }
+        return false;
     }
 }

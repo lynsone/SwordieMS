@@ -33,6 +33,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -767,18 +768,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
 	public void removeSkill(int skillId) {
-		List<Skill> skills = new ArrayList<>();
-		Skill skill = chr.getSkill(skillId);
-		if (skill != null) {
-			chr.removeSkill(skillId);
-			skill.setCurrentLevel(-1);
-			skill.setMasterLevel(-1);
-			skills.add(skill);
-		}
-		if (skills.size() > 0) {
-			chr.getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
-		}
+		chr.removeSkillAndSendPacket(skillId);
 	}
+
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
 	}
@@ -1579,11 +1571,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) mesos));
 	}
 
 	@Override
 	public void deductMesos(long mesos) {
 		chr.deductMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) -mesos));
 	}
 
 	@Override
@@ -2364,6 +2358,18 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
 
 	public boolean hasTutor() { return chr.hasTutor(); }
+
+	public int getMakingSkillLevel(int skillID) { return chr.getMakingSkillLevel(skillID); }
+
+	public boolean isAbleToLevelUpMakingSkill(int skillID) {
+		int neededProficiency = SkillConstants.getNeededProficiency(chr.getMakingSkillLevel(skillID));
+		if (neededProficiency <= 0) {
+			return false;
+		}
+		return chr.getMakingSkillProficiency(skillID) >= neededProficiency;
+	}
+
+	public void makingSkillLevelUp(int skillID) { chr.makingSkillLevelUp(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

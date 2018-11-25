@@ -14,7 +14,11 @@ public enum InstanceTableType {
     HyperActiveSkill("hyper", 28, 1),
     HyperStatIncAmount("incHyperStat", 0, 0),
     NeedHyperStatLv("needHyperStatLv", 0, 0),
-
+    Skill_9200("92000000", 0, 0),
+    Skill_9201("92010000", 0, 0),
+    Skill_9202("92020000", 0, 0),
+    Skill_9203("92030000", 0, 0),
+    Skill_9204("92040000", 0, 0),
     ;
 
     private String tableName;
