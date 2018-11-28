@@ -6081,10 +6081,4 @@ public class WorldHandler {
             }
         }
     }
-
-    public static void handleEventListRequest(Char chr, InPacket inPacket) {
-        if (chr != null && chr.getField() != null) {
-            chr.write(WvsContext.requestEventList(EventList.events, EventList.liveEvents));
-        }
-    }
 }
