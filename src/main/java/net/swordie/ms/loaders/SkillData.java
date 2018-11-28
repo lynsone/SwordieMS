@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
+import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -21,6 +22,7 @@ public class SkillData {
     private static Map<Integer, SkillInfo> skills = new HashMap<>();
     private static Map<Integer, Map<Integer, Integer>> eliteMobSkills = new HashMap<>();
     private static Map<Short, Map<Short, MobSkillInfo>> mobSkillInfos = new HashMap<>();
+    private static Map<Integer, MakingSkillRecipe> makingSkillRecipes = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static void saveSkills(String dir) {
@@ -320,6 +322,21 @@ public class SkillData {
 
     public static Map<Short, Map<Short, MobSkillInfo>> getMobSkillInfos() {
         return mobSkillInfos;
+    }
+
+    public static Map<Integer, MakingSkillRecipe> getMakingSkillRecipes() {
+        return makingSkillRecipes;
+    }
+
+    public static MakingSkillRecipe getRecipeById(int recipeID) {
+        if (!getMakingSkillRecipes().containsKey(recipeID)) {
+            File file = new File(String.format("%s/recipes/%d.dat", ServerConstants.DAT_DIR, recipeID));
+            if (file.exists()) {
+                loadRecipe(file);
+            }
+        }
+        return getMakingSkillRecipes().get(recipeID);
+
     }
 
     public static void addMobSkillInfo(MobSkillInfo msi) {
@@ -829,6 +846,208 @@ public class SkillData {
         }
     }
 
+    public static void loadMakingRecipeSkillsFromWz() {
+        int[] recipes = {9200, 9201, 9202, 9203, 9204};
+        for (Integer recipeCategory : recipes) {
+            String wzDir = String.format(ServerConstants.WZ_DIR + "/Skill.wz/Recipe_%d.img.xml", recipeCategory);
+            File file = new File(wzDir);
+            Node root = XMLApi.getRoot(file);
+            Node mainNode = XMLApi.getAllChildren(root).get(0);
+            List<Node> nodes = XMLApi.getAllChildren(mainNode);
+            for (Node node : nodes) {
+                MakingSkillRecipe msr = new MakingSkillRecipe();
+                int recipeID = Integer.parseInt(XMLApi.getNamedAttribute(node, "name"));
+                msr.setRecipeID(recipeID);
+                msr.setReqSkillID(10000 * (recipeID / 10000));
+                for (Node recipe : XMLApi.getAllChildren(node)) {
+                    String name = XMLApi.getNamedAttribute(recipe, "name");
+                    String value = XMLApi.getNamedAttribute(recipe, "value");
+                    switch (name) {
+                        case "target":
+                            for (Node targets : XMLApi.getAllChildren(recipe)) {
+                                MakingSkillRecipe.TargetElem tar = new MakingSkillRecipe.TargetElem();
+                                for (Node target : XMLApi.getAllChildren(targets)) {
+                                    String targetName = XMLApi.getNamedAttribute(target, "name");
+                                    int targetValue = Integer.parseInt(XMLApi.getNamedAttribute(target, "value"));
+                                    switch (targetName) {
+                                        case "item":
+                                            tar.setItemID(targetValue);
+                                            break;
+                                        case "count":
+                                            tar.setCount(targetValue);
+                                            break;
+                                        case "probWeight":
+                                            tar.setProbWeight(targetValue);
+                                            break;
+                                        default:
+                                            System.out.println("Unknown target value " + targetName);
+                                            break;
+                                    }
+                                }
+                                msr.addTarget(tar);
+                            }
+                            break;
+                        case "weatherItem":
+                            msr.setWeatherItemID(Integer.parseInt(value));
+                            break;
+                        case "incSkillProficiency":
+                            msr.setIncSkillProficiency(Integer.parseInt(value));
+                            break;
+                        case "incSkillProficiencyOnFailure":
+                            msr.setIncSkillProficiencyOnFailure(Integer.parseInt(value));
+                            break;
+                        case "incSkillMasterProficiency":
+                            msr.setIncSkillMasterProficiency(Integer.parseInt(value));
+                            break;
+                        case "incSkillMasterProficiencyOnFailure":
+                            msr.setIncSkillMasterProficiencyOnFailure(Integer.parseInt(value));
+                            break;
+                        case "incFatigability":
+                            msr.setIncFatigability(Integer.parseInt(value));
+                            break;
+                        case "addedCoolProb":
+                            msr.setAddedCoolProb(Integer.parseInt(value));
+                            break;
+                        case "coolTimeSec":
+                            msr.setCoolTimeSec(Integer.parseInt(value));
+                            break;
+                        case "addedTimeTaken":
+                            msr.setAddedSecForMaxGauge(Integer.parseInt(value));
+                            break;
+                        case "period":
+                            msr.setExpiredPeriod(Integer.parseInt(value));
+                            break;
+                        case "premium":
+                            msr.setPremiumItem(Integer.parseInt(value) != 0);
+                            break;
+                        case "needOpenItem":
+                            msr.setNeedOpenItem(Integer.parseInt(value) != 0);
+                            break;
+                        case "reqSkillLevel":
+                            msr.setRecommandedSkillLevel(Integer.parseInt(value));
+                            break;
+                        case "reqSkillProficiency":
+                            msr.setReqSkillProficiency(Integer.parseInt(value));
+                            break;
+                        case "reqMeso":
+                            msr.setReqMeso(Integer.parseInt(value));
+                            break;
+                        case "reqMapObjectTag":
+                            msr.setReqMapObjectTag(value);
+                            break;
+                        case "recipe":
+                            for (Node ingredients : XMLApi.getAllChildren(recipe)) {
+                                int itemID = -1, count = -1;
+                                for (Node ingredient : XMLApi.getAllChildren(ingredients)) {
+                                    String ingredientName = XMLApi.getNamedAttribute(ingredient, "name");
+                                    int ingredientValue = Integer.parseInt(XMLApi.getNamedAttribute(ingredient, "value"));
+                                    switch (ingredientName) {
+                                        case "item":
+                                            itemID = ingredientValue;
+                                            break;
+                                        case "count":
+                                            count = ingredientValue;
+                                            break;
+                                        default:
+                                            System.out.println("Unknown ingredient value " + ingredientName);
+                                            break;
+                                    }
+                                }
+                                if (itemID != -1 && count != -1) {
+                                    msr.addIngredient(itemID, count);
+                                }
+                            }
+                            break;
+                        default:
+                            System.out.println("Unknown recipe value " + name);
+                            break;
+                    }
+                }
+                makingSkillRecipes.put(recipeID, msr);
+            }
+        }
+    }
+
+    public static void saveMakingRecipeSkillsToDat(String dir) {
+        Util.makeDirIfAbsent(dir);
+        for (MakingSkillRecipe msr : getMakingSkillRecipes().values()) {
+            int recipeID = msr.getRecipeID();
+            File file = new File(String.format("%s/%d.dat", dir, recipeID));
+            try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+                dos.writeInt(recipeID);
+                dos.writeShort(msr.getTarget().size());
+                for (MakingSkillRecipe.TargetElem target : msr.getTarget()) {
+                    dos.writeInt(target.getItemID());
+                    dos.writeInt(target.getCount());
+                    dos.writeInt(target.getProbWeight());
+                }
+                dos.writeInt(msr.getWeatherItemID());
+                dos.writeInt(msr.getIncSkillProficiency());
+                dos.writeInt(msr.getIncSkillProficiencyOnFailure());
+                dos.writeInt(msr.getIncFatigability());
+                dos.writeInt(msr.getIncSkillMasterProficiency());
+                dos.writeInt(msr.getIncSkillMasterProficiencyOnFailure());
+                dos.writeBoolean(msr.isNeedOpenItem());
+                dos.writeInt(msr.getReqSkillID());
+                dos.writeInt(msr.getRecommandedSkillLevel());
+                dos.writeInt(msr.getReqSkillProficiency());
+                dos.writeInt(msr.getReqMeso());
+                dos.writeUTF(msr.getReqMapObjectTag());
+                dos.writeShort(msr.getIngredient().size());
+                for (Tuple<Integer, Integer> ingredient : msr.getIngredient()) {
+                    dos.writeInt(ingredient.getLeft());
+                    dos.writeInt(ingredient.getRight());
+                }
+                dos.writeInt(msr.getAddedCoolProb());
+                dos.writeInt(msr.getCoolTimeSec());
+                dos.writeInt(msr.getAddedSecForMaxGauge());
+                dos.writeInt(msr.getExpiredPeriod());
+                dos.writeBoolean(msr.isPremiumItem());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void loadRecipe(File file) {
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file))) {
+            MakingSkillRecipe msr = new MakingSkillRecipe();
+            msr.setRecipeID(dataInputStream.readInt());
+            short targets = dataInputStream.readShort();
+            for (int j = 0; j < targets; j++) {
+                MakingSkillRecipe.TargetElem target = new MakingSkillRecipe.TargetElem();
+                target.setItemID(dataInputStream.readInt());
+                target.setCount(dataInputStream.readInt());
+                target.setProbWeight(dataInputStream.readInt());
+                msr.addTarget(target);
+            }
+            msr.setWeatherItemID(dataInputStream.readInt());
+            msr.setIncSkillProficiency(dataInputStream.readInt());
+            msr.setIncSkillProficiencyOnFailure(dataInputStream.readInt());
+            msr.setIncFatigability(dataInputStream.readInt());
+            msr.setIncSkillMasterProficiency(dataInputStream.readInt());
+            msr.setIncSkillMasterProficiencyOnFailure(dataInputStream.readInt());
+            msr.setNeedOpenItem(dataInputStream.readBoolean());
+            msr.setReqSkillID(dataInputStream.readInt());
+            msr.setRecommandedSkillLevel(dataInputStream.readInt());
+            msr.setReqSkillProficiency(dataInputStream.readInt());
+            msr.setReqMeso(dataInputStream.readInt());
+            msr.setReqMapObjectTag(dataInputStream.readUTF());
+            short ingredients = dataInputStream.readShort();
+            for (int j = 0; j < ingredients; j++) {
+                msr.addIngredient(dataInputStream.readInt(), dataInputStream.readInt());
+            }
+            msr.setAddedCoolProb(dataInputStream.readInt());
+            msr.setCoolTimeSec(dataInputStream.readInt());
+            msr.setAddedSecForMaxGauge(dataInputStream.readInt());
+            msr.setExpiredPeriod(dataInputStream.readInt());
+            msr.setPremiumItem(dataInputStream.readBoolean());
+            getMakingSkillRecipes().put(msr.getRecipeID(), msr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void generateDatFiles() {
         log.info("Started generating skill data.");
         long start = System.currentTimeMillis();
@@ -840,6 +1059,12 @@ public class SkillData {
         loadMobSkillsFromWz();
         saveMobSkillsToDat(ServerConstants.DAT_DIR + "/mobSkills");
         log.info(String.format("Completed generating mob skill data in %dms.", System.currentTimeMillis() - start));
+        log.info("Started generating recipe skill data.");
+        start = System.currentTimeMillis();
+        loadMakingRecipeSkillsFromWz();
+        saveMakingRecipeSkillsToDat(ServerConstants.DAT_DIR + "/recipes");
+        log.info(String.format("Completed generating recipe skill data in %dms.", System.currentTimeMillis() - start));
+
     }
 
     public static void main(String[] args) {
