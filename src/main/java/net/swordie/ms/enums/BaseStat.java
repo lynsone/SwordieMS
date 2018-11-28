@@ -186,18 +186,14 @@ public enum BaseStat {
                 stats.put(mhp, o.nValue);
                 break;
             case IndieMHPR:
-                stats.put(mhpR, o.nValue);
-                break;
             case MaxHP:
             case IncMaxHP:
                 stats.put(mhpR, o.nOption);
                 break;
             case IndieMMP:
-                stats.put(mmp, o.nValue);
-                break;
             case MaxMP:
             case IncMaxMP:
-                stats.put(mmp, o.nOption);
+                stats.put(mmpR, o.nOption);
                 break;
             case IndieMMPR:
                 stats.put(mmpR, o.nValue);

@@ -2374,7 +2374,7 @@ public class Char {
 		}
 		toField.spawnLifesForChar(this);
 
-		if (JobConstants.isEvan(getJob()) && !(getJob() == JobConstants.JobEnum.EVAN_NOOB.getJobId())) {
+		if (JobConstants.isEvan(getJob()) && getJob() != JobConstants.JobEnum.EVAN_NOOB.getJobId()) {
 			((Evan) getJobHandler()).spawnMir();
 		}
 		if (JobConstants.isKanna(getJob())) {
