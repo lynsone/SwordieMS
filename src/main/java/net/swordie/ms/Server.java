@@ -22,6 +22,8 @@ import net.swordie.ms.util.container.Tuple;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -84,6 +86,10 @@ public class Server extends Properties {
 			}
 		}
 		log.info(String.format("Finished loading server in %dms", System.currentTimeMillis() - startNow));
+		new Thread(() -> {
+			// jvm warmup
+			new ScriptEngineManager().getEngineByName("python");
+		}).start();
 	}
 
 	private void checkAndCreateDat() {

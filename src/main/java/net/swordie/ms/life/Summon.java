@@ -2,6 +2,7 @@ package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.avatar.AvatarLook;
+import net.swordie.ms.client.character.items.ItemBuffs;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
@@ -17,9 +18,8 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.Stat;
+import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
@@ -46,8 +46,8 @@ public class Summon extends Life {
     private int summonTerm;
     private byte charLevel;
     private byte slv;
-    private byte assistType;
-    private byte enterType;
+    private AssistType assistType;
+    private EnterType enterType;
     private byte teslaCoilState;
     private boolean flyMob;
     private boolean beforeFirstAttack;
@@ -56,7 +56,7 @@ public class Summon extends Life {
     private short curFoothold;
     private AvatarLook avatarLook;
     private List<Position> teslaCoilPositions = new ArrayList<>();
-    private byte moveAbility;
+    private MoveAbility moveAbility;
     private Position[] kishinPositions = new Position[2];
     private int maxHP;
     private int hp;
@@ -113,19 +113,19 @@ public class Summon extends Life {
         this.summonTerm = 1000 * summonTerm;
     }
 
-    public byte getAssistType() {
+    public AssistType getAssistType() {
         return assistType;
     }
 
-    public void setAssistType(byte assistType) {
+    public void setAssistType(AssistType assistType) {
         this.assistType = assistType;
     }
 
-    public byte getEnterType() {
+    public EnterType getEnterType() {
         return enterType;
     }
 
-    public void setEnterType(byte enterType) {
+    public void setEnterType(EnterType enterType) {
         this.enterType = enterType;
     }
 
@@ -193,11 +193,11 @@ public class Summon extends Life {
         this.teslaCoilPositions = teslaCoilPositions;
     }
 
-    public byte getMoveAbility() {
+    public MoveAbility getMoveAbility() {
         return moveAbility;
     }
 
-    public void setMoveAbility(byte moveAbility) {
+    public void setMoveAbility(MoveAbility moveAbility) {
         this.moveAbility = moveAbility;
     }
 
@@ -212,9 +212,9 @@ public class Summon extends Life {
         summon.setPosition(chr.getPosition().deepCopy());
         summon.setMoveAction((byte) 1);
         summon.setCurFoothold((short) chr.getField().findFootHoldBelow(summon.getPosition()).getId());
-        summon.setMoveAbility((byte) 1);
-        summon.setAssistType((byte) 1);
-        summon.setEnterType((byte) 1);
+        summon.setMoveAbility(MoveAbility.Walk);
+        summon.setAssistType(AssistType.Attack);
+        summon.setEnterType(EnterType.Animation);
         summon.setBeforeFirstAttack(false);
         summon.setTemplateId(skillID);
         summon.setAttackActive(true);
@@ -225,7 +225,7 @@ public class Summon extends Life {
         o1.nValue = 1;
         o1.summon = summon;
         o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = summon.getSummonTerm();
+        o1.tTerm = summon.getSummonTerm() / 1000;
         tsm.putCharacterStatValue(IndieEmpty, o1);
         tsm.sendSetStatPacket();
         return summon;
@@ -250,7 +250,7 @@ public class Summon extends Life {
         Position kishLeftPos = new Position(chr.getPosition().getX() - 250, chr.getPosition().getY());
         kishinLeft.setPosition(kishLeftPos);
         kishinLeft.setCurFoothold((short) field.findFootHoldBelow(kishLeftPos).getId());
-        kishinLeft.setMoveAbility(MoveAbility.Stop.getVal());
+        kishinLeft.setMoveAbility(MoveAbility.Stop);
         kishinLeft.setMoveAction((byte) 0);
         kishinLeft.setKishinPositions(new Position[] {
             new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -264,7 +264,7 @@ public class Summon extends Life {
         Position kishRightPos = new Position(chr.getPosition().getX() + 250, chr.getPosition().getY());
         kishinRight.setPosition(kishRightPos);
         kishinRight.setCurFoothold((short) field.findFootHoldBelow(kishRightPos).getId());
-        kishinRight.setMoveAbility(MoveAbility.Stop.getVal());
+        kishinRight.setMoveAbility(MoveAbility.Stop);
         kishinRight.setMoveAction((byte) 5);
         kishinLeft.setKishinPositions(new Position[] {
                 new Position(chr.getPosition().getX() + 250, chr.getPosition().getY()),
@@ -311,9 +311,13 @@ public class Summon extends Life {
             case Mechanic.ENHANCED_SUPPORT_UNIT:
                 ((Mechanic) chr.getJobHandler()).healFromSupportUnit(this);
                 break;
-
             default:
-                chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                int buffItem = SkillConstants.getBuffSkillItem(skillId);
+                if (buffItem != 0) {
+                    ItemBuffs.giveItemBuffsFromItemID(chr, chr.getTemporaryStatManager(), buffItem);
+                } else {
+                    chr.chatMessage(String.format("Unhandled Summon Skill: %d, casted by Summon: %d", skillId, getSkillID()));
+                }
                 break;
         }
         chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));

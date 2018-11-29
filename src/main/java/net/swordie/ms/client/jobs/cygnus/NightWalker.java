@@ -263,7 +263,7 @@ public class NightWalker extends Noblesse {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
-                    summon.setMoveAbility(MoveAbility.WalkClone.getVal());
+                    summon.setMoveAbility(MoveAbility.WalkClone);
                     field.spawnSummon(summon);
                 }
                 if(chr.hasSkill(DARK_SERVANT)) {
@@ -274,7 +274,7 @@ public class NightWalker extends Noblesse {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
         }
@@ -303,7 +303,7 @@ public class NightWalker extends Noblesse {
         Field field = c.getChr().getField();
         darkServant.setFlyMob(false);
         darkServant.setAvatarLook(chr.getAvatarData().getAvatarLook());
-        darkServant.setMoveAbility(MoveAbility.WalkClone.getVal());
+        darkServant.setMoveAbility(MoveAbility.WalkClone);
         field.spawnSummon(darkServant);
     }
 
@@ -529,7 +529,7 @@ public class NightWalker extends Noblesse {
     private Summon summonBatAndRegister() {
         Summon bat = Summon.getSummonBy(chr, getBatSkill().getSkillId(), (byte) getBatSkill().getCurrentLevel());
         bat.setFlyMob(true);
-        bat.setMoveAbility(MoveAbility.Fly.getVal());
+        bat.setMoveAbility(MoveAbility.Fly);
         bat.setAttackActive(false);
         chr.getField().spawnAddSummon(bat);
         bats.add(bat);

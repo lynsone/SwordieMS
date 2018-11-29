@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.FieldOption;
 import net.swordie.ms.enums.FieldType;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
@@ -41,6 +42,7 @@ public class FieldData {
                     dataOutputStream.writeInt(field.getFieldType().getVal());
                     dataOutputStream.writeBoolean(field.isTown());
                     dataOutputStream.writeBoolean(field.isSwim());
+                    dataOutputStream.writeLong(field.getFieldLimit());
                     dataOutputStream.writeInt(field.getReturnMap());
                     dataOutputStream.writeInt(field.getForcedReturn());
                     dataOutputStream.writeDouble(field.getMobRate());
@@ -159,6 +161,9 @@ public class FieldData {
                             break;
                         case "swim":
                             field.setSwim(Integer.parseInt(value) != 0);
+                            break;
+                        case "fieldLimit":
+                            field.setFieldLimit(Long.parseLong(value));
                             break;
                         case "returnMap":
                             field.setReturnMap(Integer.parseInt(value));
@@ -531,6 +536,7 @@ public class FieldData {
             field.setFieldType(FieldType.getByVal(dataInputStream.readInt()));
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());
+            field.setFieldLimit(dataInputStream.readLong());
             field.setReturnMap(dataInputStream.readInt());
             field.setForcedReturn(dataInputStream.readInt());
             field.setMobRate(dataInputStream.readDouble());
@@ -658,6 +664,7 @@ public class FieldData {
         copy.setFieldType(field.getFieldType());
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());
+        copy.setFieldLimit(field.getFieldLimit());
         copy.setReturnMap(field.getReturnMap());
         copy.setForcedReturn(field.getForcedReturn());
         copy.setMobRate(field.getMobRate());

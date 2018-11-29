@@ -17,6 +17,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
@@ -301,8 +302,8 @@ public class Thief extends Beginner {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
-                    summon.setMoveAbility((byte) 0);
-                    summon.setAssistType((byte) 0);
+                    summon.setMoveAbility(MoveAbility.Stop);
+                    summon.setAssistType(AssistType.None);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
                     summon.setMaxHP(si.getValue(x, slv));
@@ -318,7 +319,7 @@ public class Thief extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
 

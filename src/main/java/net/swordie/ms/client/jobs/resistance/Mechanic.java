@@ -16,10 +16,7 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatType;
-import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.TSIndex;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -240,8 +237,8 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 
@@ -254,15 +251,15 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
             case ROCK_N_SHOCK:      //TODO TeslaCoil
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
 
@@ -271,8 +268,8 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
 
@@ -328,7 +325,7 @@ public class Mechanic extends Citizen {
             subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
             subSummon.setPosition(position);
             subSummon.setAttackActive(false);
-            subSummon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+            subSummon.setMoveAbility(MoveAbility.WalkRandom);
 
             chr.getField().spawnAddSummon(subSummon);
 

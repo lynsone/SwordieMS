@@ -56,6 +56,7 @@ public class Field {
     private double mobRate;
     private int id;
     private FieldType fieldType;
+    private long fieldLimit;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
@@ -161,6 +162,10 @@ public class Field {
     public FieldType getFieldType() { return fieldType; }
 
     public void setFieldType(FieldType fieldType) { this.fieldType = fieldType; }
+
+    public long getFieldLimit() { return fieldLimit; }
+
+    public void setFieldLimit(long fieldLimit) { this.fieldLimit = fieldLimit; }
     
     public Set<Portal> getPortals() {
         return portals;
@@ -435,6 +440,17 @@ public class Field {
         spawnLife(summon, null);
     }
 
+    public void removeSummon(int skillID, int chrID) {
+        Summon summon = (Summon) getLifes().values().stream()
+                .filter(s -> s instanceof Summon &&
+                        ((Summon) s).getChr().getId() == chrID &&
+                        ((Summon) s).getSkillID() == skillID)
+                .findFirst().orElse(null);
+        if (summon != null) {
+            removeLife(summon.getObjectId(), false);
+        }
+    }
+
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
         if (getChars().size() > 0) {
@@ -443,11 +459,20 @@ public class Field {
                 controller = getLifeToControllers().get(life);
             }
             if (controller == null) {
-                controller = getChars().get(0);
-                putLifeController(life, controller);
+                setRandomController(life);
             }
             life.broadcastSpawnPacket(onlyChar);
         }
+    }
+
+    private void setRandomController(Life life) {
+        // No chars -> set controller to null, so a controller will be assigned next time someone enters this field
+        Char controller = null;
+        if (getChars().size() > 0) {
+            controller = Util.getRandomFromCollection(getChars());
+            life.notifyControllerChange(controller);
+        }
+        putLifeController(life, controller);
     }
 
     public void removeLife(Life life) {
@@ -491,10 +516,10 @@ public class Field {
     public void removeChar(Char chr) {
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
-        // set controllers to null
+        // change controllers for which the chr was the controller of
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
-                putLifeController(entry.getKey(), null);
+                setRandomController(entry.getKey());
             }
         }
         // remove summons of that char & remove field attacks of that char
@@ -1190,6 +1215,7 @@ public class Field {
      * @param init if this is the first time that this method is called.
      */
     public void generateMobs(boolean init) {
+<<<<<<< HEAD
         if ((getChars().size() > 0)) {
             int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
             if(channelID <= 2) {
@@ -1217,6 +1243,16 @@ public class Field {
                         if (currentMobs > getFixedMobCapacity()) {
                             break;
                         }
+=======
+        if (init || getChars().size() > 0) {
+            int currentMobs = getMobs().size();
+            for (MobGen mg : getMobGens()) {
+                if (mg.canSpawnOnField(this)) {
+                    mg.spawnMob(this);
+                    currentMobs++;
+                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
+                        break;
+>>>>>>> d14b10898a5e6c6dc8b840bea0e97f9a07257ec1
                     }
                 }
             }

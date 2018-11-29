@@ -25,6 +25,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -38,6 +39,7 @@ import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
@@ -68,6 +70,7 @@ import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.gach.GachaponManager;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
@@ -372,6 +375,12 @@ public class Char {
 	@Transient
 	private long lastLieDetector = 0;
 	// TOOD: count and log lie detector passes and fails
+    @Transient
+	private boolean tutor = false;
+	@Transient
+	private int transferField = 0;
+	@Transient
+	private int transferFieldReq = 0;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1563,23 +1572,6 @@ public class Char {
 		return field;
 	}
 
-	public void resetStats() {
-		int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
-		total -= 16;// 4 str, dex, luk, int
-		setStat(Stat.str, 4);
-		setStat(Stat.dex, 4);
-		setStat(Stat.inte, 4);
-		setStat(Stat.luk, 4);
-		setStat(Stat.ap, total);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.str, (short) getStat(Stat.str));
-		stats.put(Stat.dex, (short) getStat(Stat.dex));
-		stats.put(Stat.inte, (short) getStat(Stat.inte));
-		stats.put(Stat.luk, (short) getStat(Stat.luk));
-		stats.put(Stat.ap, (short) getStat(Stat.ap));
-		write(WvsContext.statChanged(stats));
-	}
-
 	/**
 	 * Sets the job of this Char with a given id. Does nothing if the id is invalid.
 	 * If it is valid, will set this Char's job, add all Skills that the job should have by default,
@@ -1598,9 +1590,6 @@ public class Char {
 		skills.forEach(skill -> addSkill(skill, true));
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
-		if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
-			resetStats();
-		}
 	}
 
 	public short getJob() {
@@ -1701,8 +1690,24 @@ public class Char {
 				removeFromBaseStatCache(skill);
 			}
 			getSkills().remove(skill);
+
 		}
 	}
+
+    /**
+     * Removes a Skill from this Char.
+     * Sends change skill record to remove the skill from the client.
+     * @param skillID the id of the skill that should be removed
+     */
+	public void removeSkillAndSendPacket(int skillID) {
+        Skill skill = getSkill(skillID);
+        if (skill != null) {
+            removeSkill(skillID);
+            skill.setCurrentLevel(-1);
+            skill.setMasterLevel(-1);
+            write(WvsContext.changeSkillRecordResult(Collections.singletonList(skill), true, false, false, false));
+        }
+    }
 
 	/**
 	 * Initializes the BaseStat cache, by going through all the needed passive stat changers.
@@ -1780,6 +1785,21 @@ public class Char {
 			}
 		}
 		return createIfNull ? createAndReturnSkill(id) : null;
+	}
+
+	public int getSkillLevel(int skillID) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			return skill.getCurrentLevel();
+		}
+		return 0;
+	}
+
+	public int getRemainRecipeUseCount(int recipeID) {
+		if (SkillConstants.isMakingSkillRecipe(recipeID)) {
+			return getSkillLevel(recipeID);
+		}
+		return 0;
 	}
 
 	/**
@@ -1973,6 +1993,7 @@ public class Char {
 		switch (charStat) {
 			case level:
 			case skin:
+			case fatigue:
 				stats.put(charStat, (byte) getStat(charStat));
 				break;
 			case str:
@@ -2104,6 +2125,13 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(item.getItemId(), getJob());
+		if (equippedSummonSkill != 0) {
+			getField().removeSummon(equippedSummonSkill, getId());
+
+            getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
+            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(CharacterTemporaryStat.RepeatEffect).rOption);
+		}
 	}
 
 	/**
@@ -2152,6 +2180,10 @@ public class Char {
         if (skills.size() > 0) {
             getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
         }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(equip.getItemId(), getJob());
+        if (equippedSummonSkill != 0) {
+			getJobHandler().handleSkill(getClient(), equippedSummonSkill, (byte) 1, null);
+		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
@@ -2343,17 +2375,17 @@ public class Char {
 		}
 		toField.spawnLifesForChar(this);
 
-		if (JobConstants.isEvan(getJob())) {
+		if (JobConstants.isEvan(getJob()) && getJob() != JobConstants.JobEnum.EVAN_NOOB.getJobId()) {
 			((Evan) getJobHandler()).spawnMir();
+		}
+		if (JobConstants.isKanna(getJob())) {
+			((Kanna) getJobHandler()).spawnHaku();
 		}
 		if (tsm.hasStat(IndieEmpty)) {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
 				if (summon != null) {
-					if (summon.getMoveAbility() == MoveAbility.WalkClone.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Walk.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Fly.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Jaguar.getVal()) {
+					if (summon.getMoveAbility().changeFieldWithOwner()) {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {
@@ -2462,6 +2494,18 @@ public class Char {
 	 */
 	public void addExpNoMsg(long amount) {
 		addExp(amount, null);
+	}
+
+	public void addTraitExp(Stat traitStat, int amount) {
+		if (amount <= 0) {
+			return;
+		}
+		Map<Stat, Object> stats = new HashMap<>();
+		addStat(traitStat, amount);
+		stats.put(traitStat, getStat(traitStat));
+		stats.put(Stat.dayLimit, getAvatarData().getCharacterStat().getNonCombatStatDayLimit());
+		write(WvsContext.statChanged(stats));
+		write(WvsContext.incNonCombatStatEXPMessage(traitStat, amount));
 	}
 
 	/**
@@ -3728,7 +3772,7 @@ public class Char {
 	 */
 	public void addSkill(int skillID, int currentLevel, int masterLevel) {
 		Skill skill = SkillData.getSkillDeepCopyById(skillID);
-		if (skill == null) {
+		if (skill == null && !SkillConstants.isMakingSkillRecipe(skillID)) {
 			log.error("No such skill found.");
 			return;
 		}
@@ -3739,7 +3783,7 @@ public class Char {
 		addSkill(skill);
 		write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
 	}
-	
+
 	public long getRuneCooldown() {
 		return runeStoneCooldown;
 	}
@@ -4172,5 +4216,127 @@ public class Char {
 			addStatAndSendPacket(Stat.mp, -mpCon);
 		}
 		return hasEnough;
+	}
+
+	public boolean hasTutor() {
+		return tutor;
+	}
+
+	public void hireTutor(boolean set) {
+		tutor = set;
+		write(UserLocal.hireTutor(set));
+	}
+
+	/**
+	 * Shows tutor automated message (the client is taking the message information from wz).
+	 * @param id the id of the message.
+	 * @param duration message duration
+	 */
+	public void tutorAutomatedMsg(int id, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(id, duration));
+	}
+
+	/**
+	 * Shows tutor custom message (you decide which message the tutor will say).
+	 * @param message your custom message
+	 * @param width size of the message box
+	 * @param duration message duration
+	 */
+	public void tutorCustomMsg(String message, int width, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(message, width, duration));
+	}
+
+	public void setTransferField(int fieldID) {
+		this.transferField = fieldID;
+		this.transferFieldReq = fieldID == 0 ? 0 : getField().getId();
+	}
+
+	public int getTransferField() {
+		return transferField;
+	}
+
+	public int getTransferFieldReq() {
+		return transferFieldReq;
+	}
+
+	public void setMakingSkillLevel(int skillID, int level) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel((level << 24) + getMakingSkillProficiency(skillID));
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getMakingSkillLevel(int skillID) {
+		return (getSkillLevel(skillID) >> 24) <= 0 ? 0 : getSkillLevel(skillID) >> 24;
+	}
+
+	public void setMakingSkillProficiency(int skillID, int proficiency) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel((getMakingSkillLevel(skillID) << 24) + proficiency);
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getMakingSkillProficiency(int skillID) {
+		return (getSkillLevel(skillID) & 0xFFFFFF) <= 0 ? 0 : getSkillLevel(skillID) & 0xFFFFFF;
+	}
+
+	public void addMakingSkillProficiency(int skillID, int amount) {
+		int makingSkillID = SkillConstants.recipeCodeToMakingSkillCode(skillID);
+		int level = getMakingSkillLevel(makingSkillID);
+
+		int neededExp = SkillConstants.getNeededProficiency(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getMakingSkillProficiency(makingSkillID);
+		if (exp >= neededExp) {
+			write(UserLocal.chatMsg(ChatType.GameDesc, "You can't gain any more Herbalism mastery until you level your skill."));
+			write(UserLocal.chatMsg(ChatType.GameDesc, "See the appropriate NPC in Ardentmill to level up."));
+			setMakingSkillProficiency(makingSkillID, neededExp);
+			return;
+		}
+		int newExp = exp + amount;
+		write(UserLocal.chatMsg(ChatType.GameDesc, SkillConstants.getMakingSkillName(makingSkillID) + "'s mastery increased. (+" + amount + ")"));
+		if (newExp >= neededExp) {
+			write(UserLocal.noticeMsg("You've accumulated " + SkillConstants.getMakingSkillName(makingSkillID) + " mastery. See an NPC in town to level up.", true));
+			setMakingSkillProficiency(makingSkillID, neededExp);
+		} else {
+			setMakingSkillProficiency(makingSkillID, newExp);
+		}
+	}
+
+	public void makingSkillLevelUp(int skillID) {
+		int level = getMakingSkillLevel(skillID);
+		int neededExp = SkillConstants.getNeededProficiency(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getMakingSkillProficiency(skillID);
+		if (exp >= neededExp) {
+			setMakingSkillProficiency(skillID, 0);
+			setMakingSkillLevel(skillID, level + 1);
+			Stat trait = Stat.craftEXP;
+			switch (skillID) {
+				case 92000000:
+					trait = Stat.senseEXP;
+					break;
+				case 92010000:
+					trait = Stat.willEXP;
+					break;
+			}
+			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
+			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+		}
 	}
 }

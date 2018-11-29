@@ -233,7 +233,7 @@ public class Xenon extends Job {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
         }

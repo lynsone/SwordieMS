@@ -215,6 +215,12 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket changeSkillRecordResult(Skill skill) {
+        List<Skill> skills = new ArrayList<>();
+        skills.add(skill);
+        return changeSkillRecordResult(skills, true, false, false, false);
+    }
+
     public static OutPacket changeSkillRecordResult(List<Skill> skills, boolean exclRequestSent, boolean showResult,
                                                     boolean removeLinkSkill, boolean sn) {
         OutPacket outPacket = new OutPacket(OutHeader.CHANGE_SKILL_RECORD_RESULT);
@@ -375,13 +381,12 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket incMoneyMessage(String clientName, int amount, int charID) {
+    public static OutPacket incMoneyMessage(int amount) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(INC_MONEY_MESSAGE.getVal());
         outPacket.encodeInt(amount);
-        outPacket.encodeInt(1);
-        outPacket.encodeString(clientName);
+        outPacket.encodeInt(amount > 0 ? 1 : -1);
 
         return outPacket;
     }
@@ -423,6 +428,17 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket incNonCombatStatEXPMessage(Stat trait, int amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_NON_COMBAT_STAT_EXP_MESSAGE.getVal());
+        long mask = 0;
+        mask |= trait.getVal();
+        outPacket.encodeLong(mask);
+        outPacket.encodeInt(amount);
+
+        return outPacket;
+    }
     /**
      * Returns a net.swordie.ms.connection.packet for messages with the following {@link MessageType}:<br>
      * int: <br>
@@ -768,6 +784,16 @@ public class WvsContext {
 
     public static OutPacket blackCubeResult(Equip equip, MemorialCubeInfo mci) {
         OutPacket outPacket = new OutPacket(OutHeader.BLACK_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+        outPacket.encodeInt(equip.getBagIndex());
+
+        return outPacket;
+    }
+
+    public static OutPacket whiteCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.WHITE_ADDTIONAL_CUBE_RESULT);
 
         outPacket.encodeLong(equip.getSerialNumber());
         mci.encode(outPacket);

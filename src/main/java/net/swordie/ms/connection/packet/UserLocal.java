@@ -21,6 +21,14 @@ import java.util.Set;
  * Created on 1/2/2018.
  */
 public class UserLocal {
+    public static OutPacket noticeMsg(String msg, boolean autoSeparated) {
+        OutPacket outPacket = new OutPacket(OutHeader.NOTICE_MSG);
+
+        outPacket.encodeString(msg);
+        outPacket.encodeByte(autoSeparated);
+
+        return outPacket;
+    }
 
     public static OutPacket chatMsg(ChatType colour, String msg) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT_MSG);
@@ -413,7 +421,38 @@ public class UserLocal {
 
         return outPacket;
     }
-    
+
+    public static OutPacket hireTutor(boolean set) {
+        OutPacket outPacket = new OutPacket(OutHeader.HIRE_TUTOR);
+
+        outPacket.encodeByte(set);
+
+        return outPacket;
+    }
+
+    public static OutPacket tutorMsg(int id, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.TUTOR_MSG);
+
+        boolean automated = true;
+        outPacket.encodeByte(automated);
+        outPacket.encodeInt(id);
+        outPacket.encodeInt(duration);
+
+        return outPacket;
+    }
+
+    public static OutPacket tutorMsg(String message, int width, int duration) {
+        OutPacket outPacket = new OutPacket(OutHeader.TUTOR_MSG);
+
+        boolean automated = false;
+        outPacket.encodeByte(automated);
+        outPacket.encodeString(message);
+        outPacket.encodeInt(width);
+        outPacket.encodeInt(duration);
+
+        return outPacket;
+    }
+
     public static OutPacket emotion(int emotion, int duration, boolean byItemOption) {
         OutPacket outPacket = new OutPacket(OutHeader.EMOTION);
 

@@ -17,6 +17,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -32,6 +33,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -764,6 +766,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
+
+	public void removeSkill(int skillId) {
+		chr.removeSkillAndSendPacket(skillId);
+	}
 
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
@@ -1570,11 +1576,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) mesos));
 	}
 
 	@Override
 	public void deductMesos(long mesos) {
 		chr.deductMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) -mesos));
 	}
 
 	@Override
@@ -2194,6 +2202,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	    chr.write(CField.blowWeather(itemID, message));
     }
 
+    public void playSound(String sound) { playSound(sound, 100); }// default
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
@@ -2230,6 +2239,16 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+
+		String[] splitted = effectPath.split("/");
+		String sceneName = splitted[splitted.length - 2];
+		String sceneNumber = splitted[splitted.length - 1];
+		String xmlPath = effectPath.replace("/" + sceneName, "").replace("/" + sceneNumber, "").replace("Effect/", "Effect.wz/");
+
+		int fieldID = new Scene(chr, xmlPath, sceneName, sceneNumber).getTransferField();
+		if (fieldID != 0) {
+			chr.setTransferField(fieldID);
+		}
 	}
 
 	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
@@ -2334,6 +2353,28 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void ballonMsg(String message) {
 		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
 	}
+
+	public void hireTutor(boolean set) { chr.hireTutor(set); }
+
+	public void tutorAutomatedMsg(int id) { tutorAutomatedMsg(id, 10000); }
+
+	public void tutorAutomatedMsg(int id, int duration) { chr.tutorAutomatedMsg(id, duration); }
+
+	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
+
+	public boolean hasTutor() { return chr.hasTutor(); }
+
+	public int getMakingSkillLevel(int skillID) { return chr.getMakingSkillLevel(skillID); }
+
+	public boolean isAbleToLevelUpMakingSkill(int skillID) {
+		int neededProficiency = SkillConstants.getNeededProficiency(chr.getMakingSkillLevel(skillID));
+		if (neededProficiency <= 0) {
+			return false;
+		}
+		return chr.getMakingSkillProficiency(skillID) >= neededProficiency;
+	}
+
+	public void makingSkillLevelUp(int skillID) { chr.makingSkillLevelUp(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

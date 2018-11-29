@@ -49,8 +49,8 @@ public class DropInfo {
     }
 
     public void generateNextDrop() {
-        if (getMaxmoney() > 0) {
-            setMoney(getMinMoney() + Util.getRandom(getMaxmoney() - getMinMoney()));
+        if (getMaxMoney() > 0) {
+            setMoney(getMinMoney() + Util.getRandom(getMaxMoney() - getMinMoney()));
         } else {
             setQuantity(getMinQuant() + Util.getRandom(getMaxQuant() - getMinQuant()));
         }
@@ -64,11 +64,11 @@ public class DropInfo {
         this.minMoney = minMoney;
     }
 
-    public int getMaxmoney() {
+    public int getMaxMoney() {
         return maxmoney;
     }
 
-    public void setMaxmoney(int maxmoney) {
+    public void setMaxMoney(int maxmoney) {
         this.maxmoney = maxmoney;
     }
 

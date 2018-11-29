@@ -44,6 +44,10 @@ public class SkillConstants {
     public static final byte PASSIVE_HYPER_JOB_LEVEL = 6;
     public static final byte ACTIVE_HYPER_JOB_LEVEL = 7;
 
+    public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
+    public static final int MAKING_SKILL_MASTER_LEVEL = 11;
+    public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
+
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
                 || (skillId / 1000000 == 92 && (skillId % 10000 == 0))
@@ -119,7 +123,7 @@ public class SkillConstants {
         return (prefix >= 800000 && prefix <= 800099) || prefix == 8001;
     }
 
-    private static boolean isMakingSkillRecipe(int recipeId) {
+    public static boolean isMakingSkillRecipe(int recipeId) {
         boolean result = false;
         if (recipeId / 1000000 != 92 || recipeId % 10000 == 1) {
             int v1 = 10000 * (recipeId / 10000);
@@ -1289,5 +1293,143 @@ public class SkillConstants {
 
     public static int getHyperActiveSkillSpByLv(int level) {
         return level == 150 || level == 170 || level == 200 ? 1 : 0;
+    }
+
+    public static int getNoviceSkillRoot(short job) {
+        if (job / 100 == 22 || job == 2001) {
+            return JobConstants.JobEnum.EVAN_NOOB.getJobId();
+        }
+        if (job / 100 == 23 || job == 2002) {
+            return JobConstants.JobEnum.MERCEDES.getJobId();
+        }
+        if (job / 100 == 24 || job == 2003) {
+            return JobConstants.JobEnum.PHANTOM.getJobId();
+        }
+        if (JobConstants.isDemon(job)) {
+            return JobConstants.JobEnum.DEMON_SLAYER.getJobId();
+        }
+        if (JobConstants.isMihile(job)) {
+            return JobConstants.JobEnum.NAMELESS_WARDEN.getJobId();
+        }
+        if (JobConstants.isLuminous(job)) {
+            return JobConstants.JobEnum.LUMINOUS.getJobId();
+        }
+        if (JobConstants.isAngelicBuster(job)) {
+            return JobConstants.JobEnum.ANGELIC_BUSTER.getJobId();
+        }
+        if (JobConstants.isXenon(job)) {
+            return JobConstants.JobEnum.XENON.getJobId();
+        }
+        if (JobConstants.isShade(job)) {
+            return JobConstants.JobEnum.SHADE.getJobId();
+        }
+        if (JobConstants.isKinesis(job)) {
+            return JobConstants.JobEnum.KINESIS_0.getJobId();
+        }
+        if (JobConstants.isBlaster(job)) {
+            return JobConstants.JobEnum.CITIZEN.getJobId();
+        }
+        if (JobConstants.isHayato(job)) {
+            return JobConstants.JobEnum.HAYATO.getJobId();
+        }
+        if (JobConstants.isKanna(job)) {
+            return JobConstants.JobEnum.KANNA.getJobId();
+        }
+        return 1000 * (job / 1000);
+    }
+
+    public static int getNoviceSkillFromRace(int skillID) {
+        if (skillID == 50001215 || skillID == 10001215) {
+            return 1005;
+        }
+        if (isCommonSkill(skillID) || (skillID >= 110001500 && skillID <= 110001504)) {
+            return skillID;
+        }
+        if (isNoviceSkill(skillID)) {
+            return skillID % 10000;
+        }
+        return 0;
+    }
+
+    public static int getBuffSkillItem(int buffSkillID) {
+        int novice = getNoviceSkillFromRace(buffSkillID);
+        switch (novice) {
+            // Angelic Blessing
+            case 86:
+                return 2022746;
+            // Dark Angelic Blessing
+            case 88:
+                return 2022747;
+            // Angelic Blessing
+            case 91:
+                return 2022764;
+            // White Angelic Blessing
+            case 180:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80000086:
+                return 2023189;
+            // White Angelic Blessing
+            case 80000155:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80010065:
+                return 2023189;
+            // Goddess' Guard
+            case 80011150:
+                return 1112932;
+        }
+        return 0;
+    }
+
+    public static String getMakingSkillName(int skillID) {
+        switch (skillID) {
+            case 92000000:
+                return "Herbalism";
+            case 92010000:
+                return "Mining";
+            case 92020000:
+                return "Smithing";
+            case 92030000:
+                return "Accessory Crafting";
+            case 92040000:
+                return "Alchemy";
+        }
+        return null;
+    }
+
+    public static int recipeCodeToMakingSkillCode(int skillID) {
+        return 10000 * (skillID / 10000);
+    }
+
+    public static int getNeededProficiency(int level) {
+        if (level <= 0 || level >= MAKING_SKILL_EXPERT_LEVEL) {
+            return 0;
+        }
+        return ((100 * level * level) + (level * 400)) / 2;
+    }
+
+    public static boolean isSynthesizeRecipe(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeID % 10000 == 9001;
+    }
+
+    public static boolean isDecompositionRecipeScroll(int recipeID) {
+        return isMakingSkillRecipe(recipeID)
+                && recipeCodeToMakingSkillCode(recipeID) == 92040000
+                && recipeID - 92040000 >= 9003
+                && recipeID - 92040000 <= 9006;
+    }
+
+    public static boolean isDecompositionRecipeCube(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049002;
+    }
+
+    public static boolean isDecompositionRecipe(int recipeID) {
+        if (isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049000
+         || isDecompositionRecipeScroll(recipeID)
+         || isDecompositionRecipeScroll(recipeID)) {
+            return true;
+        }
+        return false;
     }
 }

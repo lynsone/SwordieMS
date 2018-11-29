@@ -620,7 +620,7 @@ public class Zero extends Job {
                 case ADVANCED_THROWING_WEAPON:
                     Summon summon = Summon.getSummonBy(chr, skillID, slv);
                     summon.setFlyMob(true);
-                    summon.setMoveAbility(MoveAbility.FixVMove.getVal());
+                    summon.setMoveAbility(MoveAbility.FixVMove);
                     chr.getField().spawnSummon(summon);
                     break;
                 case TEMPLE_RECALL:

@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.world.field.Field;
@@ -163,8 +164,8 @@ public class PinkBean extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
                 break;
@@ -291,7 +292,7 @@ public class PinkBean extends Job {
                     field = c.getChr().getField();
                     summon.setFlyMob(true);
                     summon.setPosition(mob.getPosition());
-                    summon.setMoveAbility(MoveAbility.FlyRandom.getVal());
+                    summon.setMoveAbility(MoveAbility.FlyRandom);
                     field.spawnAddSummon(summon);
                 }
             }

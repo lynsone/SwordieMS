@@ -116,7 +116,6 @@ public class Evan extends Job {
                     chr.addSkill(skill);
                 }
             }
-            //spawnMir();
         }
     }
 
@@ -224,7 +223,7 @@ public class Evan extends Job {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
 

@@ -202,8 +202,8 @@ public class WildHunter extends Citizen {
                 summon = Summon.getSummonBy(chr, SUMMONS[chr.getWildHunterInfo().getIdx()], (byte) 1);
                 summon.setSummonTerm(0);
 
-                summon.setMoveAbility(MoveAbility.Jaguar.getVal());
-                summon.setAssistType(AssistType.Attacking.getVal());
+                summon.setMoveAbility(MoveAbility.Jaguar);
+                summon.setAssistType(AssistType.Attack);
                 summon.setAttackActive(true);
 
                 field = c.getChr().getField();
@@ -213,14 +213,6 @@ public class WildHunter extends Citizen {
                     tsm.removeStatsBySkill(RIDE_JAGUAR);
                     tsm.sendResetStatPacket();
                 }
-
-                c.write(UserLocal.jaguarActive(true));
-                o2.nReason = skillID;
-                o2.nValue = 1;
-                o2.summon = summon;
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = 0;
-                tsm.putCharacterStatValue(IndieEmpty, o2);
 
                 o1.nOption = 1;
                 o1.rOption = skillID;
@@ -346,7 +338,7 @@ public class WildHunter extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), DRILL_SALVO, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
         }
