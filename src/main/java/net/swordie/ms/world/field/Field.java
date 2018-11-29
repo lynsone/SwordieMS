@@ -1215,7 +1215,6 @@ public class Field {
      * @param init if this is the first time that this method is called.
      */
     public void generateMobs(boolean init) {
-<<<<<<< HEAD
         if ((getChars().size() > 0)) {
             int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
             if(channelID <= 2) {
@@ -1225,7 +1224,7 @@ public class Field {
                         mg.spawnMob(this, channelID);
 
                         currentMobs++;
-                        if (currentMobs > getFixedMobCapacity()) {
+                        if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
                             break;
                         }
                     }
@@ -1240,19 +1239,9 @@ public class Field {
                         mg.spawnMob(this, channelID);
 
                         currentMobs++;
-                        if (currentMobs > getFixedMobCapacity()) {
+                        if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
                             break;
                         }
-=======
-        if (init || getChars().size() > 0) {
-            int currentMobs = getMobs().size();
-            for (MobGen mg : getMobGens()) {
-                if (mg.canSpawnOnField(this)) {
-                    mg.spawnMob(this);
-                    currentMobs++;
-                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
-                        break;
->>>>>>> d14b10898a5e6c6dc8b840bea0e97f9a07257ec1
                     }
                 }
             }
