@@ -10,6 +10,7 @@ import net.swordie.ms.client.character.items.ScrollUpgradeInfo;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
+import net.swordie.ms.client.character.skills.PsychicLockBall;
 import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
@@ -27,6 +28,7 @@ import net.swordie.ms.loaders.MakingSkillRecipe;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.world.field.ClockPacket;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
@@ -208,26 +210,25 @@ public class CField {
         return outPacket;
     }
 
-    public static OutPacket createPsychicArea(boolean approved, PsychicArea psychicArea) {
+    public static OutPacket createPsychicArea(int charID, PsychicArea pa) {
         OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_AREA);
 
-        outPacket.encodeByte(approved);
-        if(approved) {
-            outPacket.encodeInt(psychicArea.action);
-            outPacket.encodeInt(psychicArea.actionSpeed);
-            outPacket.encodeInt(psychicArea.localPsychicAreaKey);
-            outPacket.encodeInt(psychicArea.skillID);
-            outPacket.encodeShort(psychicArea.slv);
-            outPacket.encodeInt(psychicArea.psychicAreaKey);
-            outPacket.encodeInt(psychicArea.duration);
-            outPacket.encodeByte(psychicArea.isLeft);
-            outPacket.encodeShort(psychicArea.skeletonFilePathIdx);
-            outPacket.encodeShort(psychicArea.skeletonAniIdx);
-            outPacket.encodeShort(psychicArea.skeletonLoop);
-            outPacket.encodePositionInt(psychicArea.start);
-        } else {
-            outPacket.encodeInt(psychicArea.localPsychicAreaKey);
-        }
+        outPacket.encodeInt(charID);
+
+        outPacket.encodeByte(pa.success);
+        outPacket.encodeInt(pa.action);
+        outPacket.encodeInt(pa.actionSpeed);
+        outPacket.encodeInt(pa.localPsychicAreaKey);
+        outPacket.encodeInt(pa.skillID);
+        outPacket.encodeShort(pa.slv);
+        outPacket.encodeInt(pa.psychicAreaKey);
+        outPacket.encodeInt(pa.duration);
+        outPacket.encodeByte(pa.isLeft);
+        outPacket.encodeShort(pa.skeletonFilePathIdx);
+        outPacket.encodeShort(pa.skeletonAniIdx);
+        outPacket.encodeShort(pa.skeletonLoop);
+        outPacket.encodePositionInt(pa.start);
+
         return outPacket;
     }
 
@@ -243,7 +244,7 @@ public class CField {
         OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_LOCK);
 
         outPacket.encodeByte(approved);
-        if(approved) {
+        if (approved) {
             pl.encode(outPacket);
         }
 

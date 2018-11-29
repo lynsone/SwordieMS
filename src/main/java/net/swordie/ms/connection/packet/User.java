@@ -3,6 +3,7 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatUserType;
+import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
 
 /**
@@ -120,6 +121,17 @@ public class User {
         outPacket.encodeInt(charID);
         outPacket.encodeByte(success);
         outPacket.encodeInt(itemID);
+
+        return outPacket;
+    }
+
+    public static OutPacket createPsychicLock(int charID, PsychicLock pl) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_LOCK);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(pl.success);
+        pl.encode(outPacket);
+
 
         return outPacket;
     }

@@ -27,6 +27,8 @@ public class GameConstants {
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
     public static final long DAMAGE_CAP = 50_000_000;
+    public static final int BEGINNER_SP_MAX_LV = 7;
+    public static final int RESISTANCE_SP_MAX_LV = 10;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
@@ -124,7 +126,6 @@ public class GameConstants {
     // Cash Shop
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
-
 
     // START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
