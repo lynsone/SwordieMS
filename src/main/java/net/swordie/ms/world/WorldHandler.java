@@ -438,6 +438,14 @@ public class WorldHandler {
                         totalDamage += dmg;
                     }
                     mob.damage(chr, totalDamage);
+                    if(mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810208) {
+                        Life life = field.getLifeByTemplateId(8810214);
+                        Mob mob2 = (Mob)life;
+                        mob2.damage(chr, totalDamage);
+                        System.out.println("boss sponge hp :" + (mob2.getHp()));
+                        System.out.println("boss total damage taken: " + totalDamage);
+                        field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                    }
                     if (mob.getHp() < 0) {
                         mob.onKilledByChar(chr);
 
@@ -812,7 +820,7 @@ public class WorldHandler {
                     long curTime = System.currentTimeMillis();
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
-                    c.getChr().chatMessage(Mob, String.format("Mob did skill with ID %d (%s), level = %d",
+                    c.getChr().chatMessage(Mob, String.format("Mob" + mob + " did skill with ID %d (%s), level = %d",
                             mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
                     if (mobSkill.getSkillAfter() > 0) {

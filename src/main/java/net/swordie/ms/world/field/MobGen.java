@@ -1,5 +1,6 @@
 package net.swordie.ms.world.field;
 
+import net.swordie.ms.constants.CustomConstants;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
@@ -31,15 +32,34 @@ public class MobGen extends Life {
     /**
      * Spawns a Mob at the position of this MobGen.
      */
-    public void spawnMob(Field field) {
-        Mob mob = getMob().deepCopy();
-        Position pos = mob.getHomePosition();
-        mob.setPosition(pos.deepCopy());
-        mob.setHomePosition(pos.deepCopy());
-        field.spawnLife(mob, null);
-        mob.broadcastSpawnPacket(null);
-        setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
-        setHasSpawned(true);
+    public void spawnMob(Field field, int channelID) {
+        if(channelID <= 2)
+        {
+            Mob mob = getMob().deepCopy();
+            Position pos = mob.getHomePosition();
+            mob.setPosition(pos.deepCopy());
+            mob.setHomePosition(pos.deepCopy());
+            field.spawnLife(mob, null);
+            mob.broadcastSpawnPacket(null);
+            setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
+            setHasSpawned(true);
+        }
+        if(channelID == 3)
+        {
+            Mob mob = getMob().deepCopy();
+            Position pos = mob.getHomePosition();
+            mob.setPosition(pos.deepCopy());
+            mob.setHomePosition(pos.deepCopy());
+            mob.setMaxHp(mob.getMaxHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
+            mob.setHp(mob.getHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
+            //TODO
+            mob.setScale(CustomConstants.BUFFED_MOB_SCALE);
+            System.out.println("mob hp " + mob.getMp());
+            field.spawnLife(mob, null);
+            mob.broadcastSpawnPacket(null);
+            setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
+            setHasSpawned(true);
+        }
     }
 
     public MobGen deepCopy() {

@@ -1164,6 +1164,12 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
+            if(this.getTemplateId() == 8810214)
+            {
+                System.out.println("yoinked, " + this.getTemplateId());
+                getField().getMobs().forEach(Mob::die);
+                getField().getMobs().forEach(Mob::die);
+            }
             die();
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
                 damageDealer.getScriptManager().setQRValue(38022, "clear", false);
