@@ -619,7 +619,24 @@ public class WorldHandler {
                     chr.getId(), skillID, rootId));
             return;
         }
-        if (JobConstants.isExtendSpJob(chr.getJob())) {
+        if (JobConstants.isBeginnerJob((short) rootId)) {
+            stats = new HashMap<>();
+            int spentSp = chr.getSkills().stream()
+                    .filter(s -> JobConstants.isBeginnerJob((short) s.getRootId()))
+                    .mapToInt(Skill::getCurrentLevel).sum();
+            int totalSp;
+            if (JobConstants.isResistance((short) skill.getRootId())) {
+                totalSp = Math.min(chr.getLevel(), GameConstants.RESISTANCE_SP_MAX_LV) - 1; // sp gained from 2~10
+            } else {
+                totalSp = Math.min(chr.getLevel(), GameConstants.BEGINNER_SP_MAX_LV) - 1; // sp gained from 2~7
+            }
+            if (totalSp - spentSp >= amount) {
+                int curLevel = curSkill == null ? 0 : curSkill.getCurrentLevel();
+                int max = curSkill == null ? skill.getMaxLevel() : curSkill.getMaxLevel();
+                int newLevel = curLevel + amount > max ? max : curLevel + amount;
+                skill.setCurrentLevel(newLevel);
+            }
+        } else if (JobConstants.isExtendSpJob(chr.getJob())) {
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -1084,7 +1101,7 @@ public class WorldHandler {
 //        c.write(WvsContext.statChanged(newStats));
     }
 
-    public static void handleCreateKinesisPsychicArea(Client c, InPacket inPacket) {
+    public static void handleCreateKinesisPsychicArea(Char chr, InPacket inPacket) {
         PsychicArea pa = new PsychicArea();
         pa.action = inPacket.decodeInt();
         pa.actionSpeed = inPacket.decodeInt();
@@ -1098,52 +1115,46 @@ public class WorldHandler {
         pa.skeletonAniIdx = inPacket.decodeShort();
         pa.skeletonLoop = inPacket.decodeShort();
         pa.start = inPacket.decodePositionInt();
-        c.write(CField.createPsychicArea(true, pa));
-//        AffectedArea aa = new AffectedArea(-1);
-//        aa.setSkillID(pa.skillID);
-//        aa.setSlv((byte) pa.slv);
-//        aa.setMobOrigin((byte) 0);
-//        aa.setCharID(c.getChr().getId());
-//        int x = pa.start.getX();
-//        int y = pa.start.getY();
-//        aa.setPosition(new Position(x, y));
-//        aa.setFlip(pa.isLeft);
-//        aa.setElemAttr(1);
-//        aa.setOption(1);
-//        SkillInfo si = SkillData.getSkillInfoById(pa.skillID);
-//        aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-//        c.getChr().getField().spawnAffectedArea(aa);
+        pa.success = true;
+        chr.write(CField.createPsychicArea(chr.getId(), pa));
+        chr.write(UserLocal.doActivePsychicArea(pa));
+        chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), null, Collections.singletonList(pa)), chr);
+        chr.chatMessage(Mob, "SkillID: " + pa.skillID + " (Psychic Area)");
     }
 
-    public static void handleReleasePsychicArea(Client c, InPacket inPacket) {
+    public static void handleReleasePsychicArea(Char chr, InPacket inPacket) {
         int localPsychicAreaKey = inPacket.decodeInt();
-        c.write(CField.releasePsychicArea(localPsychicAreaKey));
+        chr.write(CField.releasePsychicArea(localPsychicAreaKey));
     }
 
-    public static void handleCreatePsychicLock(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
+    public static void handleCreatePsychicLock(Char chr, InPacket inPacket) {
         Field f = chr.getField();
         PsychicLock pl = new PsychicLock();
         pl.skillID = inPacket.decodeInt();
         pl.slv = inPacket.decodeShort();
         pl.action = inPacket.decodeInt();
         pl.actionSpeed = inPacket.decodeInt();
+        int i = 1;
         while (inPacket.decodeByte() != 0) {
             PsychicLockBall plb = new PsychicLockBall();
             plb.localKey = inPacket.decodeInt();
             plb.psychicLockKey = inPacket.decodeInt();
+            plb.psychicLockKey = 1;
             int mobID = inPacket.decodeInt();
             plb.mob = (Mob) f.getLifeByObjectID(mobID);
             plb.stuffID = inPacket.decodeShort();
             plb.usableCount = inPacket.decodeShort();
             plb.posRelID = inPacket.decodeByte();
+            plb.posRelID = (byte) i++;
             plb.start = inPacket.decodePositionInt();
             plb.rel = inPacket.decodePositionInt();
+            pl.psychicLockBalls.add(plb);
         }
-        // TODO can't attack after this, gotta fix
+        chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), pl, null), chr);
+        chr.write(User.createPsychicLock(chr.getId(), pl));
     }
 
-    public static void handleReleasePsychicLock(Client c, InPacket inPacket) {
+    public static void handleReleasePsychicLock(Char chr, InPacket inPacket) {
         int skillID = inPacket.decodeInt();
         short slv = inPacket.decodeShort();
         short count = inPacket.decodeShort();
@@ -1152,9 +1163,9 @@ public class WorldHandler {
         if (mobID != 0) {
             List<Integer> l = new ArrayList<>();
             l.add(mobID);
-            c.write(CField.releasePsychicLockMob(l));
+            chr.write(CField.releasePsychicLockMob(l));
         } else {
-            c.write(CField.releasePsychicLock(id));
+            chr.write(CField.releasePsychicLock(id));
         }
     }
 
@@ -1248,8 +1259,7 @@ public class WorldHandler {
         ((Summon) life).onHit(damage, mobTemplateId);
     }
 
-    public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
+    public static void handleUserFlameOrbRequest(Char chr, InPacket inPacket) {
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
         short dir = inPacket.decodeShort();

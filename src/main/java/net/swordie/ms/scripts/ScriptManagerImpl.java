@@ -17,7 +17,6 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -2351,7 +2350,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void ballonMsg(String message) {
-		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
+		chr.write(UserLocal.balloonMsg(message, 100, 3, null));
 	}
 
 	public void hireTutor(boolean set) { chr.hireTutor(set); }

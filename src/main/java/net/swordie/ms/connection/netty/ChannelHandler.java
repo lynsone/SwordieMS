@@ -414,19 +414,19 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 WorldHandler.handleRequestArrowPlatterObj(chr, inPacket);
                 break;
             case USER_FLAME_ORB_REQUEST:
-                WorldHandler.handleUserFlameOrbRequest(c, inPacket);
+                WorldHandler.handleUserFlameOrbRequest(chr, inPacket);
                 break;
             case CREATE_PSYCHIC_LOCK:
-                WorldHandler.handleCreatePsychicLock(c, inPacket);
+                WorldHandler.handleCreatePsychicLock(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_LOCK:
-                WorldHandler.handleReleasePsychicLock(c, inPacket);
+                WorldHandler.handleReleasePsychicLock(chr, inPacket);
                 break;
             case CREATE_KINESIS_PSYCHIC_AREA:
-                WorldHandler.handleCreateKinesisPsychicArea(c, inPacket);
+                WorldHandler.handleCreateKinesisPsychicArea(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_AREA:
-                WorldHandler.handleReleasePsychicArea(c, inPacket);
+                WorldHandler.handleReleasePsychicArea(chr, inPacket);
                 break;
             case MOB_MOVE:
                 WorldHandler.handleMoveMob(c, inPacket);
