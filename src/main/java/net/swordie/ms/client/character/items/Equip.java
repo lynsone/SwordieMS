@@ -1789,7 +1789,7 @@ public class Equip extends Item {
             case dexR:
             case intR:
             case lukR:
-                res += getTotalStat(EquipBaseStat.iStr);
+                res += getTotalStat(EquipBaseStat.statR);
                 break;
         }
         return res;

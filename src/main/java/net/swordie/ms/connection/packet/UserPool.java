@@ -161,7 +161,7 @@ public class UserPool {
         outPacket.encodeByte(0);
         outPacket.encodeByte(0); // StarPlanetRank::Decode
         // start CUser::DecodeStarPlanetTrendShopLook
-        outPacket.encodeInt(1); // 0 will go to -1 -> not breaking the loop
+        outPacket.encodeInt(0); // 0 will go to -1 -> not breaking the loop
         outPacket.encodeInt(0);
         // end CUser::DecodeStarPlanetTrendShopLook
         outPacket.encodeInt(0); // CUser::DecodeTextEquipInfo
