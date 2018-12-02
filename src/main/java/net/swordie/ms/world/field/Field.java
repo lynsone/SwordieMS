@@ -494,10 +494,17 @@ public class Field {
     public void addChar(Char chr) {
         if (!getChars().contains(chr)) {
             getChars().add(chr);
-            if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
-                chr.chatMessage("First enter script!");
-                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
-                setUserFirstEnter(true);
+            if (!isUserFirstEnter()) {
+                if (hasUserFirstEnterScript()) {
+                    chr.chatMessage("First enter script!");
+                    chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
+                    setUserFirstEnter(true);
+                } else if (CustomFUEFieldScripts.getByVal(getId()) != null) {
+                    chr.chatMessage("Custom First enter script!");
+                    String feFieldScript = CustomFUEFieldScripts.getByVal(getId()).toString();
+                    chr.getScriptManager().startScript(getId(), feFieldScript, ScriptType.FirstEnterField);
+                    setUserFirstEnter(true);
+                }
             }
         }
         broadcastPacket(UserPool.userEnterField(chr), chr);
@@ -1000,11 +1007,17 @@ public class Field {
 
     public void execUserEnterScript(Char chr) {
         chr.clearCurrentDirectionNode();
-        if(getOnUserEnter() == null || getOnUserEnter().equalsIgnoreCase("")) {
+        if(getOnUserEnter() == null) {
             return;
         }
-        String script = getOnUserEnter();
-        chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
+        if (!getOnUserEnter().equalsIgnoreCase("")) {
+            String script = getOnUserEnter();
+            chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
+        } else if (CustomFieldScripts.getByVal(getId()) != null) {
+            String customFieldScriptName = CustomFieldScripts.getByVal(getId()).toString();
+            chr.chatMessage("Custom Field Script:");
+            chr.getScriptManager().startScript(getId(), customFieldScriptName, ScriptType.Field);
+        }
     }
 
     public boolean isUserFirstEnter() {
