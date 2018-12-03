@@ -34,6 +34,7 @@ import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import org.python.modules.math;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -46,6 +47,7 @@ public class Mob extends Life {
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp;
     private long mp;
+    private int level;
     private byte calcDamageIndex = 1, moveAction, appearType, teamForMCarnival;
     private Position prevPos;
     private Foothold curFoodhold;
@@ -196,6 +198,7 @@ public class Mob extends Life {
         copy.setTargetUserIdFromServer(getTargetUserIdFromServer());
         copy.setHp(getHp());
         copy.setMaxHp(getMaxHp());
+        copy.setLevel(getLevel());
         copy.setCalcDamageIndex(getCalcDamageIndex());
         copy.setMoveAction(getMoveAction());
         copy.setAppearType(getAppearType());
@@ -580,6 +583,32 @@ public class Mob extends Life {
     public void setMaxMp(long maxMp) {
         getForcedMobStat().setMaxMP(maxMp);
     }
+
+    public int getLevel(){return getForcedMobStat().getLevel();}
+
+    public void setLevel(int level) {
+        getForcedMobStat().setLevel(level);
+    }
+
+    public int getPad()
+    {
+        return getForcedMobStat().getPad();
+    }
+    public void setPad(int Pad)
+    {
+        getForcedMobStat().setPad(Pad);
+    }
+    public int getMad()
+    {
+        return getForcedMobStat().getMad();
+    }
+    public void setMad(int Mad)
+    {
+        getForcedMobStat().setMad(Mad);
+    }
+    public int getPdr(){return getForcedMobStat().getPdr();}
+
+    public int getMdr(){return getForcedMobStat().getMdr();}
 
     public void setTemporaryStat(MobTemporaryStat temporaryStat) {
         this.temporaryStat = temporaryStat;
@@ -1166,9 +1195,8 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
-            if(this.getTemplateId() == 8810214)
+            if(this.getTemplateId() == 8810214 || this.getTemplateId() == 8810118)
             {
-                System.out.println("yoinked, " + this.getTemplateId());
                 getField().getMobs().forEach(Mob::die);
                 getField().getMobs().forEach(Mob::die);
             }
@@ -1195,7 +1223,7 @@ public class Mob extends Life {
         }
         distributeExp();
         dropDrops(); // xd
-        addNxCash(100, getObjectId());
+        addNxCash(getObjectId());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
@@ -1285,23 +1313,25 @@ public class Mob extends Life {
         getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
     }
 
-    void addNxCash(int amount, int monsterID)
+    void addNxCash(int monsterID)
     {
         Char chr = getMostDamageChar();
         if (chr != null)
         {
             Account account = chr.getAccount();
-            if (rand.nextInt(100) < 25) // 2nd value is chance
+            if (rand.nextInt(100) < 100) // 2nd value is chance
             {
-                account.addNXCredit(amount);
+
                 chr.write(User.scriptProgressMessage("You have gained " + calculateNxCash(monsterID) + " NX cash."));
+                account.addNXCredit(calculateNxCash(monsterID));
             }
         }
     }
 
     int calculateNxCash(int monsterID)
     {
-        double amount = (Math.sqrt(((getMaxHp() * 3))) / getExp() * 11) * (getExp() / 70);
+        double amount = ((math.sqrt(getMaxHp()/100D)) * ((double) getMaxHp() / (getExp() * getLevel())) * getExp()/getExp());
+        amount = math.ceil(amount);
         if(amount < 1)
         {
             amount = 1;

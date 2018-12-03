@@ -449,13 +449,37 @@ public class WorldHandler {
                         totalDamage += dmg;
                     }
                     mob.damage(chr, totalDamage);
-                    if(mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810208) {
+                    //TODO Horntail sponge damage, should make a separate function
+                    if((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810208)) {
                         Life life = field.getLifeByTemplateId(8810214);
-                        Mob mob2 = (Mob)life;
-                        mob2.damage(chr, totalDamage);
-                        System.out.println("boss sponge hp :" + (mob2.getHp()));
-                        System.out.println("boss total damage taken: " + totalDamage);
-                        field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                        if (life != null) {
+                            Mob mob2 = (Mob) life;
+                            mob2.damage(chr, totalDamage);
+                            System.out.println("boss sponge hp :" + (mob2.getHp()));
+                            System.out.println("boss total damage taken: " + totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                        }
+                    }
+                    if((mob.getTemplateId() >= 8810002 && mob.getTemplateId() <= 8810009)){
+                        Life life2 = field.getLifeByTemplateId(8810214);
+                        if(life2 != null) {
+                            Mob mob2 = (Mob) life2;
+                            mob2.damage(chr, totalDamage);
+                            System.out.println("boss sponge hp :" + (mob2.getHp()));
+                            System.out.println("boss total damage taken: " + totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                        }
+                    }
+                    if((mob.getTemplateId() >= 8810102 && mob.getTemplateId() <= 8810109)){
+                        Life life2 = field.getLifeByTemplateId(8810118);
+                        if(life2 != null) {
+                            Mob mob2 = (Mob) life2;
+                            mob2.damage(chr, totalDamage);
+                            System.out.println("boss sponge hp :" + (mob2.getHp()));
+                            System.out.println("boss total damage taken: " + totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                            }
+                        }
                     }
                     if (mob.getHp() < 0) {
                         mob.onKilledByChar(chr);
@@ -465,7 +489,7 @@ public class WorldHandler {
                         mobexp = mob.getForcedMobStat().getExp();
                     }
                 }
-            }
+
 
             // MultiKill Message Popup & Exp
             if (multiKillMessage > 2) {

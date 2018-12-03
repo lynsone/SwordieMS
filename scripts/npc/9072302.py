@@ -18,12 +18,13 @@ maps = [
 240010700, 241000210, 241000220, 272010000, 910028600, 706041000, 706041005, 273050000, 
 231040400, 401050000, 541020000, 502010010], # Monster Maps
 
-[[105100100, "Balrog"], [211042300, "Zakum"], [240050400, "Horntail"], [262030000, "Hilla"], 
-[105200000, "Root Abyss"], [211070000, "Von Leon"], [272020110, "Arkarium"], [401060000, "Easy Magnus"], 
-[401060000, "Normal/Hard Magnus"], [270050000, "Pink Bean"], [271030600, "Cygnus"], [350060300, "Lotus"], 
-[863010000, "Gollux"], [211041700, "Ranmaru"], [811000008, "Princess No"], [970000106, "Hekaton"], 
-[970072200, "Ursus"], [105300303, "Damien"], [610030010, "Crimsonwood Keep"], [450004000, "Lucid"], 
-[927030060, "Black Mage"]] # Boss Maps
+#[[105100100, "Balrog"], [211042300, "Zakum"], [240050400, "Horntail"], [262030000, "Hilla"],
+#[105200000, "Root Abyss"], [211070000, "Von Leon"], [272020110, "Arkarium"], [401060000, "Easy Magnus"],
+#[401060000, "Normal/Hard Magnus"], [270050000, "Pink Bean"], [271030600, "Cygnus"], [350060300, "Lotus"],
+#[863010000, "Gollux"], [211041700, "Ranmaru"], [811000008, "Princess No"], [970000106, "Hekaton"],
+#[970072200, "Ursus"], [105300303, "Damien"], [610030010, "Crimsonwood Keep"], [450004000, "Lucid"],
+#[927030060, "Black Mage"]] # Boss Maps
+    [[211042300, "Zakum"], [240050400, "Horntail"], [262030000, "Hilla"],[211070000, "Von Leon"], [272020110, "Arkarium"],[271040000, "Cygnus"]]
 ]
 
 list = "Hello #r#h0##k! How can I help you today?"

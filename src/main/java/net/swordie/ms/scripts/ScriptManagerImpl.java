@@ -46,6 +46,7 @@ import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.*;
@@ -1088,7 +1089,34 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-
+	@Override
+	public boolean checkDropsinRect(int itemID, int rectRange)
+	{
+		Field field = chr.getField();
+		Rect rect = new Rect(
+				new Position(
+						chr.getPosition().getX() - rectRange,
+						chr.getPosition().getY() - rectRange),
+				new Position(
+						chr.getPosition().getX() + rectRange,
+						chr.getPosition().getY() + rectRange));
+		List<Drop> dropList = field.getDropsInRect(rect);
+		for(Drop drop : dropList) {
+			if(dropList.isEmpty() || drop == null)
+			{
+			return false;
+			}
+			if(drop.getItem().getItemId() == itemID){
+				chr.getField().removeDrop(drop.getObjectId(), drop.getOwnerID(), true, 0);
+				return true;
+			}
+			else if(drop.getItem().getItemId() != itemID)
+			{
+				return false;
+			}
+		}
+		return false;
+	}
 
 	// Life-related methods --------------------------------------------------------------------------------------------
 

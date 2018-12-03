@@ -4,7 +4,7 @@ if sm.getFieldID() == 240050400:
     sm.dispose()
 else:
     if sm.sendAskYesNo("Would you like to leave?"):
-        sm.clearPartyInfo(240050400)
+        sm.warpInstanceOut(240050400, 0)
         sm.dispose()
     else:
         sm.dispose()

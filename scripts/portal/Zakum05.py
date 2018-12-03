@@ -10,7 +10,7 @@ i = 0
 for entry in fields:
     s += "#L" + str(i) + "#" + entry[0] + "#l\r\n"
     i += 1
-sm.sendSay(s)
+answer = sm.sendSay(s)
 
 sm.warp(fields[answer][1])
 sm.dispose()

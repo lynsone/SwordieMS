@@ -441,6 +441,7 @@ public interface ScriptManager extends Observer {
 	 */
 	void teleportToPortal(int portalId);
 
+	boolean checkDropsinRect(int itemID, int rectRange);
 	/**
 	 * Gets the id of the linked {@link Field}
 	 * Example: "sm.getFieldID()"

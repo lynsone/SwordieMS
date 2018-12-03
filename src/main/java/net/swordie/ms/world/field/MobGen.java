@@ -52,6 +52,9 @@ public class MobGen extends Life {
             mob.setHomePosition(pos.deepCopy());
             mob.setMaxHp(mob.getMaxHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
             mob.setHp(mob.getHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
+            //mob.setLevel();
+            mob.setPad(1000);
+            mob.setMad(1000);
             //TODO
             mob.setScale(CustomConstants.BUFFED_MOB_SCALE);
             System.out.println("mob hp " + mob.getMp());
