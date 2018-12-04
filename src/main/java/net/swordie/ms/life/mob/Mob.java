@@ -1195,10 +1195,21 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
-            if(this.getTemplateId() == 8810214 || this.getTemplateId() == 8810118)
+            //TODO horntail kills
+            if(this.getTemplateId() == 8810214 || this.getTemplateId() == 8810018 || this.getTemplateId() == 8810118  )
             {
                 getField().getMobs().forEach(Mob::die);
                 getField().getMobs().forEach(Mob::die);
+                getField().getMobs().forEach(Mob::die);
+                if(this.getTemplateId() == 8810118)
+                {
+
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+
+                }
             }
             die();
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {

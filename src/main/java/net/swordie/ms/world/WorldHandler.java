@@ -450,7 +450,7 @@ public class WorldHandler {
                     }
                     mob.damage(chr, totalDamage);
                     //TODO Horntail sponge damage, should make a separate function
-                    if((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810208)) {
+                    if((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810209)) {
                         Life life = field.getLifeByTemplateId(8810214);
                         if (life != null) {
                             Mob mob2 = (Mob) life;
@@ -461,7 +461,7 @@ public class WorldHandler {
                         }
                     }
                     if((mob.getTemplateId() >= 8810002 && mob.getTemplateId() <= 8810009)){
-                        Life life2 = field.getLifeByTemplateId(8810214);
+                        Life life2 = field.getLifeByTemplateId(8810018);
                         if(life2 != null) {
                             Mob mob2 = (Mob) life2;
                             mob2.damage(chr, totalDamage);
@@ -471,19 +471,18 @@ public class WorldHandler {
                         }
                     }
                     if((mob.getTemplateId() >= 8810102 && mob.getTemplateId() <= 8810109)){
-                        Life life2 = field.getLifeByTemplateId(8810118);
-                        if(life2 != null) {
-                            Mob mob2 = (Mob) life2;
-                            mob2.damage(chr, totalDamage);
-                            System.out.println("boss sponge hp :" + (mob2.getHp()));
+                        Life life3 = field.getLifeByTemplateId(8810118);
+                        if(life3 != null) {
+                            Mob mob3 = (Mob) life3;
+                            mob3.damage(chr, totalDamage);
+                            System.out.println("boss sponge hp :" + (mob3.getHp()));
                             System.out.println("boss total damage taken: " + totalDamage);
-                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob3)));
                             }
                         }
                     }
                     if (mob.getHp() < 0) {
                         mob.onKilledByChar(chr);
-
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
                         mobexp = mob.getForcedMobStat().getExp();
