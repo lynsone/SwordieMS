@@ -182,7 +182,10 @@ public class WorldHandler {
                 chr.setParty(party);
             }
         }
+        // blessing has to be split up, as adding skills before SetField is send will crash the client
+        chr.initBlessingSkillNames();
         chr.warp(field, true);
+        chr.initBlessingSkills();
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         if (chr.getGuild() != null) {
             chr.setGuild(chr.getClient().getWorld().getGuildByID(chr.getGuild().getId()));

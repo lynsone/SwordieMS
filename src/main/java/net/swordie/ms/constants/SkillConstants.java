@@ -1,5 +1,6 @@
 package net.swordie.ms.constants;
 
+import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
 import net.swordie.ms.client.jobs.adventurer.BeastTamer;
@@ -47,6 +48,7 @@ public class SkillConstants {
     public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
     public static final int MAKING_SKILL_MASTER_LEVEL = 11;
     public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
+
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -1023,7 +1025,7 @@ public class SkillConstants {
     public static int getLinkSkillByJob(short job) {
         if (JobConstants.isCannonShooter(job)) { // Pirate Blessing
             return 80000000;
-        } else if (JobConstants.isKoC(job)) { // Cygnus Blessing
+        } else if (JobConstants.isCygnusKnight(job)) { // Cygnus Blessing
             return 80000070;
         } else if (JobConstants.isMercedes(job)) { // Elven Blessing
             return 80001040;
@@ -1431,5 +1433,17 @@ public class SkillConstants {
             return true;
         }
         return false;
+    }
+
+    public static int getFairyBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0012, where xxxx is the "0th" job
+        return beginJob * 10000 + 12;
+    }
+
+    public static int getEmpressBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0073, where xxxx is the "0th" job
+        return beginJob * 10000 + 73;
     }
 }

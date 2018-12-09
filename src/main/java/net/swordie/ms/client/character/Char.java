@@ -380,6 +380,10 @@ public class Char {
 	private int transferField = 0;
 	@Transient
 	private int transferFieldReq = 0;
+	@Transient
+	private String blessingOfFairy = null;
+	@Transient
+	private String blessingOfEmpress = null;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1428,11 +1432,19 @@ public class Char {
 	}
 
 	private String getBlessingOfEmpress() {
-		return null;
+		return blessingOfEmpress;
+	}
+
+	public void setBlessingOfEmpress(String blessingOfEmpress) {
+		this.blessingOfEmpress = blessingOfEmpress;
 	}
 
 	private String getBlessingOfFairy() {
-		return null;
+		return blessingOfFairy;
+	}
+
+	public void setBlessingOfFairy(String blessingOfFairy) {
+		this.blessingOfFairy = blessingOfFairy;
 	}
 
 	public void setCombatOrders(int combatOrders) {
@@ -4315,6 +4327,47 @@ public class Char {
 			}
 			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
 			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+		}
+	}
+
+	public void addNx(int nx) {
+		getAccount().addNXCredit(nx);
+		chatScriptMessage("You have gained " + nx + " NX.");
+	}
+
+	public void initBlessingSkillNames() {
+		Account account = getAccount();
+		Char fairyChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& chr.getLevel() >= 10
+					&& (fairyChar == null || chr.getLevel() > fairyChar.getLevel())) {
+				fairyChar = chr;
+			}
+		}
+		setBlessingOfFairy(fairyChar.getName());
+		Char empressChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& (JobConstants.isCygnusKnight(chr.getJob()) || JobConstants.isMihile(chr.getJob())
+					&& chr.getLevel() >= 5
+					&& (empressChar == null || chr.getLevel() > empressChar.getLevel()))) {
+				empressChar = chr;
+			}
+		}
+		setBlessingOfEmpress(empressChar.getName());
+	}
+
+	public void initBlessingSkills() {
+		Char fairyChar = getAccount().getCharByName(getBlessingOfFairy());
+		if (fairyChar != null) {
+			addSkill(SkillConstants.getFairyBlessingByJob(getJob()),
+					Math.min(20, fairyChar.getLevel() / 10), 20);
+		}
+		Char empressChar = getAccount().getCharByName(getBlessingOfEmpress());
+		if (empressChar != null) {
+			addSkill(SkillConstants.getEmpressBlessingByJob(getJob()),
+					Math.min(30, empressChar.getLevel() / 5), 30);
 		}
 	}
 }

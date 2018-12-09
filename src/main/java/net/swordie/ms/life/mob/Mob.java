@@ -1323,6 +1323,11 @@ public class Mob extends Life {
             eei.setIncEXP((int) appliedExpPre);
             chr.addExp(appliedExpPost, eei);
 
+            if (Util.succeedProp(GameConstants.NX_DROP_CHANCE)) {
+                int nx = (int) (damagePerc * getNxDropAmount());
+                chr.addNx(nx);
+            }
+
             Party party = chr.getParty();
             if (party != null) {
                 if (!damagePercPerParty.containsKey(party)) {
@@ -1781,5 +1786,12 @@ public class Mob extends Life {
         }
         outPacket.encodeInt(getTargetUserIdFromServer());
         outPacket.encodeInt(0);
+    }
+
+    public int getNxDropAmount() {
+        long hp = getMaxHp();
+        ForcedMobStat fms = getForcedMobStat();
+        int base = (int) (50 + (fms.getLevel() / 2D) * (Math.pow(hp, (1/7D))));
+        return Util.getRandom(base, (base + base / 10)); // base + 10% random
     }
 }

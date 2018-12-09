@@ -48,6 +48,7 @@ public class PartyDamageInfo {
         for (Char chr : eligibleMembers) {
             long exp = (long) (totalExp * (0.2 * damageDone.getOrDefault(chr, 0D)
                                 + 0.8 * chr.getLevel() / chr.getParty().getAvgPartyLevel(chr)));
+            double perc = (double) exp / totalExp;
             exp *= expRate;
             ExpIncreaseInfo eii = new ExpIncreaseInfo();
             if (!damageDone.containsKey(chr)) {
@@ -57,6 +58,10 @@ public class PartyDamageInfo {
             }
             if (exp > 0) {
                 chr.addExp(exp, eii);
+            }
+            if (Util.succeedProp(GameConstants.NX_DROP_CHANCE)) {
+                int nx = (int) (perc * mob.getNxDropAmount());
+                chr.addNx(nx);
             }
         }
     }

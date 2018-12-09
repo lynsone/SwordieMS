@@ -101,6 +101,7 @@ public class GameConstants {
 
     // Mob
     public static final int MOB_SKILL_CHANCE = 20;
+    public static final int NX_DROP_CHANCE = 70;
 
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;

@@ -52,7 +52,7 @@ public class CashShopHandler {
                 boolean notEnoughMoney = false;
                 switch (paymentMethod) {
                     case 1: // Credit
-                        if (account.getNXCredit() >= cost) {
+                        if (account.getNxCredit() >= cost) {
                             account.deductNXCredit(cost);
                         } else {
                             notEnoughMoney = true;
@@ -66,7 +66,7 @@ public class CashShopHandler {
                         }
                         break;
                     case 4: // Prepaid
-                        if (account.getNXPrepaid() >= cost) {
+                        if (account.getNxPrepaid() >= cost) {
                             account.deductNXPrepaid(cost);
                         } else {
                             notEnoughMoney = true;

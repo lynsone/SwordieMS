@@ -6,6 +6,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.loaders.FieldData;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 
@@ -137,7 +138,7 @@ public class Channel {
     }
 
     public Char getCharByName(String name) {
-        return getChars().values().stream().filter(chr -> chr.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+        return Util.findWithPred(getChars().values(), chr -> chr.getName().equals(name));
     }
 
     public Account getAccountByID(int accID) {
