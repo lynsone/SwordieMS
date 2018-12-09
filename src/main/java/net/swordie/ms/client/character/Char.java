@@ -1721,6 +1721,7 @@ public class Char {
 		stats.put(BaseStat.mdd, 9L);
 		stats.put(BaseStat.acc, 11L);
 		stats.put(BaseStat.eva, 8L);
+		stats.put(BaseStat.buffTimeR, 100L);
 		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
 				forEach(this::addToBaseStatCache);
 	}

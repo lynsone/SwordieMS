@@ -92,9 +92,7 @@ public class TemporaryStatManager {
         SkillInfo skillinfo = SkillData.getSkillInfoById(indie ? option.nReason : option.rOption);
         if(skillinfo != null && !skillinfo.isNotIncBuffDuration()) {
             int duration = (indie ? option.tTerm : option.tOption);
-            long buffTimeR = 100 // Base Buff Duration %
-                    + (getBaseStats().get(BaseStat.buffTimeR) == null ? 0 : getBaseStats().get(BaseStat.buffTimeR) // Active Buff Duration %
-                    + (getChr().getBaseStats().get(BaseStat.buffTimeR) == null ? 0 : getChr().getBaseStats().get(BaseStat.buffTimeR))); // Passive Buff Duration %
+            long buffTimeR = getChr().getTotalStat(BaseStat.buffTimeR); // includes the 100% base
             if (indie) {
                 option.tTerm = (int) ((buffTimeR * duration) / 100);
             } else {
