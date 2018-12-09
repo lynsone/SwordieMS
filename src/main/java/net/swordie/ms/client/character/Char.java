@@ -4345,7 +4345,9 @@ public class Char {
 				fairyChar = chr;
 			}
 		}
-		setBlessingOfFairy(fairyChar.getName());
+		if (fairyChar != null) {
+			setBlessingOfFairy(fairyChar.getName());
+		}
 		Char empressChar = null;
 		for (Char chr : account.getCharacters()) {
 			if (!chr.equals(this)
@@ -4355,7 +4357,9 @@ public class Char {
 				empressChar = chr;
 			}
 		}
-		setBlessingOfEmpress(empressChar.getName());
+		if (fairyChar != null) {
+			setBlessingOfEmpress(empressChar.getName());
+		}
 	}
 
 	public void initBlessingSkills() {
