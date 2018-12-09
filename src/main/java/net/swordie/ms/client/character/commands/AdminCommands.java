@@ -19,6 +19,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -1167,6 +1168,18 @@ public class AdminCommands {
                 } else {
                     Map<Integer, String> map;
                     switch (queryType) {
+                        case "equip":
+                            map = StringData.getItemStringByName(query.toString());
+                            Set<Integer> nonEquips = new HashSet<>();
+                            for (int itemId : map.keySet()) {
+                                if (!ItemConstants.isEquip(itemId)) {
+                                    nonEquips.add(itemId);
+                                }
+                            }
+                            for (int itemId : nonEquips) {
+                                map.remove(itemId);
+                            }
+                            break;
                         case "item":
                             map = StringData.getItemStringByName(query.toString());
                             break;

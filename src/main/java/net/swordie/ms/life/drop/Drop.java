@@ -4,6 +4,7 @@ import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.enums.DropMotionType;
 import net.swordie.ms.enums.DropType;
 import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.loaders.ItemData;
@@ -21,12 +22,15 @@ public class Drop extends Life {
     private DropType dropType;
     private int ownerID;
     private boolean explosiveDrop;
-    private boolean canBePickedUpByPet = true;
+    private boolean canBePickedUpByPet;
     private FileTime expireTime;
     private long mobExp;
+    private DropMotionType dropMotionType;
 
     public Drop(int templateId) {
         super(templateId);
+        dropMotionType = DropMotionType.Normal;
+        canBePickedUpByPet = true;
     }
 
     public DropType getDropType() {
@@ -141,5 +145,13 @@ public class Drop extends Life {
 
     public void setCanBePickedUpByPet(boolean canBePickedUpByPet) {
         this.canBePickedUpByPet = canBePickedUpByPet;
+    }
+
+    public DropMotionType getDropMotionType() {
+        return dropMotionType;
+    }
+
+    public void setDropMotionType(DropMotionType dropMotionType) {
+        this.dropMotionType = dropMotionType;
     }
 }

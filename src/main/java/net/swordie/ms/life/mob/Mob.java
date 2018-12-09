@@ -1647,7 +1647,10 @@ public class Mob extends Life {
             List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
             Foothold foothold = Util.getRandomFromCollection(listOfFootHolds);
             Position position = foothold.getRandomPosition();
-            RandomPortal randomPortal = new RandomPortal(RandomPortal.Type.Inferno, position, chr.getId());
+            RandomPortal.Type portalType = Util.succeedProp(50)
+                    ? RandomPortal.Type.PolloFritto
+                    : RandomPortal.Type.Inferno;
+            RandomPortal randomPortal = new RandomPortal(portalType, position, chr.getId());
             field.addLife(randomPortal);
             chr.write(RandomPortalPool.created(randomPortal));
         }

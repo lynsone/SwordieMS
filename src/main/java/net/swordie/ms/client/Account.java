@@ -9,6 +9,7 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AccountType;
 import net.swordie.ms.enums.PicStatus;
