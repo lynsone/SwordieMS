@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static net.swordie.ms.client.character.skills.SkillStat.mesoR;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -937,7 +938,7 @@ public class Field {
      * @param ownerID   The owner's character ID.
      */
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
-        drop(dropInfos, findFootHoldBelow(position), position, ownerID);
+        drop(dropInfos, findFootHoldBelow(position), position, ownerID, 0, 0);
     }
 
     public void drop(Drop drop, Position position) {
@@ -966,14 +967,16 @@ public class Field {
      * @param fh        The Foothold this Set of DropInfos is bound to.
      * @param position  The Position the Drops originate from.
      * @param ownerID   The ID of the owner of all drops.
+     * @param mesoRate  The added meso rate of the character.
+     * @param dropRate  The added drop rate of the character.
      */
-    public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
+    public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID, int mesoRate, int dropRate) {
         int x = position.getX();
         int minX = fh == null ? position.getX() : fh.getX1();
         int maxX = fh == null ? position.getX() : fh.getX2();
         int diff = 0;
         for (DropInfo dropInfo : dropInfos) {
-            if (dropInfo.willDrop()) {
+            if (dropInfo.willDrop(dropRate)) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
                 Position posTo;
                 if (fh == null) {
@@ -981,7 +984,14 @@ public class Field {
                 } else {
                     posTo = new Position(x, fh.getYFromX(x));
                 }
-                drop(dropInfo, position, posTo, ownerID);
+                // Copy the drop info for money, as we chance the amount that's in there.
+                // Not copying -> original dropinfo will keep increasing in mesos
+                DropInfo copy = null;
+                if (dropInfo.isMoney()) {
+                    copy = dropInfo.deepCopy();
+                    copy.setMoney((int) (dropInfo.getMoney() * ((100 + mesoRate) / 100D)));
+                }
+                drop(copy != null ? copy : dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
                 dropInfo.generateNextDrop();
             }

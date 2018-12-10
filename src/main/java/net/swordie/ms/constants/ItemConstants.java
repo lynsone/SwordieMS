@@ -2,6 +2,7 @@ package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
@@ -94,6 +95,49 @@ public class ItemConstants {
     public static final short EQUIP_FLAME_LEVEL_DIVIDER = 40;
     public static final short EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED = 20;
     public static final int SCARLET_SHOULDER = 1152155; // The only exception for flames on shoulders.
+
+    // Self-made drops per mob
+    public static final Map<Integer, Set<DropInfo>> consumableDropsPerLevel = new HashMap<>();
+    public static final Map<Integer, Map<ItemJob, Set<DropInfo>>> equipDropsPerLevel = new HashMap<>();
+
+    static {
+        initConsumableDrops();
+        initEquipDrops();
+    }
+
+    private static void initConsumableDrops() {
+        consumableDropsPerLevel.put(0, Util.makeSet(
+                new DropInfo(2000046, 200), // Red Potion
+                new DropInfo(2000014, 200)  // Blue Potion
+        ));
+        consumableDropsPerLevel.put(20, Util.makeSet(
+                new DropInfo(2000002, 200), // White Potion
+                new DropInfo(2000006, 200)  // Mana Elixir
+        ));
+        consumableDropsPerLevel.put(40, Util.makeSet(
+                new DropInfo(2001527, 200), // Unagi
+                new DropInfo(2022000, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(60, Util.makeSet(
+                new DropInfo(2001527, 200), // Unagi
+                new DropInfo(2022000, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(80, Util.makeSet(
+                new DropInfo(2001001, 200), // Ice Cream Pop
+                new DropInfo(2001002, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(100, Util.makeSet(
+                new DropInfo(2020012, 100), // Melting Cheese
+                new DropInfo(2020013, 100), // Reindeer Milk
+                new DropInfo(2020014, 100), // Sunrise Dew
+                new DropInfo(2020015, 100), // Sunset Dew
+                new DropInfo(2050004, 10)   // All Cure
+        ));
+    }
+
+    private static void initEquipDrops() {
+
+    }
 
     public static int getGenderFromId(int nItemID) {
         int result; // eax
@@ -1293,5 +1337,19 @@ public class ItemConstants {
 
     public static boolean isRecipeOpenItem(int itemID) {
         return itemID / 10000 == 251;
+    }
+
+    public static Set<DropInfo> getConsumableMobDrops(int level) {
+        level = Math.min(100, (level / 20) * 20); // round it to the nearest 20th level + max of level 100
+        return consumableDropsPerLevel.getOrDefault(level, new HashSet<>());
+    }
+
+    public static Set<DropInfo> getEquipMobDrops(short job, int level) {
+        level = Math.min(140, (level / 10) * 10); // round it to the nearest 10th level + max of level 140
+        ItemJob itemJob = GameConstants.getItemJobByJob(job);
+        if (itemJob == null) {
+            itemJob = ItemJob.BEGINNER;
+        }
+        return equipDropsPerLevel.getOrDefault(level, new HashMap<>()).getOrDefault(itemJob, new HashSet<>());
     }
 }

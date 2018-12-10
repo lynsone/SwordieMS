@@ -32,6 +32,11 @@ public class DropInfo {
     public DropInfo() {
     }
 
+    public DropInfo(int itemID, int chance) {
+        this.itemID = itemID;
+        this.chance = chance;
+    }
+
     public DropInfo(int chance, int minMoney, int maxmoney) {
         this.chance = chance;
         this.minMoney = minMoney;
@@ -39,9 +44,8 @@ public class DropInfo {
         generateNextDrop();
     }
 
-    public DropInfo(int itemID, int money, int chance, int minQuant, int maxQuant) {
+    public DropInfo(int itemID, int chance, int minQuant, int maxQuant) {
         this.itemID = itemID;
-        this.money = money;
         this.chance = chance;
         this.minQuant = minQuant;
         this.maxQuant = maxQuant;
@@ -90,11 +94,14 @@ public class DropInfo {
 
     /**
      * Does an RNG roll to check if this should be dropped.
+     *
+     * @param dropRate the drop rate of the Char
      * @return Whether or not the drop is successful.
      */
-    public boolean willDrop() {
+    public boolean willDrop(int dropRate) {
         // Added 50x multiplier for the dropping chance if the item is a Quest item.
         int chance = getChance();
+        chance *= (100 + dropRate) / 100D;
         ItemInfo ii = ItemData.getItemInfoByID(getItemID());
         if (ii != null && ii.getQuestIDs().size() > 0) {
             chance *= 50;
@@ -153,5 +160,20 @@ public class DropInfo {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public DropInfo deepCopy() {
+        DropInfo di = new DropInfo();
+
+        di.setItemID(getItemID());
+        di.setChance(getChance());
+        di.setMoney(getMoney());
+        di.setMinMoney(getMinMoney());
+        di.setMaxMoney(getMaxMoney());
+        di.setMinQuant(getMinQuant());
+        di.setMaxQuant(getMaxQuant());
+        di.setQuantity(getQuantity());
+
+        return di;
     }
 }

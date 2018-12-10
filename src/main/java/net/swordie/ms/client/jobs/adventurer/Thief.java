@@ -1094,7 +1094,7 @@ public class Thief extends Beginner {
                 Set<DropInfo> dropInfoSet = new HashSet<>();
                 for (int i = 0; i < slv; i++) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        dropInfoSet.add(new DropInfo(0, 100, GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
+                        dropInfoSet.add(new DropInfo(GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
                     }
                 }
                 if (dropInfoSet.size() > 0) {
