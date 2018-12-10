@@ -179,6 +179,8 @@ public class ThunderBreaker extends Noblesse {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndieDamR, o2);
+                chr.resetSkillCoolTime(TYPHOON);
+                chr.resetSkillCoolTime(GALE);
                 break;
 
         }
@@ -337,6 +339,19 @@ public class ThunderBreaker extends Noblesse {
                     break;
             }
         }
+    }
+
+    @Override
+    public boolean applyCooldownBySkillId(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        switch (skillId) {
+            case GALE:
+            case TYPHOON:
+                if (tsm.hasStat(StrikerHyperElectric)) {
+                    return false;
+                }
+        }
+        return true;
     }
 
 

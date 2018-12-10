@@ -641,6 +641,15 @@ create table chosenskills (
     foreign key (charid) references characters(id)
 );
 
+create table skillcooltimes (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    nextusabletime bigint,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
 create table hyperrockfields (
 	id bigint not null auto_increment,
     charid int,
