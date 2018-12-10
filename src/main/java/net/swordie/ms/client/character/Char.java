@@ -4357,7 +4357,7 @@ public class Char {
 				empressChar = chr;
 			}
 		}
-		if (fairyChar != null) {
+		if (empressChar != null) {
 			setBlessingOfEmpress(empressChar.getName());
 		}
 	}
