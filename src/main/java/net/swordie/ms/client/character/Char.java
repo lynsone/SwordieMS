@@ -3675,7 +3675,7 @@ public class Char {
 
 	public void resetSkillCoolTime(int skillId) {
 		if(hasSkillOnCooldown(skillId)) {
-			removeSkillCoolTime(skillId);
+			addSkillCoolTime(skillId, 0);
 			write(UserLocal.skillCooltimeSetM(skillId, 0));
 		}
 	}

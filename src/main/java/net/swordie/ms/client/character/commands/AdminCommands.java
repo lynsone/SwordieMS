@@ -1575,13 +1575,11 @@ public class AdminCommands {
     public static class BypassSkillCD extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            if (!chr.hasSkillCDBypass()) {
-                chr.setSkillCDBypass(true);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: ON");
-            } else {
-                chr.setSkillCDBypass(false);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: OFF");
+            chr.setSkillCDBypass(!chr.hasSkillCDBypass());
+            if(chr.hasSkillCDBypass()) {
+                chr.getSkillCoolTimes().keySet().forEach(chr::resetSkillCoolTime);
             }
+            chr.chatMessage(Notice2, "Skill Cooldown bypass: "+ chr.hasSkillCDBypass());
             chr.dispose();
         }
     }
