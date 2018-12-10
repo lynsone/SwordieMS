@@ -273,6 +273,11 @@ public abstract class Job {
 		}
 	}
 
+	public boolean applyCooldownBySkillId(int skillId) {
+		return true;
+	}
+
+
 	/**
 	 * Gets called when Character receives a debuff from a Mob Skill
 	 *
