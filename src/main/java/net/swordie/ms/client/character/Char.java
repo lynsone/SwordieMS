@@ -199,6 +199,12 @@ public class Char {
 	private int partyID = 0; // Just for DB purposes
 	private int previousFieldID;
 
+	@ElementCollection
+	@CollectionTable(name = "skillcooltimes", joinColumns = @JoinColumn(name = "charID"))
+	@MapKeyColumn(name = "skillid")
+	@Column(name = "nextusabletime")
+	private Map<Integer, Long> skillCoolTimes;
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -343,8 +349,6 @@ public class Char {
 	@Transient
 	private ScheduledFuture timeLimitTimer;
 	@Transient
-	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
-	@Transient
 	private int deathCount = -1;
 	@Transient
 	private long runeStoneCooldown;
@@ -435,6 +439,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		skillCoolTimes = new HashMap<>();
 		familiars = new HashSet<>();
 		hyperrockfields = new int[]{
 				999999999,
@@ -3660,6 +3665,21 @@ public class Char {
 		return skillCoolTimes;
 	}
 
+	public void addSkillCoolTime(int skillId, long nextusabletime) {
+		getSkillCoolTimes().put(skillId, nextusabletime);
+	}
+
+	public void removeSkillCoolTime(int skillId) {
+		getSkillCoolTimes().remove(skillId);
+	}
+
+	public void resetSkillCoolTime(int skillId) {
+		if(hasSkillOnCooldown(skillId)) {
+			removeSkillCoolTime(skillId);
+			write(UserLocal.skillCooltimeSetM(skillId, 0));
+		}
+	}
+
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
 	 *
@@ -3678,7 +3698,7 @@ public class Char {
 	 * @return whether or not the skill was allowed
 	 */
 	public boolean checkAndSetSkillCooltime(int skillID) {
-		if (hasSkillOnCooldown(skillID)) {
+		if (hasSkillOnCooldown(skillID) || !getJobHandler().applyCooldownBySkillId(skillID)) {
 			return false;
 		} else {
 			Skill skill = getSkill(skillID);
@@ -3701,8 +3721,8 @@ public class Char {
 		if (si != null) {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
-			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
 			if (!hasSkillCDBypass()) {
+				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 			}
 		}
