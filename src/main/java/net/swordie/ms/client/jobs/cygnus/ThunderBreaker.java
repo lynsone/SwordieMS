@@ -342,16 +342,16 @@ public class ThunderBreaker extends Noblesse {
     }
 
     @Override
-    public boolean applyCooldownBySkillId(int skillId) {
+    public int alterCooldownSkill(int skillId) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         switch (skillId) {
             case GALE:
             case TYPHOON:
                 if (tsm.hasStat(StrikerHyperElectric)) {
-                    return false;
+                    return 0;
                 }
         }
-        return true;
+        return -1;
     }
 
 

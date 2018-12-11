@@ -1,6 +1,5 @@
 package net.swordie.ms.constants;
 
-import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Zero;
 import net.swordie.ms.client.jobs.adventurer.BeastTamer;
@@ -1241,6 +1240,7 @@ public class SkillConstants {
             case 22141012:
             case ThunderBreaker.GALE:
             case ThunderBreaker.TYPHOON:
+            case Demon.DEMON_CRY:
                 return true;
         }
         return false;

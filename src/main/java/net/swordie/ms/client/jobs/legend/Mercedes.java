@@ -16,7 +16,6 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
@@ -285,7 +284,7 @@ public class Mercedes extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, attackInfo);
+            incrementIgnisRoarStackCount(tsm, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -400,43 +399,44 @@ public class Mercedes extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, AttackInfo attackInfo) {
-        if (Arrays.asList(summonAttacks).contains(skillID)) {
+    private void incrementIgnisRoarStackCount(TemporaryStatManager tsm, AttackInfo attackInfo) {
+        if (Arrays.asList(summonAttacks).contains(attackInfo.skillId)
+                || attackInfo.skillId == getFinalAtkSkill().getSkillId()
+                || attackInfo.skillId == lastAttackSkill) {
             return;
-        } else {
-            Option o = new Option();
-            Option o1 = new Option();
-            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(IGNIS_ROAR);
-            Skill skill = chr.getSkill(IGNIS_ROAR);
-            if (skill == null) {
-                return;
-            }
-            byte slv = (byte) skill.getCurrentLevel();
-            int amount = 1;
-            if(attackInfo.skillId == getFinalAttackSkill()) {
-                return;
-            }
-            if(attackInfo.skillId == lastAttackSkill) {
-                return;
-            }
-            if (tsm.hasStat(IgnisRore)) {
-                if (tsm.hasStat(AddAttackCount)) {
-                    amount = tsm.getOption(AddAttackCount).nOption;
-                    if (amount < ignisRoarInfo.getValue(y, slv)) {
-                        amount++;
-                    }
+        }
+        Option o = new Option();
+        Option o1 = new Option();
+        Skill skill = chr.getSkill(IGNIS_ROAR);
+        if (skill == null) {
+            return;
+        }
+        SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int amount = 1;
+        SkillInfo si = SkillData.getSkillInfoById(lastAttackSkill);
+        if(si != null && si.getAddAttackSkills().stream().noneMatch(aas -> aas == attackInfo.skillId)) {
+            return;
+        }
+        if(attackInfo.skillId != SPIKES_ROYALE) {
+            chr.reduceSkillCoolTime(SPIKES_ROYALE, 1000);
+        }
+        if (tsm.hasStat(IgnisRore)) {
+            if (tsm.hasStat(AddAttackCount)) {
+                amount = tsm.getOption(AddAttackCount).nOption;
+                if (amount < ignisRoarInfo.getValue(y, slv)) {
+                    amount++;
                 }
-
-                lastAttackSkill = attackInfo.skillId;
-                o.nOption = amount;
-                o.rOption = IGNIS_ROAR;
-                o.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(AddAttackCount, o);
-                o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
-                o1.rOption = IGNIS_ROAR;
-                o1.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(DamR, o1);
             }
+            lastAttackSkill = attackInfo.skillId;
+            o.nOption = amount;
+            o.rOption = IGNIS_ROAR;
+            o.tOption = ignisRoarInfo.getValue(subTime, slv);
+            tsm.putCharacterStatValue(AddAttackCount, o);
+            o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
+            o1.rOption = IGNIS_ROAR;
+            o1.tOption = ignisRoarInfo.getValue(subTime, slv);
+            tsm.putCharacterStatValue(DamR, o1);
             tsm.sendSetStatPacket();
         }
     }

@@ -30,10 +30,7 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -154,7 +151,7 @@ public class Pirate extends Beginner {
             ROLL_OF_THE_DICE_BUCC_DD,
             CROSSBONES,
             SPEED_INFUSION,
-            TIME_LEAP, //TODO
+            TIME_LEAP,
             MAPLE_WARRIOR_BUCC,
 
             SCURVY_SUMMONS,
@@ -260,6 +257,13 @@ public class Pirate extends Beginner {
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
+                break;
+            case TIME_LEAP: // TODO Implement personal cooldown of 180sec | Use QR Value
+                for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                    if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset()) {
+                        chr.resetSkillCoolTime(skillId);
+                    }
+                }
                 break;
             case SPEED_INFUSION:
                 PartyBooster pb = (PartyBooster) tsm.getTSBByTSIndex(TSIndex.PartyBooster);

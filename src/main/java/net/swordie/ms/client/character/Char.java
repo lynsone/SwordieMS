@@ -3680,6 +3680,14 @@ public class Char {
 		}
 	}
 
+	public void reduceSkillCoolTime(int skillId, long amountInMS) {
+		if (hasSkillOnCooldown(skillId)) {
+			long nextUsableTime = getSkillCoolTimes().get(skillId);
+			addSkillCoolTime(skillId, nextUsableTime - amountInMS);
+			write(UserLocal.skillCooltimeSetM(skillId, (int) ((nextUsableTime - amountInMS) - System.currentTimeMillis() < 0 ? 0 : (nextUsableTime - amountInMS) - System.currentTimeMillis())));
+		}
+	}
+
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
 	 *
@@ -3698,7 +3706,7 @@ public class Char {
 	 * @return whether or not the skill was allowed
 	 */
 	public boolean checkAndSetSkillCooltime(int skillID) {
-		if (hasSkillOnCooldown(skillID) || !getJobHandler().applyCooldownBySkillId(skillID)) {
+		if (hasSkillOnCooldown(skillID)) {
 			return false;
 		} else {
 			Skill skill = getSkill(skillID);
@@ -3721,7 +3729,11 @@ public class Char {
 		if (si != null) {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
-			if (!hasSkillCDBypass()) {
+			int alteredcd = getJobHandler().alterCooldownSkill(skillID);
+			if (alteredcd >= 0) {
+				cdInMillis = alteredcd;
+			}
+			if (!hasSkillCDBypass() && cdInMillis > 0) {
 				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 			}

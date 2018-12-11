@@ -273,8 +273,8 @@ public abstract class Job {
 		}
 	}
 
-	public boolean applyCooldownBySkillId(int skillId) {
-		return true;
+	public int alterCooldownSkill(int skillId) {
+		return -1;
 	}
 
 
