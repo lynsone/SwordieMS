@@ -388,6 +388,8 @@ public class Char {
 	private String blessingOfFairy = null;
 	@Transient
 	private String blessingOfEmpress = null;
+	@Transient
+	private Map<Integer, Integer> hyperPsdSkillsCooltimeR = new HashMap<>();
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1752,6 +1754,11 @@ public class Char {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
 		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
 		stats.forEach(this::addBaseStat);
+		if (si.isPsd() && si.getSkillStatInfo().containsKey(SkillStat.coolTimeR)) {
+			for(int psdSkill : si.getPsdSkills()) {
+				getHyperPsdSkillsCooltimeR().put(psdSkill, si.getValue(SkillStat.coolTimeR, 1));
+			}
+		}
 	}
 
 	/**
@@ -4412,5 +4419,13 @@ public class Char {
 			addSkill(SkillConstants.getEmpressBlessingByJob(getJob()),
 					Math.min(30, empressChar.getLevel() / 5), 30);
 		}
+	}
+
+	public Map<Integer, Integer> getHyperPsdSkillsCooltimeR() {
+		return hyperPsdSkillsCooltimeR;
+	}
+
+	public void setHyperPsdSkillsCooltimeR(Map<Integer, Integer> hyperPsdSkillsCooltimeR) {
+		this.hyperPsdSkillsCooltimeR = hyperPsdSkillsCooltimeR;
 	}
 }

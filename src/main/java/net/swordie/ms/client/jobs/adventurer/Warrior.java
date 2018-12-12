@@ -101,6 +101,7 @@ public class Warrior extends Beginner {
     public static final int MAGIC_CRASH_DRK = 1321014;
     public static final int SACRIFICE = 1321015; //Resets summon
     public static final int HEROS_WILL_DRK = 1321010;
+    public static final int GUNGNIR_DESCENT = 1321013;
 
     //Hyper Skills
     public static final int EPIC_ADVENTURE_HERO = 1121053; //Lv200
@@ -1150,6 +1151,17 @@ public class Warrior extends Beginner {
             tsm.putCharacterStatValue(Restoration, o);
             tsm.sendSetStatPacket();
         }
+    }
+
+    public int alterCooldownSkill(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        switch (skillId) {
+            case GUNGNIR_DESCENT:
+                if (tsm.hasStatBySkillId(SACRIFICE)) {
+                    return 0;
+                }
+        }
+        return -1;
     }
 
 
