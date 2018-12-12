@@ -3,7 +3,6 @@ package net.swordie.ms.constants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
@@ -175,6 +174,10 @@ public class GameConstants {
     private static int[][] enchantSuccessRates = new int[25][2];
     private static int[][] enchantSuccessRatesSuperior = new int[15][2];
     private static int[] guildExp = new int[MAX_GUILD_LV];
+
+    // Skills
+    public static final int TIME_LEAP_QR_KEY = 99996; // Quest where personal Time Leap CDs get stored
+
 
     private static List<QuickMoveInfo> quickMoveInfos;
     public static int[][][] INC_HP_MP = {

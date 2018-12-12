@@ -63,6 +63,7 @@ public class Mercedes extends Job {
 
     public static final int HEROIC_MEMORIES_MERC = 23121053;
     public static final int ELVISH_BLESSING = 23121054;
+    public static final int WRATH_OF_ENLIL = 23121052;
 
     //Final Attack
     public static final int FINAL_ATTACK_DBG = 23100006;
@@ -420,6 +421,12 @@ public class Mercedes extends Job {
         }
         if(attackInfo.skillId != SPIKES_ROYALE) {
             chr.reduceSkillCoolTime(SPIKES_ROYALE, 1000);
+        }
+        if(attackInfo.skillId != UNICORN_SPIKE) {
+            chr.reduceSkillCoolTime(UNICORN_SPIKE, 1000);
+        }
+        if(attackInfo.skillId != WRATH_OF_ENLIL) {
+            chr.reduceSkillCoolTime(WRATH_OF_ENLIL, 1000);
         }
         if (tsm.hasStat(IgnisRore)) {
             if (tsm.hasStat(AddAttackCount)) {

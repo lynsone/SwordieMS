@@ -16,6 +16,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MoveAbility;
@@ -30,7 +31,10 @@ import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -258,16 +262,20 @@ public class Pirate extends Beginner {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
-            case TIME_LEAP: // TODO Implement personal cooldown of 180sec | Use QR Value
-                for (int skillId : chr.getSkillCoolTimes().keySet()) {
-                    if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset()) {
-                        chr.resetSkillCoolTime(skillId);
+            case TIME_LEAP:
+                long nextAvailableTime = System.currentTimeMillis() + (si.getValue(time, slv)*1000);
+                chr.getScriptManager().createQuestWithQRValue(chr, GameConstants.TIME_LEAP_QR_KEY, String.valueOf(nextAvailableTime), false);
+                if (chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue() == null
+                        || Long.parseLong(chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue()) < System.currentTimeMillis()) {
+                    for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                        if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset()) {
+                            chr.resetSkillCoolTime(skillId);
+                        }
                     }
                 }
                 break;
             case SPEED_INFUSION:
                 PartyBooster pb = (PartyBooster) tsm.getTSBByTSIndex(TSIndex.PartyBooster);
-                pb.setDynamicTermSet(false);
                 pb.setNOption(-1);
                 pb.setROption(skillID);
                 pb.setCurrentTime((int) System.currentTimeMillis());

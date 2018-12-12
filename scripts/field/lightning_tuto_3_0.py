@@ -4,6 +4,7 @@ BLACK_MAGE_MINION_2 = 2159361
 
 sm.lockInGameUI(True)
 sm.curNodeEventEnd(True)
+sm.removeEscapeButton()
 sm.forcedInput(0)
 
 sm.spawnNpc(ARAN, 1500, 50)

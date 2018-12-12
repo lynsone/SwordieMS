@@ -63,7 +63,7 @@ public class Kaiser extends Job {
     public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
-    public static final int KAISERS_MAJESTY = 61121054; // TODO reset Cooldown
+    public static final int KAISERS_MAJESTY = 61121054;
 
 
     //Attacking Skills
@@ -221,14 +221,10 @@ public class Kaiser extends Job {
                 break;
             case GRAND_ARMOR:
                 // w = party dmg taken  v = self dmg taken
-                o1.nOption = si.getValue(w, slv);
+                o1.nOption = si.getValue(v, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamageReduce, o1); //TODO DamageReduce Party-wide
-                o2.nOption = si.getValue(v, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamageReduce, o2);
+                tsm.putCharacterStatValue(DamageReduce, o1);
                 break;
             case NOVA_WARRIOR_KAISER:
                 o1.nReason = skillID;
@@ -373,7 +369,11 @@ public class Kaiser extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
-                //TODO Cooldown Reset
+                for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                    if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset() && SkillData.getSkillInfoById(skillId).getHyper() == 0) {
+                        chr.resetSkillCoolTime(skillId);
+                    }
+                }
                 break;
             case STONE_DRAGON:
             case STONE_DRAGON_FINAL_FORM:

@@ -84,6 +84,7 @@ public class ThunderBreaker extends Noblesse {
     };
 
     private int lastAttackSkill = 0;
+    private byte arcChargeCDCount;
 
     public ThunderBreaker(Char chr) {
         super(chr);
@@ -131,11 +132,12 @@ public class ThunderBreaker extends Noblesse {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
-            case ARC_CHARGER: //TODO   y = - y seconds Cooltime per Lightning Buff
+            case ARC_CHARGER:
                 o1.nOption = si.getValue(x, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(ShadowPartner, o1);
+                arcChargeCDCount = 0;
                 break;
             case SPEED_INFUSION:
                 TemporaryStatBase tsb = tsm.getTSBByTSIndex(TSIndex.PartyBooster);
@@ -274,6 +276,20 @@ public class ThunderBreaker extends Noblesse {
         o.tOption = leInfo.getValue(y, leInfo.getCurrentLevel());
         tsm.putCharacterStatValue(IgnoreTargetDEF, o);
         tsm.sendSetStatPacket();
+        reduceArcChargerCoolTime();
+    }
+
+    private void reduceArcChargerCoolTime() {
+        Skill skill = chr.getSkill(ARC_CHARGER);
+        if (skill == null || arcChargeCDCount >= 5) {
+            return;
+        }
+        SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+
+        arcChargeCDCount++;
+        chr.reduceSkillCoolTime(ARC_CHARGER, (si.getValue(y, slv) * 1000));
+        chr.chatMessage(arcChargeCDCount + "");
     }
 
     private Skill getLightningChargeSkill() {

@@ -3688,6 +3688,13 @@ public class Char {
 		}
 	}
 
+	public long getRemainingCoolTime(int skillId) {
+		if (hasSkillOnCooldown(skillId)) {
+			return getSkillCoolTimes().getOrDefault(skillId, System.currentTimeMillis()) - System.currentTimeMillis();
+		}
+		return 0L;
+	}
+
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
 	 *
