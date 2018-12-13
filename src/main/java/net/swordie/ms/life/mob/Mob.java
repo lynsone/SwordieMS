@@ -48,7 +48,6 @@ public class Mob extends Life {
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp;
     private long mp;
-    private int level;
     private byte calcDamageIndex = 1, moveAction, appearType, teamForMCarnival;
     private Position prevPos;
     private Foothold curFoodhold;
