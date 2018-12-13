@@ -51,6 +51,14 @@ import static net.swordie.ms.enums.InventoryOperation.ADD;
 public class AdminCommands {
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
+    @Command(names = {"lookupreactor"}, requiredType = Admin)
+    public static class lookupreactor extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            chr.getField().getReactors().stream().forEach(reactor -> chr.chatMessage("reactor" + reactor.toString()));
+        }
+        }
+
+
     @Command(names = {"test"}, requiredType = Admin)
     public static class Test extends AdminCommand {
 

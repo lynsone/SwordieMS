@@ -1,5 +1,8 @@
 package net.swordie.ms.life.mob;
 
+import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
@@ -32,6 +35,7 @@ import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import org.python.modules.math;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -44,6 +48,7 @@ public class Mob extends Life {
     private int refImgMobID, lifeReleaseOwnerAID, afterAttack, currentAction, scale, eliteGrade, eliteType, targetUserIdFromServer;
     private long hp;
     private long mp;
+    private int level;
     private byte calcDamageIndex = 1, moveAction, appearType, teamForMCarnival;
     private Position prevPos;
     private Foothold curFoodhold;
@@ -139,6 +144,7 @@ public class Mob extends Life {
     private List<EscortDest> escortDest = new ArrayList<>();
     private int currentDestIndex = 0;
     private int escortStopDuration = 0;
+    private final static Random rand = new Random();
 
     public Mob(int templateId) {
         super(templateId);
@@ -193,6 +199,7 @@ public class Mob extends Life {
         copy.setTargetUserIdFromServer(getTargetUserIdFromServer());
         copy.setHp(getHp());
         copy.setMaxHp(getMaxHp());
+        copy.setLevel(getLevel());
         copy.setCalcDamageIndex(getCalcDamageIndex());
         copy.setMoveAction(getMoveAction());
         copy.setAppearType(getAppearType());
@@ -553,6 +560,11 @@ public class Mob extends Life {
         return getForcedMobStat().getMaxHP();
     }
 
+    public long getExp()
+    {
+        return getForcedMobStat().getExp();
+    }
+
     public void setMaxHp(long maxHp) {
         getForcedMobStat().setMaxHP(maxHp);
     }
@@ -572,6 +584,32 @@ public class Mob extends Life {
     public void setMaxMp(long maxMp) {
         getForcedMobStat().setMaxMP(maxMp);
     }
+
+    public int getLevel(){return getForcedMobStat().getLevel();}
+
+    public void setLevel(int level) {
+        getForcedMobStat().setLevel(level);
+    }
+
+    public int getPad()
+    {
+        return getForcedMobStat().getPad();
+    }
+    public void setPad(int Pad)
+    {
+        getForcedMobStat().setPad(Pad);
+    }
+    public int getMad()
+    {
+        return getForcedMobStat().getMad();
+    }
+    public void setMad(int Mad)
+    {
+        getForcedMobStat().setMad(Mad);
+    }
+    public int getPdr(){return getForcedMobStat().getPdr();}
+
+    public int getMdr(){return getForcedMobStat().getMdr();}
 
     public void setTemporaryStat(MobTemporaryStat temporaryStat) {
         this.temporaryStat = temporaryStat;
@@ -1158,6 +1196,22 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
+            //TODO horntail kills
+            if(this.getTemplateId() == 8810214 || this.getTemplateId() == 8810018 || this.getTemplateId() == 8810118  )
+            {
+                getField().getMobs().forEach(Mob::die);
+                getField().getMobs().forEach(Mob::die);
+                getField().getMobs().forEach(Mob::die);
+                if(this.getTemplateId() == 8810118)
+                {
+
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+                    getField().getMobs().forEach(Mob::die);
+
+                }
+            }
             die();
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
                 damageDealer.getScriptManager().setQRValue(38022, "clear", false);
@@ -1181,6 +1235,7 @@ public class Mob extends Life {
         }
         distributeExp();
         dropDrops(); // xd
+        addNxCash(getObjectId());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
@@ -1261,6 +1316,31 @@ public class Mob extends Life {
         getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID, totalMesoRate, totalDropRate);
     }
 
+    void addNxCash(int monsterID)
+    {
+        Char chr = getMostDamageChar();
+        if (chr != null)
+        {
+            Account account = chr.getAccount();
+            if (rand.nextInt(100) < 100) // 2nd value is chance
+            {
+
+                chr.write(User.scriptProgressMessage("You have gained " + calculateNxCash(monsterID) + " NX cash."));
+                account.addNXCredit(calculateNxCash(monsterID));
+            }
+        }
+    }
+
+    int calculateNxCash(int monsterID)
+    {
+        double amount = ((math.sqrt(getMaxHp()/100D)) * ((double) getMaxHp() / (getExp() * getLevel())) * getExp()/getExp());
+        amount = math.ceil(amount);
+        if(amount < 1)
+        {
+            amount = 1;
+        }
+        return (int) amount;
+    }
     public Map<Char, Long> getDamageDone() {
         return damageDone;
     }

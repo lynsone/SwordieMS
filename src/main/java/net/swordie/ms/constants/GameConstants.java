@@ -149,6 +149,10 @@ public class GameConstants {
 
     // END OF Party Quests
 
+    //Boss QR Values
+    public static final int EASY_HORNTAIL_QUEST = 99996; // Quest where the Spawn state of horntail's heads is stored
+    public static final int EASY_HILLA_QUEST = 99995; //Quest where the state of hilla portals is stored
+    public static final int ARKARIUM_QUEST = 99994; //Quest wehre difficulty of arkarium is stored
     // Trading
     public static final int MAX_TRADE_ITEMS = 9;
 
