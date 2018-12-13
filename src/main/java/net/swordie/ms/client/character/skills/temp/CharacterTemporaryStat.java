@@ -217,7 +217,7 @@ public enum CharacterTemporaryStat implements Comparator<CharacterTemporaryStat>
     LUK(182),
     DispelItemOptionByField(183),
 
-    DarkTornado(184),
+    DarkTornado(184), // Cygnus Attack
     PVPDamage(185),
     PvPScoreBonus(186),
     PvPInvincible(187),

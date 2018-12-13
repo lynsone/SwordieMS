@@ -13,6 +13,7 @@ import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.life.mob.MobStat;
@@ -284,6 +285,12 @@ public class AffectedArea extends Life {
                 break;
             case BeastTamer.PURR_ZONE:
                 chr.heal(si.getValue(hp, slv));
+                break;
+            case Xenon.TEMPORAL_POD:
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(VenomSnake, o1);
+                Xenon.temporalPodTimer(chr);
                 break;
         }
         tsm.sendSetStatPacket();
