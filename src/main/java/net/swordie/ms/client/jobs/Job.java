@@ -383,6 +383,11 @@ public abstract class Job {
 		hitInfo.hpDamage = damage;
 		hitInfo.templateID = templateID;
 		hitInfo.mobID = mobID;
+
+		if(chr.isInvincible()) {
+			return;
+		}
+
 		handleHit(c, inPacket, hitInfo);
 		handleHit(c, hitInfo);
 	}

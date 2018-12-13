@@ -1078,6 +1078,11 @@ public class SkillConstants {
         return skillID;
     }
 
+    public static boolean isPassiveSkill_NoPsdSkillsCheck(int skillId) {
+        SkillInfo si = SkillData.getSkillInfoById(skillId);
+        return si != null && si.isPsd();
+    }
+
     public static boolean isPassiveSkill(int skillId) {
         SkillInfo si = SkillData.getSkillInfoById(skillId);
         return si != null && si.isPsd() && si.getPsdSkills().size() == 0;

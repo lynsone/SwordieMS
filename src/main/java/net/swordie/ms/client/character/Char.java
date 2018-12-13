@@ -390,6 +390,8 @@ public class Char {
 	private String blessingOfEmpress = null;
 	@Transient
 	private Map<Integer, Integer> hyperPsdSkillsCooltimeR = new HashMap<>();
+	@Transient
+	private boolean isInvincible = false;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -1741,7 +1743,7 @@ public class Char {
 		stats.put(BaseStat.acc, 11L);
 		stats.put(BaseStat.eva, 8L);
 		stats.put(BaseStat.buffTimeR, 100L);
-		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
+		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill_NoPsdSkillsCheck(skill.getSkillId())).
 				forEach(this::addToBaseStatCache);
 	}
 
@@ -1752,8 +1754,10 @@ public class Char {
 	 */
 	public void addToBaseStatCache(Skill skill) {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
-		stats.forEach(this::addBaseStat);
+		if(SkillConstants.isPassiveSkill(skill.getSkillId())) {
+			Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+			stats.forEach(this::addBaseStat);
+		}
 		if (si.isPsd() && si.getSkillStatInfo().containsKey(SkillStat.coolTimeR)) {
 			for(int psdSkill : si.getPsdSkills()) {
 				getHyperPsdSkillsCooltimeR().put(psdSkill, si.getValue(SkillStat.coolTimeR, 1));
@@ -4427,5 +4431,13 @@ public class Char {
 
 	public void setHyperPsdSkillsCooltimeR(Map<Integer, Integer> hyperPsdSkillsCooltimeR) {
 		this.hyperPsdSkillsCooltimeR = hyperPsdSkillsCooltimeR;
+	}
+
+	public boolean isInvincible() {
+		return isInvincible;
+	}
+
+	public void setInvincible(boolean invincible) {
+		isInvincible = invincible;
 	}
 }

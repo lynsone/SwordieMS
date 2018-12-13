@@ -45,6 +45,7 @@ public class Drop extends Life {
         super(templateId);
         this.item = item;
         dropType = DropType.Item;
+        dropMotionType = DropMotionType.Normal;
         expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
@@ -52,6 +53,7 @@ public class Drop extends Life {
         super(templateId);
         this.money = money;
         dropType = DropType.Mesos;
+        dropMotionType = DropMotionType.Normal;
         expireTime = FileTime.fromType(FileTime.Type.ZERO_TIME);
     }
 
