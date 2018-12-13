@@ -101,6 +101,7 @@ public class Channel {
         Field newField = FieldData.getFieldCopyById(id);
         if (newField != null) {
             newField.setChannelField(true);
+            newField.setChannel(getChannelId());
             getFields().add(newField);
         }
         return newField;

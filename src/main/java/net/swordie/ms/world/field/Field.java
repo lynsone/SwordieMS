@@ -86,6 +86,7 @@ public class Field {
     private boolean isChannelField;
     private Map<Integer, List<String>> directionInfo;
     private Clock clock;
+    private int channel;
 
     public Field(int fieldID) {
         this.id = fieldID;
@@ -1239,14 +1240,15 @@ public class Field {
      */
     public void generateMobs(boolean init) {
         if (init || getChars().size() > 0) {
-            int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
-            boolean buffed = channelID > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
+            boolean buffed = !isChannelField()
+                    && getChannel() > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
             int currentMobs = getMobs().size();
             for (MobGen mg : getMobGens()) {
                 if (mg.canSpawnOnField(this)) {
                     mg.spawnMob(this, buffed);
                     currentMobs++;
-                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
+                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0
+                            && currentMobs > getFixedMobCapacity()) {
                         break;
                     }
                 }
@@ -1307,9 +1309,7 @@ public class Field {
     }
 
     public void removeTownPortal(TownPortal townPortal) {
-        if (getTownPortalList().contains(townPortal)) {
-            getTownPortalList().remove(townPortal);
-        }
+        getTownPortalList().remove(townPortal);
     }
 
     public TownPortal getTownPortalByChrId(int chrId) {
@@ -1318,7 +1318,7 @@ public class Field {
     
     public void increaseReactorState(Char chr, int templateId, int stateLength) {
         Life life = getLifeByTemplateId(templateId);
-        if (life != null && life instanceof Reactor) {
+        if (life instanceof Reactor) {
             Reactor reactor = (Reactor) life;
             reactor.increaseState();
             chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
@@ -1347,5 +1347,13 @@ public class Field {
 
     public void setClock(Clock clock) {
         this.clock = clock;
+    }
+
+    public int getChannel() {
+        return channel;
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
     }
 }
