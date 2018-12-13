@@ -458,8 +458,6 @@ public class WorldHandler {
                         if (life != null) {
                             Mob mob2 = (Mob) life;
                             mob2.damage(chr, totalDamage);
-                            System.out.println("boss sponge hp :" + (mob2.getHp()));
-                            System.out.println("boss total damage taken: " + totalDamage);
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
                         }
                     }
@@ -468,8 +466,6 @@ public class WorldHandler {
                         if(life2 != null) {
                             Mob mob2 = (Mob) life2;
                             mob2.damage(chr, totalDamage);
-                            System.out.println("boss sponge hp :" + (mob2.getHp()));
-                            System.out.println("boss total damage taken: " + totalDamage);
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
                         }
                     }
@@ -478,8 +474,6 @@ public class WorldHandler {
                         if(life3 != null) {
                             Mob mob3 = (Mob) life3;
                             mob3.damage(chr, totalDamage);
-                            System.out.println("boss sponge hp :" + (mob3.getHp()));
-                            System.out.println("boss total damage taken: " + totalDamage);
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob3)));
                             }
                         }
@@ -6097,7 +6091,6 @@ public class WorldHandler {
         }
         chr.getField().broadcastPacket(CField.makingSkillResult(chr.getId(), recipeID, result, target, incSkillProficiency));
         chr.write(User.effect(Effect.gainQuestItem(itemResult)));
-        System.out.println(MakingSkillRecipe.getSuccessProb(reqSkillID, msr.getRecommandedSkillLevel(), chr.getMakingSkillLevel(reqSkillID)));
     }
 
     public static void handleUserRecipeOpenItemUseRequest(Char chr, InPacket inPacket) {

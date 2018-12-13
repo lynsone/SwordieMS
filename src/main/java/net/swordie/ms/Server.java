@@ -2,6 +2,7 @@ package net.swordie.ms;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -71,7 +72,7 @@ public class Server extends Properties {
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
-		worldList.add(new World(1, "Je Moeder", 3));
+		worldList.add(new World(1, "Je Moeder", GameConstants.CHANNELS_PER_WORLD));
 		long startCashShop = System.currentTimeMillis();
 		initCashShop();
 		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startCashShop) + "ms");

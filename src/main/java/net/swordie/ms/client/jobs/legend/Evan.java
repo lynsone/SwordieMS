@@ -43,29 +43,29 @@ public class Evan extends Job {
     public static final int INHERITED_WILL = 20010194;
     public static final int BACK_TO_NATURE = 20011293;
 
-    public static final int MAGIC_GUARD = 22001012; //Buff
+    public static final int MAGIC_GUARD = 22001012; // Buff
 
-    public static final int MAGIC_BOOSTER = 22111020; //Buff
-    public static final int ELEMENTAL_DECREASE = 22141016; //Buff
+    public static final int MAGIC_BOOSTER = 22111020; // Buff
+    public static final int ELEMENTAL_DECREASE = 22141016; // Buff
     public static final int PARTNERS = 22110016;
 
-    public static final int BLESSING_OF_THE_ONYX = 22181000; //Buff
-    public static final int MAPLE_WARRIOR_EVAN = 22171000; //Buff
+    public static final int BLESSING_OF_THE_ONYX = 22181000; // Buff
+    public static final int MAPLE_WARRIOR_EVAN = 22171000; // Buff
     public static final int MAGIC_DEBRIS = 22141017;
 
-    public static final int DRAGON_MASTER = 22171080; //Mount
-    public static final int DRAGON_MASTER_2 = 22171083; //Add-on
-    public static final int SUMMON_ONYX_DRAGON = 22171081; //Summon
+    public static final int DRAGON_MASTER = 22171080; // Mount
+    public static final int DRAGON_MASTER_2 = 22171083; // Add-on
+    public static final int SUMMON_ONYX_DRAGON = 22171081; // Summon
     public static final int HEROIC_MEMORIES_EVAN = 22171082;
     public static final int ENHANCED_MAGIC_DEBRIS = 22170070;
     public static final int HEROS_WILL_EVAN = 22171004;
     public static final int DRAGON_FURY = 22170074;
 
     //Returns
-    public static final int RETURN_FLASH = 22110013; //Return after Wind Skills (Mob Debuff)
-    public static final int RETURN_DIVE = 22140013; //Return Dive (Buff)
-    public static final int RETURN_FLAME = 22170064; //Return Flame (Flame  AoE)
-    public static final int RETURN_FLAME_TILE = 22170093; //Return Flames Tile
+    public static final int RETURN_FLASH = 22110013; // Return after Wind Skills (Mob Debuff)
+    public static final int RETURN_DIVE = 22140013; // Return Dive (Buff)
+    public static final int RETURN_FLAME = 22170064; // Return Flame (Flame  AoE)
+    public static final int RETURN_FLAME_TILE = 22170093; // Return Flames Tile
 
 
     //Evan Attacks

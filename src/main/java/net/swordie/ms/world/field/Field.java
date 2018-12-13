@@ -1238,34 +1238,15 @@ public class Field {
      * @param init if this is the first time that this method is called.
      */
     public void generateMobs(boolean init) {
-        if ((getChars().size() > 0)) {
-            int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
-            if(channelID <= 2) {
-                int currentMobs = getMobs().size();
-                for (MobGen mg : getMobGens()) {
-                    if (mg.canSpawnOnField(this)) {
-                        mg.spawnMob(this, channelID);
-
-                        currentMobs++;
-                        if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
-                            break;
-                        }
-                    }
-                }
-            }
-            if(channelID == 3)
-            {
-                System.out.println("current channel "+ Util.getRandomFromCollection(this.getChars()).getClient().getChannel());
-                int currentMobs = getMobs().size();
-                for (MobGen mg : getMobGens()) {
-                    if (mg.canSpawnOnField(this)) {
-                        mg.spawnMob(this, channelID);
-
-                        currentMobs++;
-                        if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
-                            break;
-                        }
-                    }
+        int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
+        boolean buffed = channelID > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
+        int currentMobs = getMobs().size();
+        for (MobGen mg : getMobGens()) {
+            if (mg.canSpawnOnField(this)) {
+                mg.spawnMob(this, buffed);
+                currentMobs++;
+                if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
+                    break;
                 }
             }
         }

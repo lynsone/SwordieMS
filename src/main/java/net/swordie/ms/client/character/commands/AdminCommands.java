@@ -51,23 +51,11 @@ import static net.swordie.ms.enums.InventoryOperation.ADD;
 public class AdminCommands {
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
-    @Command(names = {"lookupreactor"}, requiredType = Admin)
-    public static class lookupreactor extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            chr.getField().getReactors().stream().forEach(reactor -> chr.chatMessage("reactor" + reactor.toString()));
-        }
-        }
-
-
     @Command(names = {"test"}, requiredType = Admin)
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            PetItem item = (PetItem) chr.getCashInventory().getItemBySlot((short) 1);
-            item.setDateExpire(FileTime.fromDate(LocalDateTime.now().plusHours(3)));
-            item.setDateDead(item.getDateExpire());
-            item.updateToChar(chr);
-            System.out.println(item.getDateExpire().toLocalDateTime().toInstant(ZoneOffset.UTC));
+            
         }
     }
 
@@ -1726,6 +1714,14 @@ public class AdminCommands {
             chr.chatMessage("" + num);
         }
     }
+
+    @Command(names = {"lookupreactor", "reactors"}, requiredType = Tester)
+    public static class lookupreactor extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            chr.getField().getReactors().forEach(reactor -> chr.chatMessage(reactor.toString()));
+        }
+    }
+
 
 
 

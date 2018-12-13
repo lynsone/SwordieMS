@@ -1176,7 +1176,7 @@ public class Char {
 				if (getZeroInfo() == null) {
 					initZeroInfo();
 				}
-				getZeroInfo().encode(outPacket); //ZeroInfo::Decode
+				getZeroInfo().encode(outPacket); // ZeroInfo::Decode
 			}
 		}
 		if (mask.isInMask(DBChar.ShopBuyLimit)) {

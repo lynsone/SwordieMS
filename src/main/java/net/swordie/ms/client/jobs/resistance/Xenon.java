@@ -325,7 +325,7 @@ public class Xenon extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            //Increment Supply on attack
+            // Increment Supply on attack
             if (Util.succeedProp(supplyProp) &&
                     attackInfo.skillId != 0 &&
                     attackInfo.skillId != PINPOINT_SALVO &&
@@ -336,7 +336,7 @@ public class Xenon extends Job {
                 incrementSupply();
             }
 
-            //Triangulation
+            // Triangulation
             applyTriangulationOnMob(attackInfo);
         }
         applySupplyCost(skillID, (byte) slv, si);

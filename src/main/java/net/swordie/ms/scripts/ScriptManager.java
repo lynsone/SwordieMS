@@ -7,6 +7,7 @@ import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Clock;
@@ -441,7 +442,7 @@ public interface ScriptManager extends Observer {
 	 */
 	void teleportToPortal(int portalId);
 
-	boolean checkDropsinRect(int itemID, int rectRange);
+	Drop getDropInRect(int itemID, int rectRange);
 	/**
 	 * Gets the id of the linked {@link Field}
 	 * Example: "sm.getFieldID()"

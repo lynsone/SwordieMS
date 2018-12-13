@@ -144,7 +144,6 @@ public class Mob extends Life {
     private List<EscortDest> escortDest = new ArrayList<>();
     private int currentDestIndex = 0;
     private int escortStopDuration = 0;
-    private final static Random rand = new Random();
 
     public Mob(int templateId) {
         super(templateId);
@@ -362,7 +361,9 @@ public class Mob extends Life {
         return detectX;
     }
 
-    public void setDetectX(int detectX) {this.detectX = detectX; }
+    public void setDetectX(int detectX) {
+        this.detectX = detectX;
+    }
 
     public int getSenseX() {
         return senseX;
@@ -560,8 +561,7 @@ public class Mob extends Life {
         return getForcedMobStat().getMaxHP();
     }
 
-    public long getExp()
-    {
+    public long getExp() {
         return getForcedMobStat().getExp();
     }
 
@@ -585,31 +585,37 @@ public class Mob extends Life {
         getForcedMobStat().setMaxMP(maxMp);
     }
 
-    public int getLevel(){return getForcedMobStat().getLevel();}
+    public int getLevel() {
+        return getForcedMobStat().getLevel();
+    }
 
     public void setLevel(int level) {
         getForcedMobStat().setLevel(level);
     }
 
-    public int getPad()
-    {
+    public int getPad() {
         return getForcedMobStat().getPad();
     }
-    public void setPad(int Pad)
-    {
-        getForcedMobStat().setPad(Pad);
+
+    public void setPad(int pad) {
+        getForcedMobStat().setPad(pad);
     }
-    public int getMad()
-    {
+
+    public int getMad() {
         return getForcedMobStat().getMad();
     }
-    public void setMad(int Mad)
-    {
-        getForcedMobStat().setMad(Mad);
-    }
-    public int getPdr(){return getForcedMobStat().getPdr();}
 
-    public int getMdr(){return getForcedMobStat().getMdr();}
+    public void setMad(int mad) {
+        getForcedMobStat().setMad(mad);
+    }
+
+    public int getPdr() {
+        return getForcedMobStat().getPdr();
+    }
+
+    public int getMdr() {
+        return getForcedMobStat().getMdr();
+    }
 
     public void setTemporaryStat(MobTemporaryStat temporaryStat) {
         this.temporaryStat = temporaryStat;
@@ -1159,32 +1165,57 @@ public class Mob extends Life {
         this.revives = revives;
     }
 
-    public void addRevive(int revive) {revives.add(revive);}
+    public void addRevive(int revive) {
+        revives.add(revive);
+    }
 
-    public void setBanMap(boolean isBanMap) { this.isBanMap = isBanMap; }
+    public void setBanMap(boolean isBanMap) {
+        this.isBanMap = isBanMap;
+    }
 
-    public boolean isBanMap() { return isBanMap; }
+    public boolean isBanMap() {
+        return isBanMap;
+    }
 
-    public void setBanType(int banType) { this.banType = banType; }
+    public void setBanType(int banType) {
+        this.banType = banType;
+    }
 
-    public int getBanType() { return banType; }
+    public int getBanType() {
+        return banType;
+    }
 
-    public void setBanMsgType(int banMsgType) { this.banMsgType = banMsgType; }
+    public void setBanMsgType(int banMsgType) {
+        this.banMsgType = banMsgType;
+    }
 
-    public int getBanMsgType() { return banMsgType; }
+    public int getBanMsgType() {
+        return banMsgType;
+    }
 
-    public void setBanMsg(String banMsg) { this.banMsg = banMsg; }
+    public void setBanMsg(String banMsg) {
+        this.banMsg = banMsg;
+    }
 
-    public String getBanMsg() { return banMsg; }
+    public String getBanMsg() {
+        return banMsg;
+    }
 
-    public void setBanMapFields(List<Tuple<Integer, String>> banMap) { this.banMap = banMap; }
+    public void setBanMapFields(List<Tuple<Integer, String>> banMap) {
+        this.banMap = banMap;
+    }
 
-    public List<Tuple<Integer, String>> getBanMapFields() { return banMap; }
+    public List<Tuple<Integer, String>> getBanMapFields() {
+        return banMap;
+    }
 
-    public void addBanMap(int fieldID, String portal) { this.banMap.add(new Tuple<>(fieldID, portal)); }
+    public void addBanMap(int fieldID, String portal) {
+        this.banMap.add(new Tuple<>(fieldID, portal));
+    }
 
     /**
      * Damages a mob.
+     *
      * @param totalDamage the total damage that should be applied to the mob
      */
     public void damage(Char damageDealer, long totalDamage) {
@@ -1196,21 +1227,10 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
-            //TODO horntail kills
-            if(this.getTemplateId() == 8810214 || this.getTemplateId() == 8810018 || this.getTemplateId() == 8810118  )
-            {
+            // Boss sponges
+            // TODO horntail kills
+            if (getTemplateId() == 8810214 || getTemplateId() == 8810018 || getTemplateId() == 8810118) {
                 getField().getMobs().forEach(Mob::die);
-                getField().getMobs().forEach(Mob::die);
-                getField().getMobs().forEach(Mob::die);
-                if(this.getTemplateId() == 8810118)
-                {
-
-                    getField().getMobs().forEach(Mob::die);
-                    getField().getMobs().forEach(Mob::die);
-                    getField().getMobs().forEach(Mob::die);
-                    getField().getMobs().forEach(Mob::die);
-
-                }
             }
             die();
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
@@ -1230,12 +1250,11 @@ public class Mob extends Life {
         Field field = getField();
         getField().broadcastPacket(MobPool.leaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());
-        if(isSplit()) {
+        if (isSplit()) {
             return;
         }
         distributeExp();
         dropDrops(); // xd
-        addNxCash(getObjectId());
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
@@ -1278,7 +1297,7 @@ public class Mob extends Life {
         }
         setChanged();
         notifyObservers();
-        //TEST
+        // TEST
         reviveMob();
     }
 
@@ -1316,31 +1335,6 @@ public class Mob extends Life {
         getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID, totalMesoRate, totalDropRate);
     }
 
-    void addNxCash(int monsterID)
-    {
-        Char chr = getMostDamageChar();
-        if (chr != null)
-        {
-            Account account = chr.getAccount();
-            if (rand.nextInt(100) < 100) // 2nd value is chance
-            {
-
-                chr.write(User.scriptProgressMessage("You have gained " + calculateNxCash(monsterID) + " NX cash."));
-                account.addNXCredit(calculateNxCash(monsterID));
-            }
-        }
-    }
-
-    int calculateNxCash(int monsterID)
-    {
-        double amount = ((math.sqrt(getMaxHp()/100D)) * ((double) getMaxHp() / (getExp() * getLevel())) * getExp()/getExp());
-        amount = math.ceil(amount);
-        if(amount < 1)
-        {
-            amount = 1;
-        }
-        return (int) amount;
-    }
     public Map<Char, Long> getDamageDone() {
         return damageDone;
     }
@@ -1348,7 +1342,8 @@ public class Mob extends Life {
     /**
      * Adds a damage amount to the given Char's current damage. Purely used for keeping track of total damage done by
      * a Char.
-     * @param chr the Char the damage originates from
+     *
+     * @param chr    the Char the damage originates from
      * @param damage the damage done
      */
     public void addDamage(Char chr, long damage) {
@@ -1376,7 +1371,7 @@ public class Mob extends Life {
             ExpIncreaseInfo eei = new ExpIncreaseInfo();
 
             // Burning Field
-            if(getField().getBurningFieldLevel() > 0) {
+            if (getField().getBurningFieldLevel() > 0) {
                 int burningFieldBonusExp = (int) (appliedExpPre * getField().getBonusExpByBurningFieldLevel() / 100);
                 eei.setRestFieldBonusExp(burningFieldBonusExp);
                 eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
@@ -1384,7 +1379,7 @@ public class Mob extends Life {
             }
 
             // + Exp% MobStats
-            if(getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) && getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption > 0) { // xOption for Exp%
+            if (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) && getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption > 0) { // xOption for Exp%
                 int expIncrease = getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption;
                 long mobStatBonusExp = ((appliedExpPre * expIncrease) / 100);
                 eei.setBaseAddExp((int) mobStatBonusExp);
@@ -1512,8 +1507,8 @@ public class Mob extends Life {
     }
 
     public void reviveMob() {
-        if(getRevives().size() > 0) {
-            for(int reviveTemplateID : getRevives()) {
+        if (getRevives().size() > 0) {
+            for (int reviveTemplateID : getRevives()) {
                 Mob mob = MobData.getMobDeepCopyById(reviveTemplateID);
                 mob.setNotRespawnable(true);
                 mob.setPosition(getPosition());
@@ -1548,6 +1543,7 @@ public class Mob extends Life {
 
     /**
      * Sets when a next skill can be used (in ms from current time).
+     *
      * @param delay The delay until the next skill can be used
      */
     public void setSkillDelay(long delay) {
@@ -1693,12 +1689,12 @@ public class Mob extends Life {
         chr.comboKillResetTimer();
 
         // Exp Orb spawning from Mob every 50 combos
-        if(chr.getComboCounter() % 50 == 0) {
+        if (chr.getComboCounter() % 50 == 0) {
             Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
-            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
+            if (chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
                 item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
             }
-            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
+            if (chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
                 item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
             }
             Drop drop = new Drop(-1, item);
@@ -1707,7 +1703,7 @@ public class Mob extends Life {
         }
 
         // Mage FP skill
-        if(isInfestedByViralSlime()) {
+        if (isInfestedByViralSlime()) {
             Magician.infestViralSlime(chr, this);
         }
 
@@ -1804,14 +1800,14 @@ public class Mob extends Life {
         outPacket.encodeShort(getHomeFoothold().getId());
         byte appearType = getAppearType();
         outPacket.encodeShort(appearType);
-        if(appearType == -3 || appearType >= 0) {
+        if (appearType == -3 || appearType >= 0) {
             // init -> -2, -1 else
             outPacket.encodeInt(getOption());
         }
         outPacket.encodeByte(getTeamForMCarnival());
         outPacket.encodeInt(getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) getHp());
         outPacket.encodeInt(getEffectItemID());
-        if(isPatrolMob()) {
+        if (isPatrolMob()) {
             outPacket.encodeInt(getPosition().getX() - getRange());
             outPacket.encodeInt(getPosition().getX() + getRange());
             outPacket.encodeInt(getDetectX());
@@ -1823,7 +1819,7 @@ public class Mob extends Life {
         outPacket.encodeInt(0); // ?
         int ownerAID = getLifeReleaseOwnerAID();
         outPacket.encodeByte(ownerAID > 0);
-        if(ownerAID > 0) {
+        if (ownerAID > 0) {
             outPacket.encodeInt(ownerAID);
             outPacket.encodeString(getLifeReleaseOwnerName());
             outPacket.encodeString(getLifeReleaseMobName());
@@ -1839,7 +1835,7 @@ public class Mob extends Life {
         }
         outPacket.encodeInt(getScale());
         outPacket.encodeInt(getEliteGrade());
-        if(getEliteGrade() >= 0) {
+        if (getEliteGrade() >= 0) {
             size = 0;
             outPacket.encodeInt(size);
             for (int i = 0; i < size; i++) {
@@ -1850,7 +1846,7 @@ public class Mob extends Life {
         }
         ShootingMoveStat sms = getShootingMoveStat();
         outPacket.encodeByte(sms != null);
-        if(sms != null) {
+        if (sms != null) {
             sms.encode(outPacket);
         }
         size = 0;
@@ -1864,9 +1860,18 @@ public class Mob extends Life {
     }
 
     public int getNxDropAmount() {
-        long hp = getMaxHp();
-        ForcedMobStat fms = getForcedMobStat();
-        int base = (int) (50 + (fms.getLevel() / 2D) * (Math.pow(hp, (1/7D))));
-        return Util.getRandom(base, (base + base / 10)); // base + 10% random
+        // yuno
+        if (getExp() == 0) {
+            return 0;
+        }
+        double amount = ((math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
+        return (int) (amount + 1);
+
+
+        // sjonnie
+//        long hp = getMaxHp();
+//        ForcedMobStat fms = getForcedMobStat();
+//        int base = (int) (50 + (fms.getLevel() / 2D) * (Math.pow(hp, (1 / 7D))));
+//        return Util.getRandom(base, (base + base / 10)); // base + 10% random
     }
 }

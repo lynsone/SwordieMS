@@ -60,7 +60,7 @@ public class DropData {
             for (Map.Entry<Integer, Set<DropInfo>> drop : getDrops().entrySet()) {
                 mobID = drop.getKey();
                 for (DropInfo di : drop.getValue()) {
-                    System.out.println(String.format("(%d, %d, %d, %d, %d),", mobID, di.getItemID(), di.getChance(), di.getMinQuant(), di.getMaxQuant()));
+                    log.debug(String.format("(%d, %d, %d, %d, %d),", mobID, di.getItemID(), di.getChance(), di.getMinQuant(), di.getMaxQuant()));
                 }
             }
 //            for (DropInfo globalDrop : getDropInfoByID(-1)) {

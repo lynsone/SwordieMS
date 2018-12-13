@@ -1089,34 +1089,28 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	@Override
-	public boolean checkDropsinRect(int itemID, int rectRange)
-	{
-		Field field = chr.getField();
-		Rect rect = new Rect(
-				new Position(
-						chr.getPosition().getX() - rectRange,
-						chr.getPosition().getY() - rectRange),
-				new Position(
-						chr.getPosition().getX() + rectRange,
-						chr.getPosition().getY() + rectRange));
-		List<Drop> dropList = field.getDropsInRect(rect);
-		for(Drop drop : dropList) {
-			if(dropList.isEmpty() || drop == null)
-			{
-			return false;
-			}
-			if(drop.getItem().getItemId() == itemID){
-				chr.getField().removeDrop(drop.getObjectId(), drop.getOwnerID(), true, 0);
-				return true;
-			}
-			else if(drop.getItem().getItemId() != itemID)
-			{
-				return false;
-			}
-		}
-		return false;
-	}
+	public Drop getDropInRect(int itemID, Rect rect) {
+	    Field field = getField();
+	    if (field == null) {
+	        field = chr.getField();
+        }
+	    return field.getDropsInRect(rect).stream()
+                .filter(drop -> drop.getItem() != null && drop.getItem().getItemId() == itemID)
+                .findAny().orElse(null);
+    }
+
+    @Override
+    public Drop getDropInRect(int itemID, int rectRange) {
+        return getDropInRect(itemID, new Rect(
+                new Position(
+                        chr.getPosition().getX() - rectRange,
+                        chr.getPosition().getY() - rectRange),
+                new Position(
+                        chr.getPosition().getX() + rectRange,
+                        chr.getPosition().getY() + rectRange))
+        );
+
+    }
 
 	// Life-related methods --------------------------------------------------------------------------------------------
 
@@ -1470,10 +1464,10 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
-	public void setChannelField()
-	{
+	public void setChannelField() {
 		chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
 	}
+
 	@Override
 	public boolean isPartyLeader() {
 		return chr.getParty() != null && chr.getParty().getPartyLeaderID() == chr.getId();

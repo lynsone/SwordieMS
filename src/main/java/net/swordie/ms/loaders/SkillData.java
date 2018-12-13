@@ -904,7 +904,7 @@ public class SkillData {
                                             tar.setProbWeight(targetValue);
                                             break;
                                         default:
-                                            System.out.println("Unknown target value " + targetName);
+                                            log.warn("Unknown target value " + targetName);
                                             break;
                                     }
                                 }
@@ -973,7 +973,7 @@ public class SkillData {
                                             count = ingredientValue;
                                             break;
                                         default:
-                                            System.out.println("Unknown ingredient value " + ingredientName);
+                                            log.warn("Unknown ingredient value " + ingredientName);
                                             break;
                                     }
                                 }
@@ -983,7 +983,7 @@ public class SkillData {
                             }
                             break;
                         default:
-                            System.out.println("Unknown recipe value " + name);
+                            log.warn("Unknown recipe value " + name);
                             break;
                     }
                 }

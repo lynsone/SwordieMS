@@ -456,7 +456,6 @@ public class Warrior extends Beginner {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             if(chr.hasSkill(ADVANCED_COMBO) && Util.succeedProp(si.getValue(prop, slv)) && currentCount + 1 < getMaxCombo(chr))
             {
-                System.out.println("has advanced combo");
                 Option o = new Option();
                 o.nOption = currentCount + 2;
                 o.rOption = COMBO_ATTACK;
@@ -657,10 +656,9 @@ public class Warrior extends Beginner {
             skillID = skill.getSkillId();
         }
 
-        if (JobConstants.isHero(chr.getJob()) && !noGiveComboAttack(attackInfo.skillId)) {
+        if (JobConstants.isHero(chr.getJob()) && !isComboIgnoreSkill(attackInfo.skillId)) {
             if (hasHitMobs) {
                 //Combo
-                System.out.println("skillID" + attackInfo.skillId);
                 int comboProp = getComboProp(chr);
                 if (Util.succeedProp(comboProp)) {
                     addCombo(chr);
@@ -1074,18 +1072,14 @@ public class Warrior extends Beginner {
         return 0;
     }
 
-    public boolean noGiveComboAttack(int skillID)
+    public boolean isComboIgnoreSkill(int skillID)
     {
-        if( skillID == SHOUT ||
-            skillID == SHOUT_DOWN ||
-            skillID == PANIC ||
-            skillID == COMBO_FURY ||
-            skillID == COMBO_FURY_DOWN ||
-            skillID == PUNCTURE)
-        {
-            return true;
-        }
-        return false;
+        return skillID == SHOUT ||
+                skillID == SHOUT_DOWN ||
+                skillID == PANIC ||
+                skillID == COMBO_FURY ||
+                skillID == COMBO_FURY_DOWN ||
+                skillID == PUNCTURE;
     }
 
 

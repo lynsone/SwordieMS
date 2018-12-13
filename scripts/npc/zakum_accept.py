@@ -15,4 +15,4 @@ if response:
     elif sm.checkParty():
         sm.setPartyDeathCount(20)
         sm.warpPartyIn(fields[sm.getFieldID()])
-        sm.invokeAfterDelay(10000, "checkDropsinRect", 4001017, 200)
+        sm.invokeAfterDelay(10000, "getDropInRect", 4001017, 200)
