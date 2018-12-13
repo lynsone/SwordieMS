@@ -1,15 +1,14 @@
 package net.swordie.ms.loaders;
 
-import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.info.SkillInfo;
-import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.ServerConstants;
+import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
+import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import net.swordie.ms.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -72,6 +71,10 @@ public class SkillData {
                     dataOutputStream.writeInt(reqSkill.getKey());
                     dataOutputStream.writeInt(reqSkill.getValue());
                 }
+                dataOutputStream.writeShort(si.getAddAttackSkills().size());
+                for (int i : si.getAddAttackSkills()) {
+                    dataOutputStream.writeInt(i);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -127,6 +130,10 @@ public class SkillData {
             short reqSkillSize = dataInputStream.readShort();
             for (int j = 0; j < reqSkillSize; j++) {
                 skillInfo.addReqSkill(dataInputStream.readInt(), dataInputStream.readInt());
+            }
+            short addAttackSize = dataInputStream.readShort();
+            for (int j = 0; j < addAttackSize; j++) {
+                skillInfo.addAddAttackSkills(dataInputStream.readInt());
             }
             getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
         } catch (IOException e) {
@@ -253,6 +260,23 @@ public class SkillData {
                                                 log.warn("Unknown SkillStat " + nodeName);
                                                 unkVals.add(nodeName);
                                             }
+                                        }
+                                    }
+                                    break;
+                                case "addAttack":
+                                    for (Node addAttackNode : XMLApi.getAllChildren(mainLevelNode)) {
+                                        Map<String, String> addAttackAttr = XMLApi.getAttributes(addAttackNode);
+                                        String nodeName = addAttackAttr.get("name");
+                                        String nodeValue = addAttackAttr.get("value");
+                                        switch (nodeName) {
+                                            case "skillPlus":
+                                                for (Node skillPlusNode : XMLApi.getAllChildren(addAttackNode)) {
+                                                    Map<String, String> skillPlusAttr = XMLApi.getAttributes(skillPlusNode);
+                                                    String skillPlusNodeName = skillPlusAttr.get("name");
+                                                    String skillPlusNodeValue = skillPlusAttr.get("value");
+                                                    skill.addAddAttackSkills(Integer.parseInt(skillPlusNodeValue));
+                                                }
+                                                break;
                                         }
                                     }
                                     break;

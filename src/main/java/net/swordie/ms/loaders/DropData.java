@@ -53,7 +53,7 @@ public class DropData {
                         minQuant = Integer.parseInt(split[2]);
                         maxQuant = Integer.parseInt(split[3]);
                     }
-                    DropInfo dropInfo = new DropInfo(itemID, 0, chance, minQuant, maxQuant);
+                    DropInfo dropInfo = new DropInfo(itemID, chance, minQuant, maxQuant);
                     addDrop(mobID, dropInfo);
                 }
             }

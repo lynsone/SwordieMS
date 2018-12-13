@@ -1,7 +1,7 @@
 # Hidden Street : Destroyed Temple of Time Entrance (927020000) | Used in Luminous' Intro
 GUWARU = 2159354
 MAGNUS = 2159355
-
+sm.removeEscapeButton()
 sm.setSpeakerID(GUWARU)
 sm.sendNext("The light you possess is like a warm ray of sunshine to the spirits. It will be painful to see it extinguished...")
 
@@ -27,6 +27,7 @@ sm.playSound("LuminousTuto/Special2", 100)
 sm.sendDelay(2280)
 
 sm.spawnNpc(MAGNUS, 0, 10)
+sm.flipNpcByTemplateId(MAGNUS, False)
 sm.showNpcSpecialActionByTemplateId(MAGNUS, "summon", 0)
 sm.sendDelay(700)
 

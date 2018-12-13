@@ -27,6 +27,7 @@ import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
 
 import java.util.Arrays;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static net.swordie.ms.client.character.skills.SkillStat.*;
@@ -52,6 +53,7 @@ public class Luminous extends Job {
     public static final int DUSK_GUARD = 27111005; //Buff
     public static final int PHOTIC_MEDITATION = 27111006; //Buff
     public static final int LUNAR_TIDE = 27110007;
+    public static final int DEATH_SCYTHE = 27111303;
 
     public static final int DARK_CRESCENDO = 27121005; //Buff
     public static final int ARCANE_PITCH = 27121006; //Buff
@@ -84,6 +86,7 @@ public class Luminous extends Job {
     };
 
     private long darkCrescendoTimer;
+    private ScheduledFuture equilibriumTimer;
 
     public Luminous(Char chr) {
         super(chr);
@@ -176,9 +179,10 @@ public class Luminous extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 tsm.putCharacterStatValue(Larkness, o1);
-                EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
+                equilibriumTimer = EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
+                chr.resetSkillCoolTime(ENDER);
+                chr.resetSkillCoolTime(DEATH_SCYTHE);
                 break;
-
             case HEROIC_MEMORIES_LUMI:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
@@ -462,7 +466,9 @@ public class Luminous extends Job {
                     o1.rOption = EQUILIBRIUM;
 //                    o1.tOption = SkillData.getSkillInfoById(EQUILIBRIUM).getValue(time, 1);
                     tsm.putCharacterStatValue(Larkness, o1);
-                    EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
+                    equilibriumTimer = EventManager.addEvent(this::changeMode, getMoreEquilibriumTime(), TimeUnit.SECONDS);
+                    chr.resetSkillCoolTime(ENDER);
+                    chr.resetSkillCoolTime(DEATH_SCYTHE);
                     break;
                 case HEROS_WILL_LUMI:
                     tsm.removeAllDebuffs();
@@ -470,6 +476,16 @@ public class Luminous extends Job {
             }
             tsm.sendSetStatPacket();
         }
+    }
+
+    public int alterCooldownSkill(int skillId) {
+        switch (skillId) {
+            case ENDER:
+            case DEATH_SCYTHE:
+                if(equilibriumTimer != null && !equilibriumTimer.isDone())
+                return 0;
+        }
+        return -1;
     }
 
 

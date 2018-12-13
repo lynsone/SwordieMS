@@ -670,6 +670,8 @@ public class Thief extends Beginner {
                 }
                 break;
             case SUDDEN_RAID_DB:
+                chr.reduceSkillCoolTime(FINAL_CUT, (long) (chr.getRemainingCoolTime(FINAL_CUT) * 0.2F));
+                // Fallthrough intended
             case SUDDEN_RAID_SHAD:
             case SUDDEN_RAID_NL:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -1094,7 +1096,7 @@ public class Thief extends Beginner {
                 Set<DropInfo> dropInfoSet = new HashSet<>();
                 for (int i = 0; i < slv; i++) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        dropInfoSet.add(new DropInfo(0, 100, GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
+                        dropInfoSet.add(new DropInfo(GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
                     }
                 }
                 if (dropInfoSet.size() > 0) {

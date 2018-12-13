@@ -36,7 +36,6 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
-import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
@@ -200,6 +199,12 @@ public class Char {
 	private int partyID = 0; // Just for DB purposes
 	private int previousFieldID;
 
+	@ElementCollection
+	@CollectionTable(name = "skillcooltimes", joinColumns = @JoinColumn(name = "charID"))
+	@MapKeyColumn(name = "skillid")
+	@Column(name = "nextusabletime")
+	private Map<Integer, Long> skillCoolTimes;
+
 	@Transient
 	private CharacterPotentialMan potentialMan;
 
@@ -344,8 +349,6 @@ public class Char {
 	@Transient
 	private ScheduledFuture timeLimitTimer;
 	@Transient
-	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
-	@Transient
 	private int deathCount = -1;
 	@Transient
 	private long runeStoneCooldown;
@@ -381,6 +384,14 @@ public class Char {
 	private int transferField = 0;
 	@Transient
 	private int transferFieldReq = 0;
+	@Transient
+	private String blessingOfFairy = null;
+	@Transient
+	private String blessingOfEmpress = null;
+	@Transient
+	private Map<Integer, Integer> hyperPsdSkillsCooltimeR = new HashMap<>();
+	@Transient
+	private boolean isInvincible = false;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -432,6 +443,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		skillCoolTimes = new HashMap<>();
 		familiars = new HashSet<>();
 		hyperrockfields = new int[]{
 				999999999,
@@ -1429,11 +1441,19 @@ public class Char {
 	}
 
 	private String getBlessingOfEmpress() {
-		return null;
+		return blessingOfEmpress;
+	}
+
+	public void setBlessingOfEmpress(String blessingOfEmpress) {
+		this.blessingOfEmpress = blessingOfEmpress;
 	}
 
 	private String getBlessingOfFairy() {
-		return null;
+		return blessingOfFairy;
+	}
+
+	public void setBlessingOfFairy(String blessingOfFairy) {
+		this.blessingOfFairy = blessingOfFairy;
 	}
 
 	public void setCombatOrders(int combatOrders) {
@@ -1722,7 +1742,8 @@ public class Char {
 		stats.put(BaseStat.mdd, 9L);
 		stats.put(BaseStat.acc, 11L);
 		stats.put(BaseStat.eva, 8L);
-		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
+		stats.put(BaseStat.buffTimeR, 100L);
+		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill_NoPsdSkillsCheck(skill.getSkillId())).
 				forEach(this::addToBaseStatCache);
 	}
 
@@ -1733,8 +1754,15 @@ public class Char {
 	 */
 	public void addToBaseStatCache(Skill skill) {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
-		stats.forEach(this::addBaseStat);
+		if(SkillConstants.isPassiveSkill(skill.getSkillId())) {
+			Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+			stats.forEach(this::addBaseStat);
+		}
+		if (si.isPsd() && si.getSkillStatInfo().containsKey(SkillStat.coolTimeR)) {
+			for(int psdSkill : si.getPsdSkills()) {
+				getHyperPsdSkillsCooltimeR().put(psdSkill, si.getValue(SkillStat.coolTimeR, 1));
+			}
+		}
 	}
 
 	/**
@@ -3648,6 +3676,36 @@ public class Char {
 		return skillCoolTimes;
 	}
 
+	public void addSkillCoolTime(int skillId, long nextusabletime) {
+		getSkillCoolTimes().put(skillId, nextusabletime);
+	}
+
+	public void removeSkillCoolTime(int skillId) {
+		getSkillCoolTimes().remove(skillId);
+	}
+
+	public void resetSkillCoolTime(int skillId) {
+		if(hasSkillOnCooldown(skillId)) {
+			addSkillCoolTime(skillId, 0);
+			write(UserLocal.skillCooltimeSetM(skillId, 0));
+		}
+	}
+
+	public void reduceSkillCoolTime(int skillId, long amountInMS) {
+		if (hasSkillOnCooldown(skillId)) {
+			long nextUsableTime = getSkillCoolTimes().get(skillId);
+			addSkillCoolTime(skillId, nextUsableTime - amountInMS);
+			write(UserLocal.skillCooltimeSetM(skillId, (int) ((nextUsableTime - amountInMS) - System.currentTimeMillis() < 0 ? 0 : (nextUsableTime - amountInMS) - System.currentTimeMillis())));
+		}
+	}
+
+	public long getRemainingCoolTime(int skillId) {
+		if (hasSkillOnCooldown(skillId)) {
+			return getSkillCoolTimes().getOrDefault(skillId, System.currentTimeMillis()) - System.currentTimeMillis();
+		}
+		return 0L;
+	}
+
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
 	 *
@@ -3671,9 +3729,7 @@ public class Char {
 		} else {
 			Skill skill = getSkill(skillID);
 			if (skill != null && SkillData.getSkillInfoById(skillID).hasCooltime()) {
-				if(!skillShouldBypassCD(skillID)) {
-					setSkillCooldown(skillID, (byte) skill.getCurrentLevel());
-				}
+				setSkillCooldown(skillID, (byte) skill.getCurrentLevel());
 			}
 			return true;
 		}
@@ -3691,33 +3747,17 @@ public class Char {
 		if (si != null) {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
-			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
-			if (!hasSkillCDBypass()) {
-				if(!skillShouldBypassCD(skillID)) {
-					write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
-				}
+			int alteredcd = getJobHandler().alterCooldownSkill(skillID);
+			if (alteredcd >= 0) {
+				cdInMillis = alteredcd;
+			}
+			if (!hasSkillCDBypass() && cdInMillis > 0) {
+				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
+				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 			}
 		}
 	}
 
-	/**
-	 * Checks if a skill's cooldown should be bypassed
-	 **/
-	public boolean skillShouldBypassCD(int skillID)
-	{
-		switch(skillID) {
-			case 1321013:
-				if (getTemporaryStatManager().hasStat(Reincarnation) || getTemporaryStatManager().hasStatBySkillId(1321015))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-		}
-		return false;
-	}
 	public CharacterPotentialMan getPotentialMan() {
 		return potentialMan;
 	}
@@ -4338,5 +4378,66 @@ public class Char {
 			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
 			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
 		}
+	}
+
+	public void addNx(int nx) {
+		getAccount().addNXCredit(nx);
+		chatScriptMessage("You have gained " + nx + " NX.");
+	}
+
+	public void initBlessingSkillNames() {
+		Account account = getAccount();
+		Char fairyChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& chr.getLevel() >= 10
+					&& (fairyChar == null || chr.getLevel() > fairyChar.getLevel())) {
+				fairyChar = chr;
+			}
+		}
+		if (fairyChar != null) {
+			setBlessingOfFairy(fairyChar.getName());
+		}
+		Char empressChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& (JobConstants.isCygnusKnight(chr.getJob()) || JobConstants.isMihile(chr.getJob())
+					&& chr.getLevel() >= 5
+					&& (empressChar == null || chr.getLevel() > empressChar.getLevel()))) {
+				empressChar = chr;
+			}
+		}
+		if (empressChar != null) {
+			setBlessingOfEmpress(empressChar.getName());
+		}
+	}
+
+	public void initBlessingSkills() {
+		Char fairyChar = getAccount().getCharByName(getBlessingOfFairy());
+		if (fairyChar != null) {
+			addSkill(SkillConstants.getFairyBlessingByJob(getJob()),
+					Math.min(20, fairyChar.getLevel() / 10), 20);
+		}
+		Char empressChar = getAccount().getCharByName(getBlessingOfEmpress());
+		if (empressChar != null) {
+			addSkill(SkillConstants.getEmpressBlessingByJob(getJob()),
+					Math.min(30, empressChar.getLevel() / 5), 30);
+		}
+	}
+
+	public Map<Integer, Integer> getHyperPsdSkillsCooltimeR() {
+		return hyperPsdSkillsCooltimeR;
+	}
+
+	public void setHyperPsdSkillsCooltimeR(Map<Integer, Integer> hyperPsdSkillsCooltimeR) {
+		this.hyperPsdSkillsCooltimeR = hyperPsdSkillsCooltimeR;
+	}
+
+	public boolean isInvincible() {
+		return isInvincible;
+	}
+
+	public void setInvincible(boolean invincible) {
+		isInvincible = invincible;
 	}
 }

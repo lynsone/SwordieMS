@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
@@ -53,7 +54,7 @@ import static net.swordie.ms.client.jobs.cygnus.Mihile.*;
  * Created on 1/2/2018.
  */
 public abstract class Job {
-	protected Char chr;
+    protected Char chr;
 	protected Client c;
 
 	public static final int MONOLITH = 80011261;
@@ -273,6 +274,23 @@ public abstract class Job {
 		}
 	}
 
+	public int alterCooldownSkill(int skillId) {
+		Skill skill = chr.getSkill(skillId);
+		if (skill == null) {
+			return -1;
+		}
+		SkillInfo si = SkillData.getSkillInfoById(skillId);
+		byte slv = (byte) skill.getCurrentLevel();
+		int cdInSec = si.getValue(SkillStat.cooltime, slv);
+		int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
+		int cooldownReductionR = chr.getHyperPsdSkillsCooltimeR().getOrDefault(skillId, 0);
+		if (cooldownReductionR > 0) {
+			return (int) (cdInMillis - ((double) (cdInMillis * cooldownReductionR) / 100));
+		}
+		return -1;
+	}
+
+
 	/**
 	 * Gets called when Character receives a debuff from a Mob Skill
 	 *
@@ -365,6 +383,11 @@ public abstract class Job {
 		hitInfo.hpDamage = damage;
 		hitInfo.templateID = templateID;
 		hitInfo.mobID = mobID;
+
+		if(chr.isInvincible()) {
+			return;
+		}
+
 		handleHit(c, inPacket, hitInfo);
 		handleHit(c, hitInfo);
 	}

@@ -2,7 +2,6 @@ package net.swordie.ms.client.character.commands;
 
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
-import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
@@ -19,6 +18,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -682,66 +682,21 @@ public class AdminCommands {
         }
     }
 
-    @Command(names = {"getprojectiles"}, requiredType = Tester)
-    public static class GetProjectiles extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            int[] projectiles = new int[]{
-                    2070000,
-                    2060000,
-                    2061000,
-                    2330000
-            };
-            for (int projectile : projectiles) {
-                Item item = ItemData.getItemDeepCopy(projectile);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                item.setQuantity(1000);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            }
-        }
-    }
-
     @Command(names = {"done"}, requiredType = Tester)
     public static class Done extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int[] projectiles = new int[]{
-                    2070000,
-                    2060000,
-                    2061000,
-                    2330000
-            };
-            for (int projectile : projectiles) {
-                Item item = ItemData.getItemDeepCopy(projectile);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                item.setQuantity(1000);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            }
-
             int num = 1000;
             int hp = 250000;
-            int lv = 200;
-            chr.setStat(Stat.hp, hp);
-            chr.setStat(Stat.mhp, hp);
-            chr.setStat(Stat.mp, hp);
-            chr.setStat(Stat.mmp, hp);
-            chr.setStat(Stat.str, (short) num);
-            chr.setStat(Stat.dex, (short) num);
-            chr.setStat(Stat.inte, (short) num);
-            chr.setStat(Stat.luk, (short) num);
-            chr.setStat(Stat.level, (short) lv);
-            Map<Stat, Object> stats = new HashMap<>();
-            stats.put(Stat.hp, hp);
-            stats.put(Stat.mhp, hp);
-            stats.put(Stat.mp, hp);
-            stats.put(Stat.mmp, hp);
-            stats.put(Stat.str, (short) num);
-            stats.put(Stat.dex, (short) num);
-            stats.put(Stat.inte, (short) num);
-            stats.put(Stat.luk, (short) num);
-            stats.put(Stat.level, (byte) lv);
-            stats.put(Stat.exp, (long) 0);
-            chr.getClient().write(WvsContext.statChanged(stats));
+            int lv = 235;
+            chr.setStatAndSendPacket(Stat.hp, hp);
+            chr.setStatAndSendPacket(Stat.mhp, hp);
+            chr.setStatAndSendPacket(Stat.mp, hp);
+            chr.setStatAndSendPacket(Stat.mmp, hp);
+            chr.setStatAndSendPacket(Stat.str, (short) num);
+            chr.setStatAndSendPacket(Stat.dex, (short) num);
+            chr.setStatAndSendPacket(Stat.inte, (short) num);
+            chr.setStatAndSendPacket(Stat.luk, (short) num);
+            chr.setStatAndSendPacket(Stat.level, (short) lv);
         }
     }
 
@@ -788,10 +743,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.ap, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.ap, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.ap, (short) num);
             }
         }
     }
@@ -801,12 +753,8 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, num);
-                chr.setStat(Stat.mhp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.hp, num);
-                stats.put(Stat.mhp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.hp, num);
+                chr.setStatAndSendPacket(Stat.mhp, num);
             }
         }
     }
@@ -816,12 +764,8 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, num);
-                chr.setStat(Stat.mmp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.mp, num);
-                stats.put(Stat.mmp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.mp, num);
+                chr.setStatAndSendPacket(Stat.mmp, num);
             }
         }
     }
@@ -831,10 +775,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.str, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.str, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.str, (short) num);
             }
         }
     }
@@ -844,10 +785,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.dex, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.dex, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.dex, (short) num);
             }
         }
     }
@@ -857,10 +795,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.inte, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.inte, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.inte, (short) num);
             }
         }
     }
@@ -870,10 +805,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.luk, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.luk, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.luk, (short) num);
             }
         }
     }
@@ -883,11 +815,8 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.level, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.level, (byte) num);
-                stats.put(Stat.exp, (long) 0);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.level, (short) num);
+                chr.setStatAndSendPacket(Stat.exp, 0);
                 chr.getJobHandler().handleLevelUp();
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
             }
@@ -915,14 +844,7 @@ public class AdminCommands {
     @Command(names = {"heal"}, requiredType = Tester)
     public static class Heal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int maxHp = chr.getTotalStat(BaseStat.mhp);
-            int maxMp = chr.getTotalStat(BaseStat.mmp);
-            chr.getAvatarData().getCharacterStat().setHp(maxHp);
-            chr.getAvatarData().getCharacterStat().setMp(maxMp);
-            Map<Stat, Object> stats = new HashMap<>();
-            stats.put(Stat.hp, maxHp);
-            stats.put(Stat.mp, maxMp);
-            chr.getClient().write(WvsContext.statChanged(stats));
+            chr.heal(Integer.parseInt(args[1]));
         }
     }
 
@@ -931,10 +853,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.hp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.hp, num);
             }
         }
     }
@@ -944,10 +863,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.mp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.mp, num);
             }
         }
     }
@@ -955,18 +871,8 @@ public class AdminCommands {
     @Command(names = {"invincible"}, requiredType = Tester)
     public static class Invincible extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            Client c = chr.getClient();
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o1 = new Option();
-            if (tsm.getOption(CharacterTemporaryStat.NotDamaged).nOption == 3) {
-                tsm.removeStat(CharacterTemporaryStat.NotDamaged, false);
-                chr.chatMessage(Notice2, "You are no longer invincible.");
-            } else {
-                o1.nOption = 3;
-                tsm.putCharacterStatValue(CharacterTemporaryStat.NotDamaged, o1);
-                tsm.sendSetStatPacket();
-                chr.chatMessage(Notice2, "You are invincible.");
-            }
+            chr.setInvincible(!chr.isInvincible());
+            chr.chatMessage("Invincibility: " + chr.isInvincible());
         }
     }
 
@@ -1084,13 +990,15 @@ public class AdminCommands {
     @Command(names = {"maxskills"}, requiredType = Tester)
     public static class MaxSkills extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            for (Skill skill : chr.getSkills()) {
+            List<Skill> list = new ArrayList<>();
+            for (Skill skill : SkillData.getSkillsByJob(chr.getJob())) {
                 byte maxLevel = (byte) skill.getMaxLevel();
                 skill.setCurrentLevel(maxLevel);
                 skill.setMasterLevel(maxLevel);
-                List<Skill> list = new ArrayList<>();
                 list.add(skill);
                 chr.addSkill(skill);
+            }
+            if (list.size() > 0) {
                 chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
             }
         }
@@ -1175,6 +1083,18 @@ public class AdminCommands {
                 } else {
                     Map<Integer, String> map;
                     switch (queryType) {
+                        case "equip":
+                            map = StringData.getItemStringByName(query.toString());
+                            Set<Integer> nonEquips = new HashSet<>();
+                            for (int itemId : map.keySet()) {
+                                if (!ItemConstants.isEquip(itemId)) {
+                                    nonEquips.add(itemId);
+                                }
+                            }
+                            for (int itemId : nonEquips) {
+                                map.remove(itemId);
+                            }
+                            break;
                         case "item":
                             map = StringData.getItemStringByName(query.toString());
                             break;
@@ -1386,9 +1306,7 @@ public class AdminCommands {
             };
             for (int warEquip : warEquips) {
                 Item item = ItemData.getItemDeepCopy(warEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
@@ -1406,9 +1324,7 @@ public class AdminCommands {
             };
             for (int mageEquip : mageEquips) {
                 Item item = ItemData.getItemDeepCopy(mageEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
@@ -1424,9 +1340,7 @@ public class AdminCommands {
             };
             for (int archerEquip : archerEquips) {
                 Item item = ItemData.getItemDeepCopy(archerEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
@@ -1444,9 +1358,7 @@ public class AdminCommands {
             };
             for (int thiefEquip : thiefEquips) {
                 Item item = ItemData.getItemDeepCopy(thiefEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
@@ -1465,9 +1377,7 @@ public class AdminCommands {
             };
             for (int pirateEquip : pirateEquips) {
                 Item item = ItemData.getItemDeepCopy(pirateEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
@@ -1476,13 +1386,18 @@ public class AdminCommands {
     public static class ClearInv extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
-                chr.chatMessage(Notice2, "Syntax Error: !ClearInv [Start Index] [End Index]");
+                chr.chatMessage(Notice2, "Syntax Error: !ClearInv <Inventory Type> <Start Index> <End Index>");
                 return;
             }
-            short startIndex = Short.parseShort(args[1]);
-            short endIndex = Short.parseShort(args[2]);
+            InvType invType = InvType.getInvTypeByString(args[1]);
+            if (invType == null) {
+                chr.chatMessage("Please fill in a correct inventory type:  equip / use / etc / setup / cash");
+                return;
+            }
+            short startIndex = Short.parseShort(args[2]);
+            short endIndex = Short.parseShort(args[3]);
             for (int i = startIndex; i < endIndex; i++) {
-                Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
+                Item removeItem = chr.getInventoryByType(invType).getItemBySlot((short) i);
                 chr.consumeItem(removeItem);
             }
             chr.dispose();
@@ -1535,7 +1450,7 @@ public class AdminCommands {
         }
     }
 
-    @Command(names = {"getphantomstolenskills"}, requiredType = Tester)
+    @Command(names = {"sethonor, honor"}, requiredType = Tester)
     public static class SetHonor extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1570,13 +1485,11 @@ public class AdminCommands {
     public static class BypassSkillCD extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            if (!chr.hasSkillCDBypass()) {
-                chr.setSkillCDBypass(true);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: ON");
-            } else {
-                chr.setSkillCDBypass(false);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: OFF");
+            chr.setSkillCDBypass(!chr.hasSkillCDBypass());
+            if(chr.hasSkillCDBypass()) {
+                chr.getSkillCoolTimes().keySet().forEach(chr::resetSkillCoolTime);
             }
+            chr.chatMessage(Notice2, "Skill Cooldown bypass: "+ chr.hasSkillCDBypass());
             chr.dispose();
         }
     }

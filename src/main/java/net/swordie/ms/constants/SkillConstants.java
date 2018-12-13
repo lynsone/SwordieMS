@@ -7,12 +7,12 @@ import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.cygnus.ThunderBreaker;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Phantom;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.resistance.Demon;
-import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
 
@@ -47,6 +47,7 @@ public class SkillConstants {
     public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
     public static final int MAKING_SKILL_MASTER_LEVEL = 11;
     public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
+
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -1023,7 +1024,7 @@ public class SkillConstants {
     public static int getLinkSkillByJob(short job) {
         if (JobConstants.isCannonShooter(job)) { // Pirate Blessing
             return 80000000;
-        } else if (JobConstants.isKoC(job)) { // Cygnus Blessing
+        } else if (JobConstants.isCygnusKnight(job)) { // Cygnus Blessing
             return 80000070;
         } else if (JobConstants.isMercedes(job)) { // Elven Blessing
             return 80001040;
@@ -1075,6 +1076,11 @@ public class SkillConstants {
                 return Zero.ADV_STORM_BREAK;
         }
         return skillID;
+    }
+
+    public static boolean isPassiveSkill_NoPsdSkillsCheck(int skillId) {
+        SkillInfo si = SkillData.getSkillInfoById(skillId);
+        return si != null && si.isPsd();
     }
 
     public static boolean isPassiveSkill(int skillId) {
@@ -1237,6 +1243,9 @@ public class SkillConstants {
             case 5711021:
             case 22171063:
             case 22141012:
+            case ThunderBreaker.GALE:
+            case ThunderBreaker.TYPHOON:
+            case Demon.DEMON_CRY:
                 return true;
         }
         return false;
@@ -1431,5 +1440,17 @@ public class SkillConstants {
             return true;
         }
         return false;
+    }
+
+    public static int getFairyBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0012, where xxxx is the "0th" job
+        return beginJob * 10000 + 12;
+    }
+
+    public static int getEmpressBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0073, where xxxx is the "0th" job
+        return beginJob * 10000 + 73;
     }
 }
