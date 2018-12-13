@@ -1238,15 +1238,17 @@ public class Field {
      * @param init if this is the first time that this method is called.
      */
     public void generateMobs(boolean init) {
-        int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
-        boolean buffed = channelID > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
-        int currentMobs = getMobs().size();
-        for (MobGen mg : getMobGens()) {
-            if (mg.canSpawnOnField(this)) {
-                mg.spawnMob(this, buffed);
-                currentMobs++;
-                if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
-                    break;
+        if (init || getChars().size() > 0) {
+            int channelID = Util.getRandomFromCollection(this.getChars()).getClient().getChannel();
+            boolean buffed = channelID > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
+            int currentMobs = getMobs().size();
+            for (MobGen mg : getMobGens()) {
+                if (mg.canSpawnOnField(this)) {
+                    mg.spawnMob(this, buffed);
+                    currentMobs++;
+                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0 && currentMobs > getFixedMobCapacity()) {
+                        break;
+                    }
                 }
             }
         }

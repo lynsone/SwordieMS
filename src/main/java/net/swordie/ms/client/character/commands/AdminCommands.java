@@ -55,7 +55,7 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            
+
         }
     }
 
