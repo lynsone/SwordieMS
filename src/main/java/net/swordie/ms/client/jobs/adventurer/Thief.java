@@ -670,9 +670,7 @@ public class Thief extends Beginner {
                 }
                 break;
             case SUDDEN_RAID_DB:
-                if(chr.hasSkillOnCooldown(FINAL_CUT)) {
-                    chr.reduceSkillCoolTime(FINAL_CUT, (long) (chr.getRemainingCoolTime(FINAL_CUT) * 0.2F));
-                }
+                chr.reduceSkillCoolTime(FINAL_CUT, (long) (chr.getRemainingCoolTime(FINAL_CUT) * 0.2F));
                 // Fallthrough intended
             case SUDDEN_RAID_SHAD:
             case SUDDEN_RAID_NL:

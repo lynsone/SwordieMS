@@ -289,7 +289,7 @@ public class AffectedArea extends Life {
             case Xenon.TEMPORAL_POD:
                 o1.nOption = 2;
                 o1.rOption = skillID;
-                tsm.putCharacterStatValue(VenomSnake, o1);
+                tsm.putCharacterStatValue(OnCapsule, o1);
                 Xenon.temporalPodTimer(chr);
                 break;
         }

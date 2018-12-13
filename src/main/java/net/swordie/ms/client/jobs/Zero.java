@@ -353,18 +353,24 @@ public class Zero extends Job {
                 o1.nOption = 1;
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(NotDamaged, o1); //
+                tsm.putCharacterStatValue(NotDamaged, o1);
 
                 if(chr.getStat(Stat.level) >= 200) {
                     o2.nOption = si.getValue(y, slv);
                     o2.rOption = TIME_HOLDING_2;
                     o2.tOption = si.getValue(x, slv);
-                    tsm.putCharacterStatValue(DamR, o2); //
+                    tsm.putCharacterStatValue(DamR, o2);
                     o3.nReason = TIME_HOLDING_2;
                     o3.nValue = si.getValue(z, slv);
                     o3.tStart = (int) System.currentTimeMillis();
                     o3.tTerm = si.getValue(x, slv);
                     tsm.putCharacterStatValue(IndieMaxDamageOverR, o3);
+                }
+
+                for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                    if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset()) {
+                        chr.resetSkillCoolTime(skillId);
+                    }
                 }
                 break;
             case REWIND:

@@ -63,7 +63,8 @@ public class Pirate extends Beginner {
     public static final int SUPERCHARGE = 5110014;
 
     public static final int OCTOPUNCH = 5121007; //Special Attack
-    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack
+    public static final int NAUTILUS_STRIKE_BUCC_FA = 5120021; // Final Attack
     public static final int DRAGON_STRIKE = 5121001; //Special Attack
     public static final int BUCCANEER_BLAST = 5121016; //Special Attack
     public static final int CROSSBONES = 5121015; //Buff
@@ -87,7 +88,7 @@ public class Pirate extends Beginner {
 
     public static final int QUICKDRAW = 5221021; //Buff
     public static final int PARROTARGETTING = 5221015; //Special Attack
-    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
     public static final int PIRATE_REVENGE_SAIR = 5220012;
@@ -110,7 +111,7 @@ public class Pirate extends Beginner {
     public static final int LUCK_OF_THE_DIE_DD = 5320007;
     public static final int ANCHOR_AWEIGH = 5321003; //Summon
     public static final int MONKEY_MALITIA = 5321004; //Summon
-    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
     public static final int HEROS_WILL_CANNON = 5321006;
@@ -268,7 +269,7 @@ public class Pirate extends Beginner {
                 if (chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue() == null
                         || Long.parseLong(chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue()) < System.currentTimeMillis()) {
                     for (int skillId : chr.getSkillCoolTimes().keySet()) {
-                        if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset()) {
+                        if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset() && SkillData.getSkillInfoById(skillId).getHyper() == 0) {
                             chr.resetSkillCoolTime(skillId);
                         }
                     }
@@ -321,6 +322,8 @@ public class Pirate extends Beginner {
 
                 tsm.throwDice(random);
                 tsm.putCharacterStatValue(Dice, o1);
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case ROLL_OF_THE_DICE_BUCC_DD:
             case ROLL_OF_THE_DICE_SAIR_DD:
@@ -353,6 +356,8 @@ public class Pirate extends Beginner {
                 if(isCharged) {
                     updateViperEnergy(tsm.getOption(EnergyCharged).nOption);
                 }
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case MONKEY_MAGIC:
             case MEGA_MONKEY_MAGIC:
@@ -399,6 +404,7 @@ public class Pirate extends Beginner {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Roulette, o1);
                 giveBarrelRouletteBuff(roulette);
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);
@@ -596,6 +602,7 @@ public class Pirate extends Beginner {
                 // Fallthrough intended
             case SCURVY_SUMMONS: //Moves, Attacks
                 corsairSummons();
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
                 break;
             case ANCHOR_AWEIGH: //Stationary, Pulls mobs
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -916,7 +923,13 @@ public class Pirate extends Beginner {
                     mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
                 }
                 break;
-
+            case NAUTILUS_STRIKE_BUCC:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(VenomSnake, o1);
+                tsm.sendSetStatPacket();
+                break;
         }
 
         super.handleAttack(c, attackInfo);
@@ -1074,6 +1087,8 @@ public class Pirate extends Beginner {
         }
         else if(chr.hasSkill(MAJESTIC_PRESENCE)) {
             return MAJESTIC_PRESENCE;
+        } else if (chr.hasSkill(NAUTILUS_STRIKE_BUCC) && tsm.hasStatBySkillId(NAUTILUS_STRIKE_BUCC)) {
+            return NAUTILUS_STRIKE_BUCC_FA;
         }
         return 0;
     }
