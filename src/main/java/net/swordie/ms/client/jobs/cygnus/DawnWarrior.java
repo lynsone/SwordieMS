@@ -261,8 +261,10 @@ public class DawnWarrior extends Noblesse {
         if(tsm.hasStat(SoulMasterFinal)) {
             applySoulElementOnMob(attackInfo, slv);
         }
-
-        equinox(tsm);
+        if(chr.hasSkill(RISING_SUN) && chr.hasSkill(FALLING_MOON))
+        {
+            equinox(tsm);
+        }
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
@@ -299,13 +301,14 @@ public class DawnWarrior extends Noblesse {
         Option o5 = new Option();
         SkillInfo mosSI = SkillData.getSkillInfoById(MASTER_OF_THE_SWORD);
         //Rising Sun Skill Info
-        Skill skillRS = chr.getSkill(RISING_SUN);
-        byte slvRS = (byte) skillRS.getCurrentLevel();
-        SkillInfo siRS = SkillData.getSkillInfoById(skillRS.getSkillId());
+            Skill skillRS = chr.getSkill(RISING_SUN);
+            byte slvRS = (byte) skillRS.getCurrentLevel();
+            SkillInfo siRS = SkillData.getSkillInfoById(skillRS.getSkillId());
         //Falling Moon Skill Info
-        Skill skillFM = chr.getSkill(FALLING_MOON);
-        byte slvFM = (byte) skillFM.getCurrentLevel();
-        SkillInfo siFM = SkillData.getSkillInfoById(skillFM.getSkillId());
+            Skill skillFM = chr.getSkill(FALLING_MOON);
+            byte slvFM = (byte) skillFM.getCurrentLevel();
+            SkillInfo siFM = SkillData.getSkillInfoById(skillFM.getSkillId());
+
 
         if(tsm.hasStat(GlimmeringTime)) {
             if(tsm.getOption(PoseType).nOption == 1) {
@@ -319,16 +322,16 @@ public class DawnWarrior extends Noblesse {
                 tsm.removeStatsBySkill(FALLING_MOON);
                 tsm.removeStatsBySkill(EQUINOX_CYCLE_SUN);
 
-                o2.nReason = RISING_SUN;
-                o2.nValue = chr.hasSkill(MASTER_OF_THE_SWORD) ? mosSI.getValue(v, slvRS) : siRS.getValue(indieDamR, slvRS);
-                o2.tStart = (int) System.currentTimeMillis();
-                o2.tTerm = 0;
-                tsm.putCharacterStatValue(IndieDamR, o2); //Indie
+                    o2.nReason = RISING_SUN;
+                    o2.nValue = chr.hasSkill(MASTER_OF_THE_SWORD) ? mosSI.getValue(v, slvRS) : siRS.getValue(indieDamR, slvRS);
+                    o2.tStart = (int) System.currentTimeMillis();
+                    o2.tTerm = 0;
+                    tsm.putCharacterStatValue(IndieDamR, o2); //Indie
 
-                o3.nOption = chr.hasSkill(MASTER_OF_THE_SWORD) ? -2 : siRS.getValue(indieBooster, slvRS);
-                o3.rOption = RISING_SUN;
-                o3.tOption = siRS.getValue(time, slvRS);
-                tsm.putCharacterStatValue(HayatoBooster, o3);
+                    o3.nOption = chr.hasSkill(MASTER_OF_THE_SWORD) ? -2 : siRS.getValue(indieBooster, slvRS);
+                    o3.rOption = RISING_SUN;
+                    o3.tOption = siRS.getValue(time, slvRS);
+                    tsm.putCharacterStatValue(HayatoBooster, o3);
 
                 //Invisible Moon Buffs
                 o4.nOption = 1;
