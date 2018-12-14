@@ -2,6 +2,8 @@ package net.swordie.ms.client.jobs.legend;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
+import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -500,5 +502,38 @@ public class Evan extends Job {
             hitInfo.mpDamage = mpDmg;
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setPosMap(900010000);
+    }
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        //TODO add checks or warp into instances, haven't tested this during instances but i'm scared it could reset zakum or other things
+        //TODO give sp to proper job advancement, now gives sp to the old one(probably not enough time inbetween setting job and sp)
+        if (chr.getLevel() == 10) {
+            chr.setJob(2210);
+            chr.warp(chr.getField());
+            chr.addSpToJobByCurrentLevel(3);
+        }
+        if (chr.getLevel() == 30) {
+            chr.setJob(2212);
+            chr.warp(chr.getField());
+            chr.addSpToJobByCurrentLevel(3);
+        }
+        if (chr.getLevel() == 60) {
+            chr.setJob(2214);
+            chr.warp(chr.getField());
+            chr.addSpToJobByCurrentLevel(3);
+        }
+        if (chr.getLevel() == 100) {
+            chr.setJob(2218);
+            chr.warp(chr.getField());
+            chr.addSpToJobByCurrentLevel(3);
+        }
+
     }
 }
