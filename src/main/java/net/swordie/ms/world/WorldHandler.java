@@ -239,7 +239,7 @@ public class WorldHandler {
         String msg = inPacket.decodeString();
         if (msg.length() > 0 && msg.charAt(0) == '@') {
             if (msg.equalsIgnoreCase("@check")) {
-                WvsContext.dispose(c.getChr());
+                chr.dispose();
                 Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
                 StringBuilder sb = new StringBuilder();
                 List<BaseStat> sortedList = Arrays.stream(BaseStat.values()).sorted(Comparator.comparing(Enum::toString)).collect(Collectors.toList());

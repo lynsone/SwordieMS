@@ -623,8 +623,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setJob(jobID);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.subJob, jobID);
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	public void addSP(int amount) {
@@ -646,8 +645,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setSpToCurrentJob(amount);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	@Override

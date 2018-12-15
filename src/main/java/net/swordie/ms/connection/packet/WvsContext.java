@@ -50,7 +50,7 @@ public class WvsContext {
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats) {
-        return statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
+        return statChanged(stats, false, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent, byte mixBaseHairColor,

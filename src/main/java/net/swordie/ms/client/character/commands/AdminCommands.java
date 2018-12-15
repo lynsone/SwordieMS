@@ -708,7 +708,7 @@ public class AdminCommands {
                 chr.setJob(id);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.subJob, id);
-                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -721,7 +721,7 @@ public class AdminCommands {
                 chr.setSpToCurrentJob(num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
@@ -979,15 +979,36 @@ public class AdminCommands {
     public static class MaxSkills extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             List<Skill> list = new ArrayList<>();
-            for (Skill skill : SkillData.getSkillsByJob(chr.getJob())) {
-                byte maxLevel = (byte) skill.getMaxLevel();
-                skill.setCurrentLevel(maxLevel);
-                skill.setMasterLevel(maxLevel);
-                list.add(skill);
-                chr.addSkill(skill);
+            Set<Short> jobs = new HashSet<>();
+            short job = chr.getJob();
+            // TODO add evan checks
+            // giant hack, but it's for a command, so it's k
+            if (job % 100 == 12) {
+                jobs.add(job);
+                jobs.add((short) (job - 1));
+                jobs.add((short) (job - 2));
+                jobs.add((short) (job - 12));
+            } else if (job % 100 == 11) {
+                jobs.add(job);
+                jobs.add((short) (job - 1));
+                jobs.add((short) (job - 11));
+            } else if (job % 100 == 10) {
+                jobs.add(job);
+                jobs.add((short) (job - 10));
+            } else {
+                jobs.add(job);
             }
-            if (list.size() > 0) {
-                chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+            for (short j : jobs) {
+                for (Skill skill : SkillData.getSkillsByJob(j)) {
+                    byte maxLevel = (byte) skill.getMaxLevel();
+                    skill.setCurrentLevel(maxLevel);
+                    skill.setMasterLevel(maxLevel);
+                    list.add(skill);
+                    chr.addSkill(skill);
+                }
+                if (list.size() > 0) {
+                    chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+                }
             }
         }
     }
