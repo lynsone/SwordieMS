@@ -2,8 +2,6 @@ package net.swordie.ms.handlers;
 
 import net.swordie.ms.client.character.skills.PsychicLockBall;
 import net.swordie.ms.connection.OutPacket;
-import net.swordie.ms.life.mob.Mob;
-import net.swordie.ms.util.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +24,8 @@ public class PsychicLock {
         outPacket.encodeShort(slv);
         outPacket.encodeInt(action);
         outPacket.encodeInt(actionSpeed);
+        outPacket.encodeByte(psychicLockBalls.size());
         for(PsychicLockBall plb : psychicLockBalls) {
-            outPacket.encodeByte(1);
             plb.encode(outPacket);
         }
         outPacket.encodeByte(0);
