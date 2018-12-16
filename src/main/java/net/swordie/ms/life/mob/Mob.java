@@ -1,5 +1,8 @@
 package net.swordie.ms.life.mob;
 
+import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
+import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
@@ -11,6 +14,8 @@ import net.swordie.ms.client.party.PartyDamageInfo;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EliteState;
 import net.swordie.ms.enums.WeatherEffNoticeType;
 import net.swordie.ms.handlers.EventManager;
@@ -30,6 +35,7 @@ import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
+import org.python.modules.math;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -191,6 +197,7 @@ public class Mob extends Life {
         copy.setTargetUserIdFromServer(getTargetUserIdFromServer());
         copy.setHp(getHp());
         copy.setMaxHp(getMaxHp());
+        copy.setLevel(getLevel());
         copy.setCalcDamageIndex(getCalcDamageIndex());
         copy.setMoveAction(getMoveAction());
         copy.setAppearType(getAppearType());
@@ -353,7 +360,9 @@ public class Mob extends Life {
         return detectX;
     }
 
-    public void setDetectX(int detectX) {this.detectX = detectX; }
+    public void setDetectX(int detectX) {
+        this.detectX = detectX;
+    }
 
     public int getSenseX() {
         return senseX;
@@ -551,6 +560,10 @@ public class Mob extends Life {
         return getForcedMobStat().getMaxHP();
     }
 
+    public long getExp() {
+        return getForcedMobStat().getExp();
+    }
+
     public void setMaxHp(long maxHp) {
         getForcedMobStat().setMaxHP(maxHp);
     }
@@ -569,6 +582,38 @@ public class Mob extends Life {
 
     public void setMaxMp(long maxMp) {
         getForcedMobStat().setMaxMP(maxMp);
+    }
+
+    public int getLevel() {
+        return getForcedMobStat().getLevel();
+    }
+
+    public void setLevel(int level) {
+        getForcedMobStat().setLevel(level);
+    }
+
+    public int getPad() {
+        return getForcedMobStat().getPad();
+    }
+
+    public void setPad(int pad) {
+        getForcedMobStat().setPad(pad);
+    }
+
+    public int getMad() {
+        return getForcedMobStat().getMad();
+    }
+
+    public void setMad(int mad) {
+        getForcedMobStat().setMad(mad);
+    }
+
+    public int getPdr() {
+        return getForcedMobStat().getPdr();
+    }
+
+    public int getMdr() {
+        return getForcedMobStat().getMdr();
     }
 
     public void setTemporaryStat(MobTemporaryStat temporaryStat) {
@@ -1119,32 +1164,57 @@ public class Mob extends Life {
         this.revives = revives;
     }
 
-    public void addRevive(int revive) {revives.add(revive);}
+    public void addRevive(int revive) {
+        revives.add(revive);
+    }
 
-    public void setBanMap(boolean isBanMap) { this.isBanMap = isBanMap; }
+    public void setBanMap(boolean isBanMap) {
+        this.isBanMap = isBanMap;
+    }
 
-    public boolean isBanMap() { return isBanMap; }
+    public boolean isBanMap() {
+        return isBanMap;
+    }
 
-    public void setBanType(int banType) { this.banType = banType; }
+    public void setBanType(int banType) {
+        this.banType = banType;
+    }
 
-    public int getBanType() { return banType; }
+    public int getBanType() {
+        return banType;
+    }
 
-    public void setBanMsgType(int banMsgType) { this.banMsgType = banMsgType; }
+    public void setBanMsgType(int banMsgType) {
+        this.banMsgType = banMsgType;
+    }
 
-    public int getBanMsgType() { return banMsgType; }
+    public int getBanMsgType() {
+        return banMsgType;
+    }
 
-    public void setBanMsg(String banMsg) { this.banMsg = banMsg; }
+    public void setBanMsg(String banMsg) {
+        this.banMsg = banMsg;
+    }
 
-    public String getBanMsg() { return banMsg; }
+    public String getBanMsg() {
+        return banMsg;
+    }
 
-    public void setBanMapFields(List<Tuple<Integer, String>> banMap) { this.banMap = banMap; }
+    public void setBanMapFields(List<Tuple<Integer, String>> banMap) {
+        this.banMap = banMap;
+    }
 
-    public List<Tuple<Integer, String>> getBanMapFields() { return banMap; }
+    public List<Tuple<Integer, String>> getBanMapFields() {
+        return banMap;
+    }
 
-    public void addBanMap(int fieldID, String portal) { this.banMap.add(new Tuple<>(fieldID, portal)); }
+    public void addBanMap(int fieldID, String portal) {
+        this.banMap.add(new Tuple<>(fieldID, portal));
+    }
 
     /**
      * Damages a mob.
+     *
      * @param totalDamage the total damage that should be applied to the mob
      */
     public void damage(Char damageDealer, long totalDamage) {
@@ -1156,6 +1226,11 @@ public class Mob extends Life {
         double percDamage = ((double) newHp / maxHP);
         newHp = newHp > Integer.MAX_VALUE ? Integer.MAX_VALUE : newHp;
         if (oldHp > 0 && newHp <= 0) {
+            // Boss sponges
+            // TODO horntail kills
+            if (getTemplateId() == 8810214 || getTemplateId() == 8810018 || getTemplateId() == 8810118) {
+                getField().getMobs().forEach(Mob::die);
+            }
             die();
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
                 damageDealer.getScriptManager().setQRValue(38022, "clear", false);
@@ -1174,7 +1249,7 @@ public class Mob extends Life {
         Field field = getField();
         getField().broadcastPacket(MobPool.leaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());
-        if(isSplit()) {
+        if (isSplit()) {
             return;
         }
         distributeExp();
@@ -1221,15 +1296,17 @@ public class Mob extends Life {
         }
         setChanged();
         notifyObservers();
-        //TEST
+        // TEST
         reviveMob();
     }
 
     private void dropDrops() {
         int ownerID = 0;
         Char mostDamageChar = getMostDamageChar();
+        short job = 0;
         if (mostDamageChar != null) {
             ownerID = mostDamageChar.getId();
+            job = mostDamageChar.getJob();
         }
         int fhID = getFh();
         if (fhID == 0) {
@@ -1238,7 +1315,23 @@ public class Mob extends Life {
                 fhID = fhBelow.getId();
             }
         }
-        getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID);
+        Set<DropInfo> dropInfoSet = getDrops();
+        // Add consumable/equip drops based on min(charLv, mobLv)
+        int level = Math.min(mostDamageChar.getLevel(), getForcedMobStat().getLevel());
+        dropInfoSet.addAll(ItemConstants.getConsumableMobDrops(level));
+        dropInfoSet.addAll(ItemConstants.getEquipMobDrops(job, level));
+        // DropRate & MesoRate Increases
+        int mostDamageCharDropRate = (getMostDamageChar() != null ? getMostDamageChar().getTotalStat(BaseStat.dropR) : 0);
+        int mostDamageCharMesoRate = (getMostDamageChar() != null ? getMostDamageChar().getTotalStat(BaseStat.mesoR) : 0);
+        int dropRateMob = (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure)
+                ? getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).yOption
+                : 0); // Item Drop Rate
+        int mesoRateMob = (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure)
+                ? getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).zOption
+                : 0); // Meso Drop Rate
+        int totalMesoRate = mesoRateMob + mostDamageCharMesoRate;
+        int totalDropRate = dropRateMob + mostDamageCharDropRate;
+        getField().drop(getDrops(), getField().getFootholdById(fhID), getPosition(), ownerID, totalMesoRate, totalDropRate);
     }
 
     public Map<Char, Long> getDamageDone() {
@@ -1248,7 +1341,8 @@ public class Mob extends Life {
     /**
      * Adds a damage amount to the given Char's current damage. Purely used for keeping track of total damage done by
      * a Char.
-     * @param chr the Char the damage originates from
+     *
+     * @param chr    the Char the damage originates from
      * @param damage the damage done
      */
     public void addDamage(Char chr, long damage) {
@@ -1276,7 +1370,7 @@ public class Mob extends Life {
             ExpIncreaseInfo eei = new ExpIncreaseInfo();
 
             // Burning Field
-            if(getField().getBurningFieldLevel() > 0) {
+            if (getField().getBurningFieldLevel() > 0) {
                 int burningFieldBonusExp = (int) (appliedExpPre * getField().getBonusExpByBurningFieldLevel() / 100);
                 eei.setRestFieldBonusExp(burningFieldBonusExp);
                 eei.setRestFieldExpRate(getField().getBonusExpByBurningFieldLevel());
@@ -1284,7 +1378,7 @@ public class Mob extends Life {
             }
 
             // + Exp% MobStats
-            if(getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) && getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption > 0) { // xOption for Exp%
+            if (getTemporaryStat().hasCurrentMobStat(MobStat.Treasure) && getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption > 0) { // xOption for Exp%
                 int expIncrease = getTemporaryStat().getCurrentOptionsByMobStat(MobStat.Treasure).xOption;
                 long mobStatBonusExp = ((appliedExpPre * expIncrease) / 100);
                 eei.setBaseAddExp((int) mobStatBonusExp);
@@ -1294,6 +1388,11 @@ public class Mob extends Life {
             eei.setLastHit(true);
             eei.setIncEXP((int) appliedExpPre);
             chr.addExp(appliedExpPost, eei);
+
+            if (Util.succeedProp(GameConstants.NX_DROP_CHANCE)) {
+                int nx = (int) (damagePerc * getNxDropAmount());
+                chr.addNx(nx);
+            }
 
             Party party = chr.getParty();
             if (party != null) {
@@ -1407,8 +1506,8 @@ public class Mob extends Life {
     }
 
     public void reviveMob() {
-        if(getRevives().size() > 0) {
-            for(int reviveTemplateID : getRevives()) {
+        if (getRevives().size() > 0) {
+            for (int reviveTemplateID : getRevives()) {
                 Mob mob = MobData.getMobDeepCopyById(reviveTemplateID);
                 mob.setNotRespawnable(true);
                 mob.setPosition(getPosition());
@@ -1443,6 +1542,7 @@ public class Mob extends Life {
 
     /**
      * Sets when a next skill can be used (in ms from current time).
+     *
      * @param delay The delay until the next skill can be used
      */
     public void setSkillDelay(long delay) {
@@ -1588,12 +1688,12 @@ public class Mob extends Life {
         chr.comboKillResetTimer();
 
         // Exp Orb spawning from Mob every 50 combos
-        if(chr.getComboCounter() % 50 == 0) {
+        if (chr.getComboCounter() % 50 == 0) {
             Item item = ItemData.getItemDeepCopy(GameConstants.BLUE_EXP_ORB_ID); // Blue Exp Orb
-            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
+            if (chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_PURPLE) {
                 item = ItemData.getItemDeepCopy(GameConstants.PURPLE_EXP_ORB_ID); // Purple Exp Orb
             }
-            if(chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
+            if (chr.getComboCounter() >= GameConstants.COMBO_KILL_REWARD_RED) {
                 item = ItemData.getItemDeepCopy(GameConstants.RED_EXP_ORB_ID); // Red Exp Orb
             }
             Drop drop = new Drop(-1, item);
@@ -1602,7 +1702,7 @@ public class Mob extends Life {
         }
 
         // Mage FP skill
-        if(isInfestedByViralSlime()) {
+        if (isInfestedByViralSlime()) {
             Magician.infestViralSlime(chr, this);
         }
 
@@ -1614,7 +1714,10 @@ public class Mob extends Life {
             List<Foothold> listOfFootHolds = new ArrayList<>(field.getNonWallFootholds());
             Foothold foothold = Util.getRandomFromCollection(listOfFootHolds);
             Position position = foothold.getRandomPosition();
-            RandomPortal randomPortal = new RandomPortal(RandomPortal.Type.Inferno, position, chr.getId());
+            RandomPortal.Type portalType = Util.succeedProp(50)
+                    ? RandomPortal.Type.PolloFritto
+                    : RandomPortal.Type.Inferno;
+            RandomPortal randomPortal = new RandomPortal(portalType, position, chr.getId());
             field.addLife(randomPortal);
             chr.write(RandomPortalPool.created(randomPortal));
         }
@@ -1696,14 +1799,14 @@ public class Mob extends Life {
         outPacket.encodeShort(getHomeFoothold().getId());
         byte appearType = getAppearType();
         outPacket.encodeShort(appearType);
-        if(appearType == -3 || appearType >= 0) {
+        if (appearType == -3 || appearType >= 0) {
             // init -> -2, -1 else
             outPacket.encodeInt(getOption());
         }
         outPacket.encodeByte(getTeamForMCarnival());
         outPacket.encodeInt(getHp() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) getHp());
         outPacket.encodeInt(getEffectItemID());
-        if(isPatrolMob()) {
+        if (isPatrolMob()) {
             outPacket.encodeInt(getPosition().getX() - getRange());
             outPacket.encodeInt(getPosition().getX() + getRange());
             outPacket.encodeInt(getDetectX());
@@ -1715,7 +1818,7 @@ public class Mob extends Life {
         outPacket.encodeInt(0); // ?
         int ownerAID = getLifeReleaseOwnerAID();
         outPacket.encodeByte(ownerAID > 0);
-        if(ownerAID > 0) {
+        if (ownerAID > 0) {
             outPacket.encodeInt(ownerAID);
             outPacket.encodeString(getLifeReleaseOwnerName());
             outPacket.encodeString(getLifeReleaseMobName());
@@ -1731,7 +1834,7 @@ public class Mob extends Life {
         }
         outPacket.encodeInt(getScale());
         outPacket.encodeInt(getEliteGrade());
-        if(getEliteGrade() >= 0) {
+        if (getEliteGrade() >= 0) {
             size = 0;
             outPacket.encodeInt(size);
             for (int i = 0; i < size; i++) {
@@ -1742,7 +1845,7 @@ public class Mob extends Life {
         }
         ShootingMoveStat sms = getShootingMoveStat();
         outPacket.encodeByte(sms != null);
-        if(sms != null) {
+        if (sms != null) {
             sms.encode(outPacket);
         }
         size = 0;
@@ -1753,5 +1856,21 @@ public class Mob extends Life {
         }
         outPacket.encodeInt(getTargetUserIdFromServer());
         outPacket.encodeInt(0);
+    }
+
+    public int getNxDropAmount() {
+        // yuno
+        if (getExp() == 0) {
+            return 0;
+        }
+        double amount = ((math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
+        return (int) (amount + 1);
+
+
+        // sjonnie
+//        long hp = getMaxHp();
+//        ForcedMobStat fms = getForcedMobStat();
+//        int base = (int) (50 + (fms.getLevel() / 2D) * (Math.pow(hp, (1 / 7D))));
+//        return Util.getRandom(base, (base + base / 10)); // base + 10% random
     }
 }

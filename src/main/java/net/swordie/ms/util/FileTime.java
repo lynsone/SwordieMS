@@ -260,4 +260,23 @@ public class FileTime implements Serializable {
 				", highDateTime=" + highDateTime +
 				'}';
 	}
+
+	public boolean isMaxTime() {
+		return equals(FileTime.fromType(Type.MAX_TIME));
+	}
+
+	public boolean isMinTime() {
+		return equals(FileTime.fromType(Type.ZERO_TIME));
+	}
+
+	public String toSqlFormat() {
+		if (isMaxTime()) {
+			return "9999-01-01 00:00:01.000";
+		} else if (isMinTime()) {
+			return "1970-01-01 00:00:01.000";
+		}
+		LocalDateTime ldt = toLocalDateTime();
+		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%03d", ldt.getYear(), ldt.getMonthValue(),
+				ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), 0);
+	}
 }

@@ -21,9 +21,9 @@ public class FileTimeConverter implements AttributeConverter<FileTime, Timestamp
         Instant instant;
         if (fileTime == null) {
             instant = null;
-        } else if (fileTime.equals(FileTime.fromType(FileTime.Type.MAX_TIME))) {
+        } else if (fileTime.isMaxTime()) {
             instant = MAX_LDT.atZone(ZoneId.systemDefault()).toInstant();
-        } else if (fileTime.equals(FileTime.fromType(FileTime.Type.ZERO_TIME))) {
+        } else if (fileTime.isMinTime()) {
             instant = MIN_LDT.atZone(ZoneId.systemDefault()).toInstant();
         } else {
             instant = fileTime.toInstant();

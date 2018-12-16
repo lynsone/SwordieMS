@@ -9,12 +9,14 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AccountType;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -71,9 +73,9 @@ public class Account {
     private Set<Char> characters = new HashSet<>();
     @Transient
     private Char currentChr;
-    private int NXCredit;
+    private int nxCredit;
     private int maplePoints;
-    private int NXPrepaid;
+    private int nxPrepaid;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
@@ -375,12 +377,12 @@ public class Account {
         this.trunk = trunk;
     }
 
-    public int getNXCredit() {
-        return NXCredit;
+    public int getNxCredit() {
+        return nxCredit;
     }
 
-    public void setNXCredit(int nxCredit) {
-        this.NXCredit = nxCredit;
+    public void setNxCredit(int nxCredit) {
+        this.nxCredit = nxCredit;
     }
 
     public int getMaplePoints() {
@@ -391,12 +393,12 @@ public class Account {
         this.maplePoints = maplePoints;
     }
 
-    public int getNXPrepaid() {
-        return NXPrepaid;
+    public int getNxPrepaid() {
+        return nxPrepaid;
     }
 
-    public void setNXPrepaid(int nxPrepaid) {
-        this.NXPrepaid = nxPrepaid;
+    public void setNxPrepaid(int nxPrepaid) {
+        this.nxPrepaid = nxPrepaid;
     }
 
     public void addLinkSkill(LinkSkill linkSkill) {
@@ -424,7 +426,10 @@ public class Account {
     }
 
     public void addNXCredit(int credit) {
-        setNXCredit(getNXCredit() + credit);
+        int newCredit = getNxCredit() + credit;
+        if (newCredit >= 0) {
+            setNxCredit(newCredit);
+        }
     }
 
     public void deductNXCredit(int credit) {
@@ -432,7 +437,10 @@ public class Account {
     }
 
     public void addMaplePoints(int points) {
-        setMaplePoints(getMaplePoints() + points);
+        int newPoints = getMaplePoints() + points;
+        if (newPoints >= 0) {
+            setMaplePoints(newPoints);
+        }
     }
 
     public void deductMaplePoints(int points) {
@@ -440,7 +448,10 @@ public class Account {
     }
 
     public void addNXPrepaid(int prepaid) {
-        addNXPrepaid(getNXPrepaid() + prepaid);
+        int newPrepaid = getNxPrepaid() + prepaid;
+        if (newPrepaid >= 0) {
+            addNXPrepaid(newPrepaid);
+        }
     }
 
     public void deductNXPrepaid(int prepaid) {
@@ -480,7 +491,11 @@ public class Account {
     }
 
     public Char getCharById(int id) {
-        return getCharacters().stream().filter(charr -> charr.getId() == id).findAny().orElse(null);
+        return Util.findWithPred(getCharacters(), chr -> chr.getId() == id);
+    }
+
+    public Char getCharByName(String name) {
+        return Util.findWithPred(getCharacters(), chr -> chr.getName().equals(name));
     }
 
     public void unstuck() {

@@ -1,8 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
-import net.swordie.ms.client.character.Char;
 import net.swordie.ms.enums.BaseStat;
-import net.swordie.ms.util.container.Tuple;
 
 /**
  * Created on 12/20/2017.
@@ -442,6 +440,8 @@ public enum SkillStat {
                 return BaseStat.hpRecovery;
             case mp:
                 return BaseStat.mpRecovery;
+            case bufftimeR:
+                return BaseStat.buffTimeR;
         }
         return null;
     }

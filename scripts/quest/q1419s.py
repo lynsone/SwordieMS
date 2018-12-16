@@ -5,7 +5,7 @@ job = "Hunter"
 monster = "Stone Golem"
 
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
-                    "a #b"+ job +"#k is specialised in ranged attacks and use #bows#k to defeat their enemies. "
+                    "A #b"+ job +"#k is specialised in ranged attacks and use #bows#k to defeat their enemies. "
                     "There are many useful skills you can acquire.")
 
 

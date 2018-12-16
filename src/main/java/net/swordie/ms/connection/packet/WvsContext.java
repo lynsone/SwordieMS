@@ -50,7 +50,7 @@ public class WvsContext {
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats) {
-        return statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
+        return statChanged(stats, false, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent, byte mixBaseHairColor,
@@ -381,13 +381,12 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket incMoneyMessage(String clientName, int amount, int charID) {
+    public static OutPacket incMoneyMessage(int amount) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(INC_MONEY_MESSAGE.getVal());
         outPacket.encodeInt(amount);
-        outPacket.encodeInt(1);
-        outPacket.encodeString(clientName);
+        outPacket.encodeInt(amount > 0 ? 1 : -1);
 
         return outPacket;
     }
@@ -429,6 +428,17 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket incNonCombatStatEXPMessage(Stat trait, int amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_NON_COMBAT_STAT_EXP_MESSAGE.getVal());
+        long mask = 0;
+        mask |= trait.getVal();
+        outPacket.encodeLong(mask);
+        outPacket.encodeInt(amount);
+
+        return outPacket;
+    }
     /**
      * Returns a net.swordie.ms.connection.packet for messages with the following {@link MessageType}:<br>
      * int: <br>

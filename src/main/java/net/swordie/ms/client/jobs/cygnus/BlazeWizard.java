@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
@@ -210,14 +211,6 @@ public class BlazeWizard extends Noblesse {
                     summonLion = summon;
                 }
 
-
-                o3.nReason = skillID;
-                o3.nValue = 1;
-                o3.summon = summon;
-                o3.tStart = (int) System.currentTimeMillis();
-                o3.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o3);
-
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(y, slv);
                 o1.tStart = (int) System.currentTimeMillis();
@@ -308,7 +301,7 @@ public class BlazeWizard extends Noblesse {
             summon = Summon.getSummonBy(chr, getFlameElement(), slv);
             summon.setFlyMob(false);
             summon.setAttackActive(false);
-            summon.setAssistType((byte) 0);
+            summon.setAssistType(AssistType.None);
             field.spawnSummon(summon);
 
             o2.nReason = getFlameElement();

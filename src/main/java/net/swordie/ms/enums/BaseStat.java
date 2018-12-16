@@ -4,9 +4,7 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created on 5/4/2018.
@@ -63,6 +61,7 @@ public enum BaseStat {
     dexLv,
     intLv,
     lukLv,
+    buffTimeR, // Buff Duration multiplier
     recoveryUp, mpconReduce, reduceCooltime, padLv, madLv, mhpLv, mmpLv; // % increase in heal potion use
 
 
@@ -186,18 +185,14 @@ public enum BaseStat {
                 stats.put(mhp, o.nValue);
                 break;
             case IndieMHPR:
-                stats.put(mhpR, o.nValue);
-                break;
             case MaxHP:
             case IncMaxHP:
                 stats.put(mhpR, o.nOption);
                 break;
             case IndieMMP:
-                stats.put(mmp, o.nValue);
-                break;
             case MaxMP:
             case IncMaxMP:
-                stats.put(mmp, o.nOption);
+                stats.put(mmpR, o.nOption);
                 break;
             case IndieMMPR:
                 stats.put(mmpR, o.nValue);
@@ -376,6 +371,9 @@ public enum BaseStat {
                 break;
             case BlessOfDarkness:
                 // TODO
+                break;
+            case IndieScriptBuff:
+                stats.put(buffTimeR, o.nValue);
                 break;
             default:
                 stats.put(unk, o.nOption);

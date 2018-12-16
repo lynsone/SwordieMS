@@ -4,7 +4,7 @@ darkMarble = 4031013
 job = "Page"
 
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
-            "a #b"+ job +"#k is specialised in short weapons such as #bHammers#k and #bAxes#k. "
+            "A #b"+ job +"#k is specialised in short weapons such as #bHammers#k and #bAxes#k. "
             "There are many useful skills you can acquire with both weapons, but I strongly recommend that you focus on one and stick to it.")
 
 

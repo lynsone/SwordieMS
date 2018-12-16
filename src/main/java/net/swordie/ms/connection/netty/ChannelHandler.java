@@ -414,19 +414,19 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 WorldHandler.handleRequestArrowPlatterObj(chr, inPacket);
                 break;
             case USER_FLAME_ORB_REQUEST:
-                WorldHandler.handleUserFlameOrbRequest(c, inPacket);
+                WorldHandler.handleUserFlameOrbRequest(chr, inPacket);
                 break;
             case CREATE_PSYCHIC_LOCK:
-                WorldHandler.handleCreatePsychicLock(c, inPacket);
+                WorldHandler.handleCreatePsychicLock(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_LOCK:
-                WorldHandler.handleReleasePsychicLock(c, inPacket);
+                WorldHandler.handleReleasePsychicLock(chr, inPacket);
                 break;
             case CREATE_KINESIS_PSYCHIC_AREA:
-                WorldHandler.handleCreateKinesisPsychicArea(c, inPacket);
+                WorldHandler.handleCreateKinesisPsychicArea(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_AREA:
-                WorldHandler.handleReleasePsychicArea(c, inPacket);
+                WorldHandler.handleReleasePsychicArea(chr, inPacket);
                 break;
             case MOB_MOVE:
                 WorldHandler.handleMoveMob(c, inPacket);
@@ -649,6 +649,18 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_MEDAL_REISSUE_REQUEST:
                 WorldHandler.handleUserMedalReissueRequest(chr, inPacket);
+                break;
+            case BROADCAST_EFFECT_TO_SPLIT:
+                WorldHandler.handleBroadcastEffectToSplit(chr, inPacket);
+                break;
+            case BROADCAST_ONE_TIME_ACTION_TO_SPLIT:
+                WorldHandler.handleBroadcastOneTimeActionToSplit(chr, inPacket);
+                break;
+            case MAKING_SKILL_REQUEST:
+                WorldHandler.handleMakingSkillRequest(chr, inPacket);
+                break;
+            case USER_RECIPE_OPEN_ITEM_USE_REQUEST:
+                WorldHandler.handleUserRecipeOpenItemUseRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);

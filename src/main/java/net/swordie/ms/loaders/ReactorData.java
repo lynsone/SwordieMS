@@ -194,7 +194,7 @@ public class ReactorData {
     }
 
     private static ReactorInfo loadReactorByID(int id) {
-        File file = new File(String.format("%s/reactors/%d.dat", ServerConstants.WZ_DIR, id));
+        File file = new File(String.format("%s/reactors/%d.dat", ServerConstants.DAT_DIR, id));
         if(file.exists()) {
             return loadReactorFromFile(file);
         } else {
@@ -214,7 +214,7 @@ public class ReactorData {
         log.info("Started generating reactor data.");
         long start = System.currentTimeMillis();
         loadReactorsFromWZ();
-        saveReactors(String.format("%s/reactors", ServerConstants.WZ_DIR));
+        saveReactors(String.format("%s/reactors", ServerConstants.DAT_DIR));
         log.info(String.format("Completed generating reactor data in %dms.", System.currentTimeMillis() - start));
     }
 

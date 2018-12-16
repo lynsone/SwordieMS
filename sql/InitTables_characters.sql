@@ -12,6 +12,7 @@ macros,
 familiars,
 stolenskills,
 chosenskills,
+skillcooltimes,
 hyperrockfields,
 characterpotentials,
 test,
@@ -637,6 +638,15 @@ create table chosenskills (
     charid int,
     skillid int,
     position int,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
+create table skillcooltimes (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    nextusabletime bigint,
     primary key (id),
     foreign key (charid) references characters(id)
 );

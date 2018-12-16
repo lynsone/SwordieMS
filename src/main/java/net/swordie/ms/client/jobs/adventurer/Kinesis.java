@@ -2,13 +2,17 @@ package net.swordie.ms.client.jobs.adventurer;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
+import net.swordie.ms.client.character.items.BodyPart;
+import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.life.mob.Mob;
@@ -243,7 +247,7 @@ public class Kinesis extends Job {
             slv = (byte) skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if(hasHitMobs) {
+        if (hasHitMobs && chr.hasSkill(KINETIC_COMBO)) {
             createKineticOrbForceAtom(skillID, slv, attackInfo);
         }
         Option o1 = new Option();
@@ -385,5 +389,18 @@ public class Kinesis extends Job {
             tsm.removeStat(KinesisPsychicShield, false);
         }
         super.handleHit(c, inPacket, hitInfo);
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        Item item = ItemData.getItemDeepCopy(1353200); // Pawn Chess Piece
+        item.setBagIndex(BodyPart.Shield.getVal());
+        chr.getEquippedInventory().addItem(item);
+        cs.setLevel(10);
+        cs.setMaxHp(574);
+        cs.setHp(574);
+        cs.setInt(45);
     }
 }

@@ -3,17 +3,22 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.damage.DamageSkinType;
 import net.swordie.ms.client.character.skills.LarknessManager;
+import net.swordie.ms.client.character.skills.PsychicArea;
+import net.swordie.ms.client.character.skills.PsychicLockBall;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.movement.MovementInfo;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +26,14 @@ import java.util.Set;
  * Created on 1/2/2018.
  */
 public class UserLocal {
+    public static OutPacket noticeMsg(String msg, boolean autoSeparated) {
+        OutPacket outPacket = new OutPacket(OutHeader.NOTICE_MSG);
+
+        outPacket.encodeString(msg);
+        outPacket.encodeByte(autoSeparated);
+
+        return outPacket;
+    }
 
     public static OutPacket chatMsg(ChatType colour, String msg) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT_MSG);
@@ -491,8 +504,8 @@ public class UserLocal {
         return outPacket;
     }
 
-    public static OutPacket ballonMsg(String message, int width, int timeOut, Position position) {
-        OutPacket outPacket = new OutPacket(OutHeader.BALLOMSG);
+    public static OutPacket balloonMsg(String message, int width, int timeOut, Position position) {
+        OutPacket outPacket = new OutPacket(OutHeader.BALLOON_MSG);
 
         outPacket.encodeString(message);
         outPacket.encodeShort(width);// 100
@@ -501,6 +514,55 @@ public class UserLocal {
         if (position != null) {
             outPacket.encodePosition(position);
         }
+        return outPacket;
+    }
+
+    public static OutPacket doActivePsychicArea(PsychicArea pa) {
+        OutPacket outPacket = new OutPacket(OutHeader.DO_ACTIVE_PSYCHIC_AREA);
+
+        outPacket.encodeInt(pa.psychicAreaKey);
+        outPacket.encodeInt(pa.localPsychicAreaKey);
+
+        return outPacket;
+    }
+
+    public static OutPacket enterFieldPsychicInfo(int userID, PsychicLock pl, List<PsychicArea> psychicAreas) {
+        OutPacket outPacket = new OutPacket(OutHeader.ENTER_FIELD_PSYCHIC_INFO);
+
+        outPacket.encodeByte(true);
+
+        outPacket.encodeInt(userID);
+        if (pl == null) {
+            outPacket.encodeInt(0);
+        } else {
+            outPacket.encodeInt(pl.psychicLockBalls.size());
+            for (PsychicLockBall plb : pl.psychicLockBalls) {
+                boolean hasMob = plb.mob != null;
+                outPacket.encodeByte(plb.success);
+                outPacket.encodeInt(plb.localKey);
+                outPacket.encodeInt(plb.psychicLockKey);
+                outPacket.encodeInt(pl.skillID);
+                outPacket.encodeShort(pl.slv);
+                outPacket.encodeInt(hasMob ? plb.mob.getObjectId() : 0);
+                outPacket.encodeShort(plb.stuffID);
+                outPacket.encodeInt(hasMob ? Util.maxInt(plb.mob.getMaxHp()) : 0);
+                outPacket.encodeInt(hasMob ? Util.maxInt(plb.mob.getHp()) : 0);
+                outPacket.encodeByte(plb.posRelID);
+                outPacket.encodePositionInt(plb.start);
+                outPacket.encodePositionInt(plb.rel);
+            }
+        }
+        if (psychicAreas == null) {
+            outPacket.encodeInt(0);
+        } else {
+            outPacket.encodeInt(psychicAreas.size());
+            for (PsychicArea pa : psychicAreas) {
+                pa.encode(outPacket);
+            }
+        }
+        // indicate end
+        outPacket.encodeByte(false);
+
         return outPacket;
     }
 }

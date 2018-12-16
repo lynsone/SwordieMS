@@ -35,10 +35,10 @@ import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.drop.DropInfo;
-import net.swordie.ms.loaders.MonsterCollectionData;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionSessionRewardInfo;
+import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 import net.swordie.ms.world.shop.cashshop.CashShopCategory;
 import net.swordie.ms.world.shop.cashshop.CashShopItem;
@@ -125,6 +125,7 @@ public class DatabaseManager {
                 DropInfo.class,
                 Offense.class,
                 OffenseManager.class,
+                NpcShopItem.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);
@@ -193,14 +194,19 @@ public class DatabaseManager {
     }
 
     public static Object getObjFromDB(Class clazz, String name) {
-        log.info(String.format("%s: Trying to get obj %s with name %s.", LocalDateTime.now(), clazz, name));
+        return getObjFromDB(clazz, "name", name);
+    }
+
+    public static Object getObjFromDB(Class clazz, String columnName, Object value) {
+        log.info(String.format("%s: Trying to get obj %s with value %s.", LocalDateTime.now(), clazz, value));
         Object o = null;
-        try(Session session = getSession()) {
+        try (Session session = getSession()) {
             Transaction transaction = session.beginTransaction();
             // String.format for query, just to fill in the class
             // Can't set the FROM clause with a parameter it seems
-            javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE name = :name", clazz.getName()));
-            query.setParameter("name", name);
+            javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
+            System.out.println(((Query) query).getQueryString());
+            query.setParameter("val", value);
             List l = ((org.hibernate.query.Query) query).list();
             if (l != null && l.size() > 0) {
                 o = l.get(0);
@@ -209,5 +215,22 @@ public class DatabaseManager {
             session.close();
         }
         return o;
+    }
+
+    public static Object getObjListFromDB(Class clazz, String columnName, Object value) {
+        log.info(String.format("%s: Trying to get obj %s with value %s.", LocalDateTime.now(), clazz, value));
+        List list;
+        try (Session session = getSession()) {
+            Transaction transaction = session.beginTransaction();
+            // String.format for query, just to fill in the class
+            // Can't set the FROM clause with a parameter it seems
+            javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
+            System.out.println(((Query) query).getQueryString());
+            query.setParameter("val", value);
+            list = ((org.hibernate.query.Query) query).list();
+            transaction.commit();
+            session.close();
+        }
+        return list;
     }
 }

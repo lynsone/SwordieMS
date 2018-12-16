@@ -496,7 +496,6 @@ public class BeastTamer extends Job {
         o1.nReason = KITTY_BATTLE_SQUAD;
         o1.nValue = si.getValue(indiePad, slv);
         o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = 0;
         tsm.putCharacterStatValue(IndiePAD, o1);
         tsm.putCharacterStatValue(IndieMAD, o1);
         tsm.sendSetStatPacket();
@@ -511,12 +510,10 @@ public class BeastTamer extends Job {
         o1.nReason = KITTY_TREATS;
         o1.nValue = si.getValue(indieMhp, slv);
         o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = 0;
         tsm.putCharacterStatValue(IndieMHP, o1);
         o2.nReason = KITTY_TREATS;
         o2.nValue = si.getValue(indieMmp, slv);
         o2.tStart = (int) System.currentTimeMillis();
-        o2.tTerm = 0;
         tsm.putCharacterStatValue(IndieMMP, o2);
         tsm.sendSetStatPacket();
     }
@@ -529,7 +526,6 @@ public class BeastTamer extends Job {
         int slv = si.getCurrentLevel();
         o1.nOption = si.getValue(v, slv);
         o1.rOption = STICKY_PAWS;
-        o1.tOption = 0;
         tsm.putCharacterStatValue(DropRate, o1);
         tsm.sendSetStatPacket();
     }
@@ -542,11 +538,9 @@ public class BeastTamer extends Job {
         int slv = si.getCurrentLevel();
         o1.nOption = si.getValue(x, slv);
         o1.rOption = CAT_CLAWS;
-        o1.tOption = 0;
         tsm.putCharacterStatValue(CriticalBuff, o1);
         o2.nOption = si.getValue(y, slv);
         o2.rOption = CAT_CLAWS;
-        o2.tOption = 0;
         tsm.putCharacterStatValue(IncCriticalDamMin, o2);
         tsm.sendSetStatPacket();
     }
@@ -559,7 +553,6 @@ public class BeastTamer extends Job {
         int slv = si.getCurrentLevel();
         o1.nOption = si.getValue(x, slv);
         o1.rOption = MOUSERS_INSIGHT;
-        o1.tOption = 0;
         tsm.putCharacterStatValue(IgnoreMobpdpR, o1);
         tsm.sendSetStatPacket();
     }
@@ -570,11 +563,12 @@ public class BeastTamer extends Job {
         Option o2 = new Option();
         SkillInfo si = SkillData.getSkillInfoById(FRIENDS_OF_ARBY);
         int slv = si.getCurrentLevel();
-        o1.nOption = si.getValue(x, slv);
-        o1.rOption = FRIENDS_OF_ARBY;
-        o1.tOption = 0;
-        tsm.putCharacterStatValue(HolySymbol, o1);
-        tsm.sendSetStatPacket();
+        if (tsm.getOptByCTSAndSkill(HolySymbol, Magician.HOLY_SYMBOL) == null) { // Only apply if player doesn't have Holy Symbol
+            o1.nOption = si.getValue(x, slv);
+            o1.rOption = FRIENDS_OF_ARBY;
+            tsm.putCharacterStatValue(HolySymbol, o1);
+            tsm.sendSetStatPacket();
+        }
     }
 
     private Summon defensiveFormationSummon() {

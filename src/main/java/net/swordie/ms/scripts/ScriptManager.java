@@ -7,6 +7,7 @@ import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ObtacleAtomEnum;
 import net.swordie.ms.enums.UIType;
 import net.swordie.ms.enums.WeatherEffNoticeType;
+import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Clock;
@@ -441,6 +442,7 @@ public interface ScriptManager extends Observer {
 	 */
 	void teleportToPortal(int portalId);
 
+	Drop getDropInRect(int itemID, int rectRange);
 	/**
 	 * Gets the id of the linked {@link Field}
 	 * Example: "sm.getFieldID()"
@@ -924,6 +926,7 @@ public interface ScriptManager extends Observer {
 	 */
 	void setPartyField();
 
+	void setChannelField();
 	/**
 	 * Checks if the {@link Char} linked to the {@link ScriptManager} is the {@link Party} leader.
 	 * Example: "if(sm.isPartyLeader()) {}"

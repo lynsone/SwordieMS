@@ -2,13 +2,23 @@ package net.swordie.ms.world.shop;
 
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.enums.ItemGrade;
 import net.swordie.ms.util.FileTime;
+
+import javax.persistence.*;
 
 /**
  * Created on 3/27/2018.
  */
+@Entity
+@Table(name = "shopitems")
 public class NpcShopItem {
+    @Id
+    @GeneratedValue
+    private long id;
+    private int shopID;
+    @Transient
     private Item item;
     private int itemID;
     private int price;
@@ -25,18 +35,20 @@ public class NpcShopItem {
     private int showLevMin;
     private int showLevMax;
     private int questID;
+    @Convert(converter = FileTimeConverter.class)
     private FileTime sellStart;
+    @Convert(converter = FileTimeConverter.class)
     private FileTime sellEnd;
     private int tabIndex;
     private boolean worldBlock;
     private int potentialGrade;
     private int buyLimit;
+    @Transient
     private BuyLimitInfo buyLimitInfo;
     private short quantity;
     private long unitPrice;
     private short maxPerSlot;
     private int discountPerc;
-    private int location;
 
     public NpcShopItem() {
         sellStart = FileTime.fromType(FileTime.Type.ZERO_TIME);
@@ -353,19 +365,27 @@ public class NpcShopItem {
         return discountPerc;
     }
 
-    public int getLocation() {
-        return location;
-    }
-
-    public void setLocation(int location) {
-        this.location = location;
-    }
-
     /**
      * Sets the discount percentage of this item, from 0 to 100.
      * @param discountPerc The discount percentage of this item
      */
     public void setDiscountPerc(int discountPerc) {
         this.discountPerc = discountPerc;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getShopID() {
+        return shopID;
+    }
+
+    public void setShopID(int shopID) {
+        this.shopID = shopID;
     }
 }

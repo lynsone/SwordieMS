@@ -63,7 +63,7 @@ public class Kaiser extends Job {
     public static final int NOVA_TEMPERANCE_KAISER = 61121015;
 
     public static final int FINAL_TRANCE = 61121053;
-    public static final int KAISERS_MAJESTY = 61121054; // TODO reset Cooldown
+    public static final int KAISERS_MAJESTY = 61121054;
 
 
     //Attacking Skills
@@ -137,7 +137,7 @@ public class Kaiser extends Job {
 
     public Kaiser(Char chr) {
         super(chr);
-        if(chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
+        if (chr.getId() != 0 && isHandlerOfJob(chr.getJob())) {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
@@ -168,7 +168,6 @@ public class Kaiser extends Job {
     }
 
 
-
     // Buff related methods --------------------------------------------------------------------------------------------
 
     public void handleBuff(Client c, InPacket inPacket, int skillID, byte slv) {
@@ -188,7 +187,7 @@ public class Kaiser extends Job {
         int weaponID = item.getItemId();
         switch (skillID) {
             case REALIGN_ATTACKER_MODE:
-                if(tsm.hasStatBySkillId(skillID)) {
+                if (tsm.hasStatBySkillId(skillID)) {
                     tsm.removeStatsBySkill(skillID);
                 } else {
                     tsm.removeStatsBySkill(REALIGN_DEFENDER_MODE);
@@ -196,7 +195,7 @@ public class Kaiser extends Job {
                 }
                 break;
             case REALIGN_DEFENDER_MODE:
-                if(tsm.hasStatBySkillId(skillID)) {
+                if (tsm.hasStatBySkillId(skillID)) {
                     tsm.removeStatsBySkill(skillID);
                 } else {
                     tsm.removeStatsBySkill(REALIGN_ATTACKER_MODE);
@@ -221,14 +220,10 @@ public class Kaiser extends Job {
                 break;
             case GRAND_ARMOR:
                 // w = party dmg taken  v = self dmg taken
-                o1.nOption = si.getValue(w, slv);
+                o1.nOption = si.getValue(v, slv);
                 o1.rOption = skillID;
                 o1.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamageReduce, o1); //TODO DamageReduce Party-wide
-                o2.nOption = si.getValue(v, slv);
-                o2.rOption = skillID;
-                o2.tOption = si.getValue(time, slv);
-                tsm.putCharacterStatValue(DamageReduce, o2);
+                tsm.putCharacterStatValue(DamageReduce, o1);
                 break;
             case NOVA_WARRIOR_KAISER:
                 o1.nReason = skillID;
@@ -238,7 +233,7 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(IndieStatR, o1);
                 break;
             case TEMPEST_BLADES_THREE:
-                if(tsm.getOption(StopForceAtomInfo).nOption != 1 && tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.getOption(StopForceAtomInfo).nOption != 1 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -253,7 +248,7 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
             case TEMPEST_BLADES_THREE_FF: //Final Form
-                if(tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.getOption(StopForceAtomInfo).nOption != 3 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -268,7 +263,7 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
             case TEMPEST_BLADES_FIVE:
-                if(tsm.getOption(StopForceAtomInfo).nOption != 2 && tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.getOption(StopForceAtomInfo).nOption != 2 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -283,7 +278,7 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
             case TEMPEST_BLADES_FIVE_FF: //Final Form
-                if(tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.getOption(StopForceAtomInfo).nOption != 4 && tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -298,7 +293,7 @@ public class Kaiser extends Job {
                 tsm.putCharacterStatValue(StopForceAtomInfo, o1);
                 break;
             case FINAL_FORM_THIRD:
-                if(tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -331,7 +326,7 @@ public class Kaiser extends Job {
                 break;
             case FINAL_TRANCE:
             case FINAL_FORM_FOURTH:
-                if(tsm.hasStat(StopForceAtomInfo)) {
+                if (tsm.hasStat(StopForceAtomInfo)) {
                     tsm.removeStat(StopForceAtomInfo, true);
                     tsm.sendResetStatPacket();
                 }
@@ -373,7 +368,11 @@ public class Kaiser extends Job {
                 o2.tStart = (int) System.currentTimeMillis();
                 o2.tTerm = si.getValue(time, slv);
                 tsm.putCharacterStatValue(IndiePAD, o2);
-                //TODO Cooldown Reset
+                for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                    if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset() && SkillData.getSkillInfoById(skillId).getHyper() == 0) {
+                        chr.resetSkillCoolTime(skillId);
+                    }
+                }
                 break;
             case STONE_DRAGON:
             case STONE_DRAGON_FINAL_FORM:
@@ -400,7 +399,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realignattacks = new int[] {
+        int[] realignattacks = new int[]{
                 REALIGN_ATTACKER_MODE,
                 REALIGN_ATTACKER_MODE_I,
                 REALIGN_ATTACKER_MODE_II,
@@ -436,7 +435,7 @@ public class Kaiser extends Job {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        int[] realigndefends = new int[] {
+        int[] realigndefends = new int[]{
                 REALIGN_DEFENDER_MODE,
                 REALIGN_DEFENDER_MODE_I,
                 REALIGN_DEFENDER_MODE_II,
@@ -470,21 +469,20 @@ public class Kaiser extends Job {
 
     public static int getTempBladeSkill(Char chr, TemporaryStatManager tsm) {
         int skill = 0;
-        if(chr.hasSkill(TEMPEST_BLADES_THREE)) {
+        if (chr.hasSkill(TEMPEST_BLADES_THREE)) {
             skill = TEMPEST_BLADES_THREE;
         }
-        if(chr.hasSkill(TEMPEST_BLADES_THREE) && tsm.hasStat(Morph)) {
+        if (chr.hasSkill(TEMPEST_BLADES_THREE) && tsm.hasStat(Morph)) {
             skill = TEMPEST_BLADES_THREE_FF;
         }
-        if(chr.hasSkill(TEMPEST_BLADES_FIVE)) {
+        if (chr.hasSkill(TEMPEST_BLADES_FIVE)) {
             skill = TEMPEST_BLADES_FIVE;
         }
-        if(chr.hasSkill(TEMPEST_BLADES_FIVE) && tsm.hasStat(Morph)) {
+        if (chr.hasSkill(TEMPEST_BLADES_FIVE) && tsm.hasStat(Morph)) {
             skill = TEMPEST_BLADES_FIVE_FF;
         }
         return skill;
     }
-
 
 
     // Attack related methods ------------------------------------------------------------------------------------------
@@ -503,7 +501,7 @@ public class Kaiser extends Job {
             slv = skill.getCurrentLevel();
             skillID = skill.getSkillId();
         }
-        if(hasHitMobs) {
+        if (hasHitMobs) {
             incrementMorphGauge(tsm, (SkillConstants.getKaiserGaugeIncrementBySkill(attackInfo.skillId) * attackInfo.mobAttackInfo.size()));
         }
         Option o1 = new Option();
@@ -518,7 +516,7 @@ public class Kaiser extends Job {
                         if (mob == null) {
                             continue;
                         }
-                        if(!mob.isBoss()) {
+                        if (!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
                             o1.rOption = skillID;
@@ -535,7 +533,7 @@ public class Kaiser extends Job {
                     if (mob == null) {
                         continue;
                     }
-                    if(!mob.isBoss()) {
+                    if (!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -563,7 +561,7 @@ public class Kaiser extends Job {
             case WING_BEAT_FINAL_FORM:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
-                    if(mob == null) {
+                    if (mob == null) {
                         continue;
                     }
                     MobTemporaryStat mts = mob.getTemporaryStat();
@@ -580,7 +578,7 @@ public class Kaiser extends Job {
                         if (mob == null) {
                             continue;
                         }
-                        if(!mob.isBoss()) {
+                        if (!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
                             o1.rOption = skillID;
@@ -596,7 +594,7 @@ public class Kaiser extends Job {
                     if (mob == null) {
                         continue;
                     }
-                    if(!mob.isBoss()) {
+                    if (!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skillID;
@@ -633,7 +631,6 @@ public class Kaiser extends Job {
                     mts.addStatOptionsAndBroadcast(MobStat.Speed, o1);
                 }
                 break;
-
             case STONE_DRAGON:
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
@@ -668,8 +665,8 @@ public class Kaiser extends Job {
             case INFERNO_BREATH:
             case INFERNO_BREATH_FINAL_FORM:
                 SkillInfo rca = SkillData.getSkillInfoById(INFERNO_BREATH);
-                for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
-                    if(chr.getField().getAffectedAreas().stream()
+                for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
+                    if (chr.getField().getAffectedAreas().stream()
                             .filter(aa -> aa.getSkillID() == INFERNO_BREATH && aa.getCharID() == chr.getId())
                             .collect(Collectors.toList()).size() > 3) {
                         continue; // to limit the amount of AAs
@@ -685,7 +682,7 @@ public class Kaiser extends Job {
                     aa.setSkillID(INFERNO_BREATH);
                     aa.setPosition(mob.getPosition());
                     Rect rect = rca.getRects().get(0);
-                    if(!attackInfo.left) {
+                    if (!attackInfo.left) {
                         rect = rect.moveRight();
                     }
                     aa.setRect(aa.getPosition().getRectAround(rect));
@@ -706,10 +703,10 @@ public class Kaiser extends Job {
         SkillInfo gaugeInfo = SkillData.getSkillInfoById(60000219);
         int amount = 1;
         int stage = 0;
-        if(chr.hasSkill(60000219)) {
+        if (chr.hasSkill(60000219)) {
             amount = tsm.getOption(SmashStack).nOption;
             if (amount <= (getKaiserGauge(chr))) {
-                if(amount + increment > getKaiserGauge(chr)) {
+                if (amount + increment > getKaiserGauge(chr)) {
                     amount = getKaiserGauge(chr);
                 } else {
                     amount = tsm.getOption(SmashStack).nOption + increment;
@@ -776,7 +773,6 @@ public class Kaiser extends Job {
     }
 
 
-
     // Skill related methods -------------------------------------------------------------------------------------------
 
     @Override
@@ -803,7 +799,6 @@ public class Kaiser extends Job {
             }
         }
     }
-
 
 
     // Hit related methods ---------------------------------------------------------------------------------------------

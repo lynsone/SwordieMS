@@ -562,7 +562,7 @@ public class MobTemporaryStat {
 			bi.setSuperPos(si.getValue(dotSuperpos, slv));
 			bi.setAttackDelay(0);
 			bi.setDotTickIdx(0);
-			bi.setDotTickDamR(si.getValue(dot, slv));
+			bi.setDotTickDamR(0); //damage added for every tick
 			bi.setDotAnimation(bi.getAttackDelay() + bi.getInterval() + time);
 			synchronized (burnedInfos) {
 				getBurnedInfos().add(bi);

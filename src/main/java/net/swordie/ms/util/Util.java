@@ -376,4 +376,12 @@ public class Util {
     public static int maxInt(long num) {
         return (int) Math.min(Integer.MAX_VALUE, num);
     }
+
+    public static <T> Set<T> makeSet(T... elems) {
+        Set<T> set = new HashSet<>();
+        for (T elem : elems) {
+            set.add(elem);
+        }
+        return set;
+    }
 }

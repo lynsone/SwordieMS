@@ -1,7 +1,7 @@
 # Hidden Street : Destroyed Temple of Time Entrance (927020000) | Used in Luminous' Intro
 PHANTOM = 2159353
 sm.sendDelay(120)
-
+sm.removeEscapeButton()
 sm.setSpeakerID(PHANTOM)
 sm.sendNext("A little over-dramatic, don't you think?")
 

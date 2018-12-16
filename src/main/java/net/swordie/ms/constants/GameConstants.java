@@ -3,7 +3,6 @@ package net.swordie.ms.constants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
@@ -21,12 +20,16 @@ import java.util.List;
  * Created on 1/23/2018.
  */
 public class GameConstants {
+    public static final int CHANNELS_PER_WORLD = 10;
+    public static final int BUFFED_CHANNELS = 7;
     public static final int MOB_EXP_RATE = 10;
     public static final long MAX_MONEY = 9_999_999_999L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
     public static final long DAMAGE_CAP = 50_000_000;
+    public static final int BEGINNER_SP_MAX_LV = 7;
+    public static final int RESISTANCE_SP_MAX_LV = 10;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
@@ -99,6 +102,7 @@ public class GameConstants {
 
     // Mob
     public static final int MOB_SKILL_CHANCE = 20;
+    public static final int NX_DROP_CHANCE = 70;
 
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;
@@ -125,7 +129,6 @@ public class GameConstants {
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
 
-
     // START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
 
@@ -148,6 +151,10 @@ public class GameConstants {
 
     // END OF Party Quests
 
+    //Boss QR Values
+    public static final int EASY_HORNTAIL_QUEST = 99996; // Quest where the Spawn state of horntail's heads is stored
+    public static final int EASY_HILLA_QUEST = 99995; //Quest where the state of hilla portals is stored
+    public static final int ARKARIUM_QUEST = 99994; //Quest wehre difficulty of arkarium is stored
     // Trading
     public static final int MAX_TRADE_ITEMS = 9;
 
@@ -173,6 +180,10 @@ public class GameConstants {
     private static int[][] enchantSuccessRates = new int[25][2];
     private static int[][] enchantSuccessRatesSuperior = new int[15][2];
     private static int[] guildExp = new int[MAX_GUILD_LV];
+
+    // Skills
+    public static final int TIME_LEAP_QR_KEY = 99996; // Quest where personal Time Leap CDs get stored
+
 
     private static List<QuickMoveInfo> quickMoveInfos;
     public static int[][][] INC_HP_MP = {

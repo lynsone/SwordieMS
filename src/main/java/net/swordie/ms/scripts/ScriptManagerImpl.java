@@ -17,7 +17,6 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.scene.Scene;
 import net.swordie.ms.client.character.skills.Option;
-import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -33,6 +32,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -46,6 +46,7 @@ import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.*;
@@ -622,8 +623,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setJob(jobID);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.subJob, jobID);
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	public void addSP(int amount) {
@@ -645,8 +645,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setSpToCurrentJob(amount);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	@Override
@@ -767,18 +766,9 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
 
 	public void removeSkill(int skillId) {
-		List<Skill> skills = new ArrayList<>();
-		Skill skill = chr.getSkill(skillId);
-		if (skill != null) {
-			chr.removeSkill(skillId);
-			skill.setCurrentLevel(-1);
-			skill.setMasterLevel(-1);
-			skills.add(skill);
-		}
-		if (skills.size() > 0) {
-			chr.getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
-		}
+		chr.removeSkillAndSendPacket(skillId);
 	}
+
 	public int getSkillByItem() {
 		return getSkillByItem(getParentID());
 	}
@@ -1097,7 +1087,28 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+	public Drop getDropInRect(int itemID, Rect rect) {
+	    Field field = getField();
+	    if (field == null) {
+	        field = chr.getField();
+        }
+	    return field.getDropsInRect(rect).stream()
+                .filter(drop -> drop.getItem() != null && drop.getItem().getItemId() == itemID)
+                .findAny().orElse(null);
+    }
 
+    @Override
+    public Drop getDropInRect(int itemID, int rectRange) {
+        return getDropInRect(itemID, new Rect(
+                new Position(
+                        chr.getPosition().getX() - rectRange,
+                        chr.getPosition().getY() - rectRange),
+                new Position(
+                        chr.getPosition().getX() + rectRange,
+                        chr.getPosition().getY() + rectRange))
+        );
+
+    }
 
 	// Life-related methods --------------------------------------------------------------------------------------------
 
@@ -1451,6 +1462,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setChannelField() {
+		chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
+	}
+
+	@Override
 	public boolean isPartyLeader() {
 		return chr.getParty() != null && chr.getParty().getPartyLeaderID() == chr.getId();
 	}
@@ -1579,11 +1595,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) mesos));
 	}
 
 	@Override
 	public void deductMesos(long mesos) {
 		chr.deductMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) -mesos));
 	}
 
 	@Override
@@ -2240,6 +2258,16 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+
+		String[] splitted = effectPath.split("/");
+		String sceneName = splitted[splitted.length - 2];
+		String sceneNumber = splitted[splitted.length - 1];
+		String xmlPath = effectPath.replace("/" + sceneName, "").replace("/" + sceneNumber, "").replace("Effect/", "Effect.wz/");
+
+		int fieldID = new Scene(chr, xmlPath, sceneName, sceneNumber).getTransferField();
+		if (fieldID != 0) {
+			chr.setTransferField(fieldID);
+		}
 	}
 
 	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
@@ -2342,7 +2370,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void ballonMsg(String message) {
-		chr.write(UserLocal.ballonMsg(message, 100, 3, null));
+		chr.write(UserLocal.balloonMsg(message, 100, 3, null));
 	}
 
 	public void hireTutor(boolean set) { chr.hireTutor(set); }
@@ -2354,6 +2382,18 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
 
 	public boolean hasTutor() { return chr.hasTutor(); }
+
+	public int getMakingSkillLevel(int skillID) { return chr.getMakingSkillLevel(skillID); }
+
+	public boolean isAbleToLevelUpMakingSkill(int skillID) {
+		int neededProficiency = SkillConstants.getNeededProficiency(chr.getMakingSkillLevel(skillID));
+		if (neededProficiency <= 0) {
+			return false;
+		}
+		return chr.getMakingSkillProficiency(skillID) >= neededProficiency;
+	}
+
+	public void makingSkillLevelUp(int skillID) { chr.makingSkillLevelUp(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

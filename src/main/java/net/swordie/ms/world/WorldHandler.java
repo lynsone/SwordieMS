@@ -182,7 +182,10 @@ public class WorldHandler {
                 chr.setParty(party);
             }
         }
+        // blessing has to be split up, as adding skills before SetField is send will crash the client
+        chr.initBlessingSkillNames();
         chr.warp(field, true);
+        chr.initBlessingSkills();
         c.write(WvsContext.updateEventNameTag(new int[]{}));
         if (chr.getGuild() != null) {
             chr.setGuild(chr.getClient().getWorld().getGuildByID(chr.getGuild().getId()));
@@ -236,7 +239,7 @@ public class WorldHandler {
         String msg = inPacket.decodeString();
         if (msg.length() > 0 && msg.charAt(0) == '@') {
             if (msg.equalsIgnoreCase("@check")) {
-                WvsContext.dispose(c.getChr());
+                chr.dispose();
                 Map<BaseStat, Integer> basicStats = chr.getTotalBasicStats();
                 StringBuilder sb = new StringBuilder();
                 List<BaseStat> sortedList = Arrays.stream(BaseStat.values()).sorted(Comparator.comparing(Enum::toString)).collect(Collectors.toList());
@@ -449,15 +452,40 @@ public class WorldHandler {
                         totalDamage += dmg;
                     }
                     mob.damage(chr, totalDamage);
+                    //TODO Horntail sponge damage, should make a separate function
+                    if((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810209)) {
+                        Life life = field.getLifeByTemplateId(8810214);
+                        if (life != null) {
+                            Mob mob2 = (Mob) life;
+                            mob2.damage(chr, totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                        }
+                    }
+                    if((mob.getTemplateId() >= 8810002 && mob.getTemplateId() <= 8810009)){
+                        Life life2 = field.getLifeByTemplateId(8810018);
+                        if(life2 != null) {
+                            Mob mob2 = (Mob) life2;
+                            mob2.damage(chr, totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
+                        }
+                    }
+                    if((mob.getTemplateId() >= 8810102 && mob.getTemplateId() <= 8810109)){
+                        Life life3 = field.getLifeByTemplateId(8810118);
+                        if(life3 != null) {
+                            Mob mob3 = (Mob) life3;
+                            mob3.damage(chr, totalDamage);
+                            field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob3)));
+                            }
+                        }
+                    }
                     if (mob.getHp() < 0) {
                         mob.onKilledByChar(chr);
-
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
                         mobexp = mob.getForcedMobStat().getExp();
                     }
                 }
-            }
+
 
             // MultiKill Message Popup & Exp
             if (multiKillMessage > 2) {
@@ -500,7 +528,7 @@ public class WorldHandler {
                 }
                 chr.warp(toField, toPortal);
             }
-        } else if (targetField != -1 && chr.getHP() <= 0) {
+        } else if (chr.getHP() <= 0) {
             // Character is dead, respawn request
             inPacket.decodeByte(); // always 0
             byte tarfield = inPacket.decodeByte(); // ?
@@ -525,8 +553,13 @@ public class WorldHandler {
                 if (chr.getParty() != null) {
                     chr.getParty().clearFieldInstances(0);
                 } else {
-                    if (targetField != -1) {// TODO: Add checks for that.
-                        chr.warp(chr.getOrCreateFieldByCurrentInstanceType(targetField));
+                    if (chr.getTransferField() == targetField && chr.getTransferFieldReq() == chr.getField().getId()) {
+                        Field toField = chr.getOrCreateFieldByCurrentInstanceType(chr.getTransferField());
+                        if (toField != null && chr.getTransferField() > 0) {
+                            chr.warp(toField);
+                        }
+                        chr.setTransferField(0);
+                        return;
                     } else {
                         chr.warp(chr.getOrCreateFieldByCurrentInstanceType(chr.getField().getForcedReturn()));
                     }
@@ -535,10 +568,12 @@ public class WorldHandler {
             chr.heal(chr.getMaxHP());
             chr.setBuffProtector(false);
         } else {
-            Field toField = chr.getOrCreateFieldByCurrentInstanceType(targetField);
-            if (toField != null) {
-                // should add checks for it and try find in IDA when it called.
-                chr.warp(toField);
+            if (chr.getTransferField() == targetField && chr.getTransferFieldReq() == chr.getField().getId()) {
+                Field toField = chr.getOrCreateFieldByCurrentInstanceType(chr.getTransferField());
+                if (toField != null && chr.getTransferField() > 0) {
+                    chr.warp(toField);
+                }
+                chr.setTransferField(0);
             }
         }
     }
@@ -604,7 +639,24 @@ public class WorldHandler {
                     chr.getId(), skillID, rootId));
             return;
         }
-        if (JobConstants.isExtendSpJob(chr.getJob())) {
+        if (JobConstants.isBeginnerJob((short) rootId)) {
+            stats = new HashMap<>();
+            int spentSp = chr.getSkills().stream()
+                    .filter(s -> JobConstants.isBeginnerJob((short) s.getRootId()))
+                    .mapToInt(Skill::getCurrentLevel).sum();
+            int totalSp;
+            if (JobConstants.isResistance((short) skill.getRootId())) {
+                totalSp = Math.min(chr.getLevel(), GameConstants.RESISTANCE_SP_MAX_LV) - 1; // sp gained from 2~10
+            } else {
+                totalSp = Math.min(chr.getLevel(), GameConstants.BEGINNER_SP_MAX_LV) - 1; // sp gained from 2~7
+            }
+            if (totalSp - spentSp >= amount) {
+                int curLevel = curSkill == null ? 0 : curSkill.getCurrentLevel();
+                int max = curSkill == null ? skill.getMaxLevel() : curSkill.getMaxLevel();
+                int newLevel = curLevel + amount > max ? max : curLevel + amount;
+                skill.setCurrentLevel(newLevel);
+            }
+        } else if (JobConstants.isExtendSpJob(chr.getJob())) {
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             int currentSp = esp.getSpByJobLevel(jobLevel);
             if (currentSp >= amount) {
@@ -825,7 +877,7 @@ public class WorldHandler {
                     long curTime = System.currentTimeMillis();
                     long interval = msi.getSkillStatIntValue(MobSkillStat.interval) * 1000;
                     long nextUseableTime = curTime + interval;
-                    c.getChr().chatMessage(Mob, String.format("Mob did skill with ID %d (%s), level = %d",
+                    c.getChr().chatMessage(Mob, String.format("Mob" + mob + " did skill with ID %d (%s), level = %d",
                             mobSkill.getSkillID(), MobSkillID.getMobSkillIDByVal(mobSkill.getSkillID()), mobSkill.getLevel()));
                     mob.putSkillCooldown(skillID, slv, nextUseableTime);
                     if (mobSkill.getSkillAfter() > 0) {
@@ -1069,7 +1121,7 @@ public class WorldHandler {
 //        c.write(WvsContext.statChanged(newStats));
     }
 
-    public static void handleCreateKinesisPsychicArea(Client c, InPacket inPacket) {
+    public static void handleCreateKinesisPsychicArea(Char chr, InPacket inPacket) {
         PsychicArea pa = new PsychicArea();
         pa.action = inPacket.decodeInt();
         pa.actionSpeed = inPacket.decodeInt();
@@ -1083,52 +1135,46 @@ public class WorldHandler {
         pa.skeletonAniIdx = inPacket.decodeShort();
         pa.skeletonLoop = inPacket.decodeShort();
         pa.start = inPacket.decodePositionInt();
-        c.write(CField.createPsychicArea(true, pa));
-//        AffectedArea aa = new AffectedArea(-1);
-//        aa.setSkillID(pa.skillID);
-//        aa.setSlv((byte) pa.slv);
-//        aa.setMobOrigin((byte) 0);
-//        aa.setCharID(c.getChr().getId());
-//        int x = pa.start.getX();
-//        int y = pa.start.getY();
-//        aa.setPosition(new Position(x, y));
-//        aa.setFlip(pa.isLeft);
-//        aa.setElemAttr(1);
-//        aa.setOption(1);
-//        SkillInfo si = SkillData.getSkillInfoById(pa.skillID);
-//        aa.setRect(aa.getPosition().getRectAround(si.getRects().get(0)));
-//        c.getChr().getField().spawnAffectedArea(aa);
+        pa.success = true;
+        chr.write(CField.createPsychicArea(chr.getId(), pa));
+        chr.write(UserLocal.doActivePsychicArea(pa));
+        chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), null, Collections.singletonList(pa)), chr);
+        chr.chatMessage(Mob, "SkillID: " + pa.skillID + " (Psychic Area)");
     }
 
-    public static void handleReleasePsychicArea(Client c, InPacket inPacket) {
+    public static void handleReleasePsychicArea(Char chr, InPacket inPacket) {
         int localPsychicAreaKey = inPacket.decodeInt();
-        c.write(CField.releasePsychicArea(localPsychicAreaKey));
+        chr.write(CField.releasePsychicArea(localPsychicAreaKey));
     }
 
-    public static void handleCreatePsychicLock(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
+    public static void handleCreatePsychicLock(Char chr, InPacket inPacket) {
         Field f = chr.getField();
         PsychicLock pl = new PsychicLock();
         pl.skillID = inPacket.decodeInt();
         pl.slv = inPacket.decodeShort();
         pl.action = inPacket.decodeInt();
         pl.actionSpeed = inPacket.decodeInt();
+        int i = 1;
         while (inPacket.decodeByte() != 0) {
             PsychicLockBall plb = new PsychicLockBall();
             plb.localKey = inPacket.decodeInt();
             plb.psychicLockKey = inPacket.decodeInt();
+            plb.psychicLockKey = 1;
             int mobID = inPacket.decodeInt();
             plb.mob = (Mob) f.getLifeByObjectID(mobID);
             plb.stuffID = inPacket.decodeShort();
             plb.usableCount = inPacket.decodeShort();
             plb.posRelID = inPacket.decodeByte();
+            plb.posRelID = (byte) i++;
             plb.start = inPacket.decodePositionInt();
             plb.rel = inPacket.decodePositionInt();
+            pl.psychicLockBalls.add(plb);
         }
-        // TODO can't attack after this, gotta fix
+        chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), pl, null), chr);
+        chr.write(User.createPsychicLock(chr.getId(), pl));
     }
 
-    public static void handleReleasePsychicLock(Client c, InPacket inPacket) {
+    public static void handleReleasePsychicLock(Char chr, InPacket inPacket) {
         int skillID = inPacket.decodeInt();
         short slv = inPacket.decodeShort();
         short count = inPacket.decodeShort();
@@ -1137,9 +1183,9 @@ public class WorldHandler {
         if (mobID != 0) {
             List<Integer> l = new ArrayList<>();
             l.add(mobID);
-            c.write(CField.releasePsychicLockMob(l));
+            chr.write(CField.releasePsychicLockMob(l));
         } else {
-            c.write(CField.releasePsychicLock(id));
+            chr.write(CField.releasePsychicLock(id));
         }
     }
 
@@ -1233,8 +1279,7 @@ public class WorldHandler {
         ((Summon) life).onHit(damage, mobTemplateId);
     }
 
-    public static void handleUserFlameOrbRequest(Client c, InPacket inPacket) {
-        Char chr = c.getChr();
+    public static void handleUserFlameOrbRequest(Char chr, InPacket inPacket) {
         int skillID = inPacket.decodeInt();
         byte slv = inPacket.decodeByte();
         short dir = inPacket.decodeShort();
@@ -5242,6 +5287,15 @@ public class WorldHandler {
                 // type == skill lv
                 value = SkillConstants.getNeededSpForHyperStatSkill(type);
                 break;
+            case Skill_9200:
+            case Skill_9201:
+            case Skill_9202:
+            case Skill_9203:
+            case Skill_9204:
+                // type == recommendSkillLevel - 1
+                // subType == making skill level -1
+                value = MakingSkillRecipe.getSuccessProb(Integer.parseInt(requestStr), type + 1, chr.getMakingSkillLevel(Integer.parseInt(requestStr)));
+                break;
             default:
                 log.error(String.format("Unhandled instance table type request %s, type %d, subType %d", itt, type, subType));
                 return;
@@ -5946,5 +6000,122 @@ public class WorldHandler {
         }
         Skill skill = chr.getSkill(skillId);
         chr.getField().broadcastPacket(UserRemote.skillPrepare(chr, skillId, (byte) skill.getCurrentLevel()), chr);
+    }
+
+    public static void handleBroadcastEffectToSplit(Char chr, InPacket inPacket) {
+        String effectPath = inPacket.decodeString();
+        int duration = inPacket.decodeInt();
+        int option = inPacket.decodeInt();
+        chr.write(User.effect(Effect.effectFromWZ(effectPath, true, duration, option, 0)));
+        chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.effectFromWZ(effectPath, true, duration, option, 0)), chr);
+    }
+
+    public static void handleBroadcastOneTimeActionToSplit(Char chr, InPacket inPacket) {
+        int action = inPacket.decodeInt();
+        int duration = inPacket.decodeInt();
+        chr.getField().broadcastPacket(CField.setOneTimeAction(chr.getId(), action, duration));
+    }
+
+    public static void handleMakingSkillRequest(Char chr, InPacket inPacket) {
+        int recipeID = inPacket.decodeInt();
+        MakingSkillRecipe msr = SkillData.getRecipeById(recipeID);
+        if (chr == null || msr == null || !msr.isAbleToBeUsedBy(chr)) {
+            return;
+        }
+        List<Tuple<Integer, Integer>> itemResult = new ArrayList<>();
+        for (Tuple<Integer, Integer> repice : msr.getIngredient()) {
+            int itemID = repice.getLeft();
+            int count = repice.getRight();
+            if (chr.hasItemCount(itemID, count)) {
+                chr.consumeItem(itemID, count);
+                itemResult.add(new Tuple<>(itemID, -count));
+            } else {
+                chr.write(UserLocal.noticeMsg("You need more materials.", true));
+                return;
+            }
+        }
+        int reqSkillID = msr.getReqSkillID();
+        Item crafted = null;
+        MakingSkillRecipe.TargetElem target = new MakingSkillRecipe.TargetElem();
+        MakingSkillResult result = MakingSkillResult.CRAFTING_FAILED;
+        if (Randomizer.nextInt(100) < MakingSkillRecipe.getSuccessProb(reqSkillID, msr.getRecommandedSkillLevel(), chr.getMakingSkillLevel(reqSkillID)) || recipeID / 10000 <= 9201) {
+            int rand = Randomizer.nextInt(100);
+            List<MakingSkillRecipe.TargetElem> targets = msr.getTarget();
+            while (true) {
+                target = targets.get(Randomizer.rand(0, targets.size()-1));
+                if (target.getProbWeight() >= rand) {
+                    break;
+                } else {
+                    rand = Randomizer.nextInt(100);
+                }
+            }
+            crafted = ItemData.getItemDeepCopy(target.getItemID(), Randomizer.isSuccess(chr.getMakingSkillLevel(reqSkillID) * 2));
+            if (crafted == null) {
+                chr.getField().broadcastPacket(CField.makingSkillResult(chr.getId(), recipeID, MakingSkillResult.UNKNOWN_ERROR, target, 0));
+                return;
+            }
+            crafted.setQuantity(target.getCount());
+            result = MakingSkillResult.SUCESS_COOL;
+            if (ItemConstants.isEquip(target.getItemID())) {
+                ((Equip) crafted).addAttribute(EquipAttribute.Crafted);
+                crafted.setOwner(chr.getName());
+                crafted.setQuantity(1);// equipment shouldn't be more than one
+            }
+            if (msr.getExpiredPeriod() > 0 ) {
+                crafted.setDateExpire(FileTime.fromLong(System.currentTimeMillis() + ((long) msr.getExpiredPeriod() * 60 * 1000)));
+            }
+            if (msr.isNeedOpenItem()) {
+                chr.removeSkillAndSendPacket(recipeID);
+            }
+        }
+
+        boolean success = result != MakingSkillResult.CRAFTING_FAILED;
+        int incSkillProficiency = msr.getIncProficiency(chr, success);
+        if (crafted != null) {
+            chr.addItemToInventory(crafted);
+            itemResult.add(new Tuple<>(crafted.getItemId(), crafted.getQuantity()));
+        }
+        chr.addMakingSkillProficiency(recipeID, incSkillProficiency);
+        chr.addStatAndSendPacket(Stat.fatigue, msr.getIncFatigability());
+        if (success) {
+            Stat trait = Stat.craftEXP;
+            switch (reqSkillID) {
+                case 92000000:
+                    trait = Stat.senseEXP;
+                    break;
+                case 92010000:
+                    trait = Stat.willEXP;
+                    break;
+            }
+            chr.addTraitExp(trait, (int) Math.pow(2, chr.getMakingSkillLevel(reqSkillID) + 2));
+        }
+        chr.getField().broadcastPacket(CField.makingSkillResult(chr.getId(), recipeID, result, target, incSkillProficiency));
+        chr.write(User.effect(Effect.gainQuestItem(itemResult)));
+    }
+
+    public static void handleUserRecipeOpenItemUseRequest(Char chr, InPacket inPacket) {
+        inPacket.decodeInt();// tick
+        short pos = inPacket.decodeShort();// // nPOS
+        int itemID = inPacket.decodeInt();// nItemID
+
+        Item item = chr.getInventoryByType(CONSUME).getItemBySlot(pos);
+        if (item.getItemId() != itemID) {
+            chr.dispose();
+            return;
+        }
+        if (chr != null && chr.getHP() > 0 && ItemConstants.isRecipeOpenItem(itemID)) {
+            ItemInfo recipe = ItemData.getItemInfoByID(itemID);
+            if (recipe != null) {
+                int recipeID = recipe.getSpecStats().getOrDefault(SpecStat.recipe, 0);
+                int reqSkillLevel = recipe.getSpecStats().getOrDefault(SpecStat.reqSkillLevel, 0);
+                MakingSkillRecipe msr = SkillData.getRecipeById(recipeID);
+                if (msr != null && msr.isNeedOpenItem()) {
+                    if (chr.getSkillLevel(msr.getReqSkillID()) < reqSkillLevel || chr.getSkillLevel(recipeID) > 0) {
+                        return;
+                    }
+                    chr.addSkill(recipeID, 1, 1);
+                }
+            }
+        }
     }
 }

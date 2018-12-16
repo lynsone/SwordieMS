@@ -42,6 +42,7 @@ public class SkillInfo {
     private boolean notIncBuffDuration;
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
     private boolean psd;
+    private Set<Integer> addAttackSkills = new HashSet<>();
 
     public int getSkillId() {
         return skillId;
@@ -307,5 +308,17 @@ public class SkillInfo {
 
     public boolean isPsd() {
         return psd;
+    }
+
+    public Set<Integer> getAddAttackSkills() {
+        return addAttackSkills;
+    }
+
+    public void setAddAttackSkills(Set<Integer> addAttackSkills) {
+        this.addAttackSkills = addAttackSkills;
+    }
+
+    public void addAddAttackSkills(int skillId) {
+        getAddAttackSkills().add(skillId);
     }
 }

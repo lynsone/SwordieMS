@@ -6,7 +6,7 @@ monster = "Zombie Lupin"
 
 sm.setSpeakerID(9000025)
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
-                "a #b"+ job +"#k is specialised in long ranged magic attacks and use #bfire and poison magic#k to defeat their enemies. "
+                "A #b"+ job +"#k is specialised in long ranged magic attacks and use #bfire and poison magic#k to defeat their enemies. "
                 "There are many useful skills you can acquire.")
 
 

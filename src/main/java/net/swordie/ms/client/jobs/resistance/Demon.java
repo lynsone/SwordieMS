@@ -885,6 +885,23 @@ public class Demon extends Job {
         }
     }
 
+    public int alterCooldownSkill(int skillId) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Skill skill = chr.getSkill(skillId);
+        if(skill != null) {
+            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+            byte slv = (byte) skill.getCurrentLevel();
+
+            switch (skillId) {
+                case DEMON_CRY:
+                    if (tsm.hasStat(InfinityForce)) {
+                        return si.getValue(s, slv) * 1000;
+                    }
+            }
+        }
+        return -1;
+    }
+
 
 
     // Hit related methods ---------------------------------------------------------------------------------------------

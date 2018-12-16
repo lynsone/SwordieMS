@@ -14,6 +14,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
@@ -283,7 +284,7 @@ public class WindArcher extends Noblesse {
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 summon.setAttackActive(false);
-                summon.setAssistType((byte) 0);
+                summon.setAssistType(AssistType.None);
                 summon.setMaxHP(si.getValue(x, slv));
                 summon.setHp(summon.getMaxHP());
                 field.spawnSummon(summon);

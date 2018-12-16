@@ -19,9 +19,7 @@ import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.LeaveType;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.Stat;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
@@ -48,8 +46,8 @@ public class Summon extends Life {
     private int summonTerm;
     private byte charLevel;
     private byte slv;
-    private byte assistType;
-    private byte enterType;
+    private AssistType assistType;
+    private EnterType enterType;
     private byte teslaCoilState;
     private boolean flyMob;
     private boolean beforeFirstAttack;
@@ -115,19 +113,19 @@ public class Summon extends Life {
         this.summonTerm = 1000 * summonTerm;
     }
 
-    public byte getAssistType() {
+    public AssistType getAssistType() {
         return assistType;
     }
 
-    public void setAssistType(byte assistType) {
+    public void setAssistType(AssistType assistType) {
         this.assistType = assistType;
     }
 
-    public byte getEnterType() {
+    public EnterType getEnterType() {
         return enterType;
     }
 
-    public void setEnterType(byte enterType) {
+    public void setEnterType(EnterType enterType) {
         this.enterType = enterType;
     }
 
@@ -215,8 +213,8 @@ public class Summon extends Life {
         summon.setMoveAction((byte) 1);
         summon.setCurFoothold((short) chr.getField().findFootHoldBelow(summon.getPosition()).getId());
         summon.setMoveAbility(MoveAbility.Walk);
-        summon.setAssistType((byte) 1);
-        summon.setEnterType((byte) 1);
+        summon.setAssistType(AssistType.Attack);
+        summon.setEnterType(EnterType.Animation);
         summon.setBeforeFirstAttack(false);
         summon.setTemplateId(skillID);
         summon.setAttackActive(true);
@@ -227,7 +225,7 @@ public class Summon extends Life {
         o1.nValue = 1;
         o1.summon = summon;
         o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = summon.getSummonTerm();
+        o1.tTerm = summon.getSummonTerm() / 1000;
         tsm.putCharacterStatValue(IndieEmpty, o1);
         tsm.sendSetStatPacket();
         return summon;

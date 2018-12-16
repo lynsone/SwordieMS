@@ -3,6 +3,7 @@ package net.swordie.ms.constants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
@@ -96,6 +97,49 @@ public class ItemConstants {
     public static final short EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED = 20;
     public static final int SCARLET_SHOULDER = 1152155; // The only exception for flames on shoulders.
 
+    // Self-made drops per mob
+    public static final Map<Integer, Set<DropInfo>> consumableDropsPerLevel = new HashMap<>();
+    public static final Map<Integer, Map<ItemJob, Set<DropInfo>>> equipDropsPerLevel = new HashMap<>();
+
+    static {
+        initConsumableDrops();
+        initEquipDrops();
+    }
+
+    private static void initConsumableDrops() {
+        consumableDropsPerLevel.put(0, Util.makeSet(
+                new DropInfo(2000046, 200), // Red Potion
+                new DropInfo(2000014, 200)  // Blue Potion
+        ));
+        consumableDropsPerLevel.put(20, Util.makeSet(
+                new DropInfo(2000002, 200), // White Potion
+                new DropInfo(2000006, 200)  // Mana Elixir
+        ));
+        consumableDropsPerLevel.put(40, Util.makeSet(
+                new DropInfo(2001527, 200), // Unagi
+                new DropInfo(2022000, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(60, Util.makeSet(
+                new DropInfo(2001527, 200), // Unagi
+                new DropInfo(2022000, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(80, Util.makeSet(
+                new DropInfo(2001001, 200), // Ice Cream Pop
+                new DropInfo(2001002, 200)  // Pure Water
+        ));
+        consumableDropsPerLevel.put(100, Util.makeSet(
+                new DropInfo(2020012, 100), // Melting Cheese
+                new DropInfo(2020013, 100), // Reindeer Milk
+                new DropInfo(2020014, 100), // Sunrise Dew
+                new DropInfo(2020015, 100), // Sunset Dew
+                new DropInfo(2050004, 10)   // All Cure
+        ));
+    }
+
+    private static void initEquipDrops() {
+
+    }
+
     public static int getGenderFromId(int nItemID) {
         int result; // eax
 
@@ -128,170 +172,180 @@ public class ItemConstants {
                 gender != 2 && genderArg != 2 && gender != genderArg) {
             return bodyPartList;
         }
-        switch (prefix) {
-            case Hat:
-                bodyPartList.add(BodyPart.Hat.getVal());
-                bodyPartList.add(BodyPart.EvanHat.getVal());
-                bodyPartList.add(BodyPart.APHat.getVal());
-                bodyPartList.add(BodyPart.DUHat.getVal());
-                bodyPartList.add(BodyPart.ZeroHat.getVal());
-                break;
-            case FaceAccessory:
-                bodyPartList.add(BodyPart.FaceAccessory.getVal());
-                bodyPartList.add(BodyPart.APFaceAccessory.getVal());
-                bodyPartList.add(BodyPart.DUFaceAccessory.getVal());
-                bodyPartList.add(BodyPart.ZeroFaceAccessory.getVal());
-                break;
-            case EyeAccessory:
-                bodyPartList.add(BodyPart.EyeAccessory.getVal());
-                bodyPartList.add(BodyPart.ZeroEyeAccessory.getVal());
-                break;
-            case Earrings:
-                bodyPartList.add(BodyPart.Earrings.getVal());
-                bodyPartList.add(BodyPart.ZeroEarrings.getVal());
-                break;
-            case Top:
-            case Overall:
-                bodyPartList.add(BodyPart.Top.getVal());
-                bodyPartList.add(BodyPart.APTop.getVal());
-                bodyPartList.add(BodyPart.DUTop.getVal());
-                bodyPartList.add(BodyPart.ZeroTop.getVal());
-                break;
-            case Bottom:
-                bodyPartList.add(BodyPart.Bottom.getVal());
-                bodyPartList.add(BodyPart.APBottom.getVal());
-                bodyPartList.add(BodyPart.ZeroBottom.getVal());
-                break;
-            case Shoes:
-                bodyPartList.add(BodyPart.Shoes.getVal());
-                bodyPartList.add(BodyPart.APShoes.getVal());
-                bodyPartList.add(BodyPart.ZeroShoes.getVal());
-                break;
-            case Gloves:
-                bodyPartList.add(BodyPart.Gloves.getVal());
-                bodyPartList.add(BodyPart.APGloves.getVal());
-                bodyPartList.add(BodyPart.DUGloves.getVal());
-                bodyPartList.add(BodyPart.ZeroGloves.getVal());
-                break;
-            case Shield:
-            case Katara:
-            case SecondaryWeapon:
-            case Lapis:
-                bodyPartList.add(BodyPart.Shield.getVal());
-                break;
-            case Cape:
-                bodyPartList.add(BodyPart.Cape.getVal());
-                bodyPartList.add(BodyPart.APCape.getVal());
-                bodyPartList.add(BodyPart.DUCape.getVal());
-                bodyPartList.add(BodyPart.ZeroCape.getVal());
-                break;
-            case Ring:
-                bodyPartList.add(BodyPart.Ring1.getVal());
-                bodyPartList.add(BodyPart.Ring2.getVal());
-                bodyPartList.add(BodyPart.Ring3.getVal());
-                bodyPartList.add(BodyPart.Ring4.getVal());
-                bodyPartList.add(BodyPart.ZeroRing1.getVal());
-                bodyPartList.add(BodyPart.ZeroRing2.getVal());
-                break;
-            case Pendant:
-                bodyPartList.add(BodyPart.Pendant.getVal());
-                bodyPartList.add(BodyPart.ExtendedPendant.getVal());
-                break;
-            case Belt:
-                bodyPartList.add(BodyPart.Belt.getVal());
-                break;
-            case Medal:
-                bodyPartList.add(BodyPart.Medal.getVal());
-                break;
-            case Shoulder:
-                bodyPartList.add(BodyPart.Shoulder.getVal());
-                break;
-            case PocketItem:
-                bodyPartList.add(BodyPart.PocketItem.getVal());
-                break;
-            case MonsterBook:
-                bodyPartList.add(BodyPart.MonsterBook.getVal());
-                break;
-            case Badge:
-                bodyPartList.add(BodyPart.Badge.getVal());
-                break;
-            case Emblem:
-                bodyPartList.add(BodyPart.Emblem.getVal());
-                break;
-            case Totem:
-                bodyPartList.add(BodyPart.Totem1.getVal());
-                bodyPartList.add(BodyPart.Totem2.getVal());
-                bodyPartList.add(BodyPart.Totem3.getVal());
-                break;
-            case MachineEngine:
-                bodyPartList.add(BodyPart.MachineEngine.getVal());
-                break;
-            case MachineArm:
-                bodyPartList.add(BodyPart.MachineArm.getVal());
-                break;
-            case MachineLeg:
-                bodyPartList.add(BodyPart.MachineLeg.getVal());
-                break;
-            case MachineFrame:
-                bodyPartList.add(BodyPart.MachineFrame.getVal());
-                break;
-            case MachineTransistor:
-                bodyPartList.add(BodyPart.MachineTransistor.getVal());
-                break;
-            case Android:
-                bodyPartList.add(BodyPart.Android.getVal());
-                break;
-            case MechanicalHeart:
-                bodyPartList.add(BodyPart.MechanicalHeart.getVal());
-                break;
-            case Bit:
-                for (int id = BodyPart.BitsBase.getVal(); id <= BodyPart.BitsEnd.getVal(); id++) {
-                    bodyPartList.add(id);
-                }
-                break;
-            case PetWear:
-                bodyPartList.add(BodyPart.PetWear1.getVal());
-                bodyPartList.add(BodyPart.PetWear2.getVal());
-                bodyPartList.add(BodyPart.PetWear3.getVal());
-                break;
-            // case 184: // unknown, equip names are untranslated and google search results in hekaton screenshots
-            // case 185:
-            // case 186:
-            // case 187:
-            // case 188:
-            // case 189:
-            case TamingMob:
-                bodyPartList.add(BodyPart.TamingMob.getVal());
-                break;
-            case Saddle:
-                bodyPartList.add(BodyPart.Saddle.getVal());
-                break;
-            case EvanHat:
-                bodyPartList.add(BodyPart.EvanHat.getVal());
-                break;
-            case EvanPendant:
-                bodyPartList.add(BodyPart.EvanPendant.getVal());
-                break;
-            case EvanWing:
-                bodyPartList.add(BodyPart.EvanWing.getVal());
-                break;
-            case EvanShoes:
-                bodyPartList.add(BodyPart.EvanShoes.getVal());
-                break;
-            default:
-                if (ItemConstants.isLongOrBigSword(itemID) || ItemConstants.isWeapon(itemID)) {
+        if(prefix != null) {
+            switch (prefix) {
+                case Hat:
+                    bodyPartList.add(BodyPart.Hat.getVal());
+                    bodyPartList.add(BodyPart.EvanHat.getVal());
+                    bodyPartList.add(BodyPart.APHat.getVal());
+                    bodyPartList.add(BodyPart.DUHat.getVal());
+                    bodyPartList.add(BodyPart.ZeroHat.getVal());
+                    break;
+                case FaceAccessory:
+                    bodyPartList.add(BodyPart.FaceAccessory.getVal());
+                    bodyPartList.add(BodyPart.APFaceAccessory.getVal());
+                    bodyPartList.add(BodyPart.DUFaceAccessory.getVal());
+                    bodyPartList.add(BodyPart.ZeroFaceAccessory.getVal());
+                    break;
+                case EyeAccessory:
+                    bodyPartList.add(BodyPart.EyeAccessory.getVal());
+                    bodyPartList.add(BodyPart.ZeroEyeAccessory.getVal());
+                    break;
+                case Earrings:
+                    bodyPartList.add(BodyPart.Earrings.getVal());
+                    bodyPartList.add(BodyPart.ZeroEarrings.getVal());
+                    break;
+                case Top:
+                case Overall:
+                    bodyPartList.add(BodyPart.Top.getVal());
+                    bodyPartList.add(BodyPart.APTop.getVal());
+                    bodyPartList.add(BodyPart.DUTop.getVal());
+                    bodyPartList.add(BodyPart.ZeroTop.getVal());
+                    break;
+                case Bottom:
+                    bodyPartList.add(BodyPart.Bottom.getVal());
+                    bodyPartList.add(BodyPart.APBottom.getVal());
+                    bodyPartList.add(BodyPart.ZeroBottom.getVal());
+                    break;
+                case Shoes:
+                    bodyPartList.add(BodyPart.Shoes.getVal());
+                    bodyPartList.add(BodyPart.APShoes.getVal());
+                    bodyPartList.add(BodyPart.ZeroShoes.getVal());
+                    break;
+                case Gloves:
+                    bodyPartList.add(BodyPart.Gloves.getVal());
+                    bodyPartList.add(BodyPart.APGloves.getVal());
+                    bodyPartList.add(BodyPart.DUGloves.getVal());
+                    bodyPartList.add(BodyPart.ZeroGloves.getVal());
+                    break;
+                case Shield:
+                case Katara:
+                case SecondaryWeapon:
+                case Lapis:
+                    bodyPartList.add(BodyPart.Shield.getVal());
+                    break;
+                case Lazuli:
                     bodyPartList.add(BodyPart.Weapon.getVal());
-                    if(ItemConstants.isFan(itemID)) {
-                        bodyPartList.add(BodyPart.HakuFan.getVal());
-                    } else {
-                        bodyPartList.add(BodyPart.ZeroWeapon.getVal());
+                    break;
+                case Cape:
+                    bodyPartList.add(BodyPart.Cape.getVal());
+                    bodyPartList.add(BodyPart.APCape.getVal());
+                    bodyPartList.add(BodyPart.DUCape.getVal());
+                    bodyPartList.add(BodyPart.ZeroCape.getVal());
+                    break;
+                case Ring:
+                    bodyPartList.add(BodyPart.Ring1.getVal());
+                    bodyPartList.add(BodyPart.Ring2.getVal());
+                    bodyPartList.add(BodyPart.Ring3.getVal());
+                    bodyPartList.add(BodyPart.Ring4.getVal());
+                    bodyPartList.add(BodyPart.ZeroRing1.getVal());
+                    bodyPartList.add(BodyPart.ZeroRing2.getVal());
+                    break;
+                case Pendant:
+                    bodyPartList.add(BodyPart.Pendant.getVal());
+                    bodyPartList.add(BodyPart.ExtendedPendant.getVal());
+                    break;
+                case Belt:
+                    bodyPartList.add(BodyPart.Belt.getVal());
+                    break;
+                case Medal:
+                    bodyPartList.add(BodyPart.Medal.getVal());
+                    break;
+                case Shoulder:
+                    bodyPartList.add(BodyPart.Shoulder.getVal());
+                    break;
+                case PocketItem:
+                    bodyPartList.add(BodyPart.PocketItem.getVal());
+                    break;
+                case MonsterBook:
+                    bodyPartList.add(BodyPart.MonsterBook.getVal());
+                    break;
+                case Badge:
+                    bodyPartList.add(BodyPart.Badge.getVal());
+                    break;
+                case Emblem:
+                    bodyPartList.add(BodyPart.Emblem.getVal());
+                    break;
+                case Totem:
+                    bodyPartList.add(BodyPart.Totem1.getVal());
+                    bodyPartList.add(BodyPart.Totem2.getVal());
+                    bodyPartList.add(BodyPart.Totem3.getVal());
+                    break;
+                case MachineEngine:
+                    bodyPartList.add(BodyPart.MachineEngine.getVal());
+                    break;
+                case MachineArm:
+                    bodyPartList.add(BodyPart.MachineArm.getVal());
+                    break;
+                case MachineLeg:
+                    bodyPartList.add(BodyPart.MachineLeg.getVal());
+                    break;
+                case MachineFrame:
+                    bodyPartList.add(BodyPart.MachineFrame.getVal());
+                    break;
+                case MachineTransistor:
+                    bodyPartList.add(BodyPart.MachineTransistor.getVal());
+                    break;
+                case Android:
+                    bodyPartList.add(BodyPart.Android.getVal());
+                    break;
+                case MechanicalHeart:
+                    bodyPartList.add(BodyPart.MechanicalHeart.getVal());
+                    break;
+                case Bit:
+                    for (int id = BodyPart.BitsBase.getVal(); id <= BodyPart.BitsEnd.getVal(); id++) {
+                        bodyPartList.add(id);
                     }
-                } else {
-                    log.debug("Unknown type? id = " + itemID);
-                }
-                break;
+                    break;
+                case PetWear:
+                    bodyPartList.add(BodyPart.PetWear1.getVal());
+                    bodyPartList.add(BodyPart.PetWear2.getVal());
+                    bodyPartList.add(BodyPart.PetWear3.getVal());
+                    break;
+                // case 184: // unknown, equip names are untranslated and google search results in hekaton screenshots
+                // case 185:
+                // case 186:
+                // case 187:
+                // case 188:
+                // case 189:
+                case TamingMob:
+                    bodyPartList.add(BodyPart.TamingMob.getVal());
+                    break;
+                case Saddle:
+                    bodyPartList.add(BodyPart.Saddle.getVal());
+                    break;
+                case EvanHat:
+                    bodyPartList.add(BodyPart.EvanHat.getVal());
+                    break;
+                case EvanPendant:
+                    bodyPartList.add(BodyPart.EvanPendant.getVal());
+                    break;
+                case EvanWing:
+                    bodyPartList.add(BodyPart.EvanWing.getVal());
+                    break;
+                case EvanShoes:
+                    bodyPartList.add(BodyPart.EvanShoes.getVal());
+                    break;
+                default:
+                    if (ItemConstants.isLongOrBigSword(itemID) || ItemConstants.isWeapon(itemID)) {
+                        bodyPartList.add(BodyPart.Weapon.getVal());
+                        if (ItemConstants.isFan(itemID)) {
+                            bodyPartList.add(BodyPart.HakuFan.getVal());
+                        } else {
+                            bodyPartList.add(BodyPart.ZeroWeapon.getVal());
+                        }
+                    } else {
+                        log.debug("Unknown type? id = " + itemID);
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            log.debug("Unknown type? id = " + itemID);
         }
         return bodyPartList;
+
     }
 
     private static int getItemPrefix(int nItemID) {
@@ -1312,6 +1366,24 @@ public class ItemConstants {
                 return 80010072;
         }
         return 0;
+    }
+
+    public static boolean isRecipeOpenItem(int itemID) {
+        return itemID / 10000 == 251;
+    }
+
+    public static Set<DropInfo> getConsumableMobDrops(int level) {
+        level = Math.min(100, (level / 20) * 20); // round it to the nearest 20th level + max of level 100
+        return consumableDropsPerLevel.getOrDefault(level, new HashSet<>());
+    }
+
+    public static Set<DropInfo> getEquipMobDrops(short job, int level) {
+        level = Math.min(140, (level / 10) * 10); // round it to the nearest 10th level + max of level 140
+        ItemJob itemJob = GameConstants.getItemJobByJob(job);
+        if (itemJob == null) {
+            itemJob = ItemJob.BEGINNER;
+        }
+        return equipDropsPerLevel.getOrDefault(level, new HashMap<>()).getOrDefault(itemJob, new HashSet<>());
     }
 }
 

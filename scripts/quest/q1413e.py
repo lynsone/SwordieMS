@@ -1,4 +1,4 @@
-#   [Job Adv] (Lv.30)   Way of the Spearman
+# 1413 - [Job Adv] (Lv.30) Way of the Spearman
 
 darkMarble = 4031013
 job = "Spearman"
@@ -14,5 +14,5 @@ else:
 sm.consumeItem(darkMarble, 30)
 sm.completeQuestNoRewards(parentID)
 sm.sendNext("You are now a #b"+ job +"#k.")
-sm.jobAdvance(130) # Page
+sm.jobAdvance(130) # Spearman
 sm.dispose()

@@ -63,6 +63,26 @@ public class BossConstants {
     public static final int MAGNUS_PURPLE_ATOM_DAMAGE = 100; // % of Max HP
 
 
+    //  Horntail ---------------------------------------------------------------------------------------------------------
+
+    //      General
+    public static final int EASY_HORNTAIL_TIME = 75 * 60; // 1 hr, 15 min timer
+    public static final int CHAOS_HORNTAIL_TIME = 150 * 60; // 2 hrs, 30 min timer
+
+//  Hilla ---------------------------------------------------------------------------------------------------------
+
+    //      General
+    public static final int EASY_HILLA_TIME = 30 * 60; // 1 hr, 15 min timer
+    public static final int NORMAL_HILLA_TIME = 150 * 60; // 2 hrs, 30 min timer
+
+//  Von Leon ---------------------------------------------------------------------------------------------------------
+    public static final int VON_LEON_TIME = 30 * 60; // 30 min timer
+
+//  Cygnus ---------------------------------------------------------------------------------------------------------
+    public static final int CYGNUS_TIME = 30 * 60; // 30 min timer
+
+//  Cygnus ---------------------------------------------------------------------------------------------------------
+    public static final int ARKARIUM_TIME = 30 * 60; // 30 min timer
 
     // TODO More bosses to be noted down...
 }

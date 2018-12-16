@@ -68,7 +68,7 @@ public class Xenon extends Job {
     public static final int HYPOGRAM_FIELD_FORCE_FIELD = 36121002;                  //TODO Summon
     public static final int HYPOGRAM_FIELD_PENETRATE = 36121013;
     public static final int HYPOGRAM_FIELD_SUPPORT = 36121014;                      //TODO Summon
-    public static final int TEMPORAL_POD = 36121007;                                //TODO
+    public static final int TEMPORAL_POD = 36121007;
     public static final int OOPARTS_CODE = 36121003; //Buff
     public static final int MAPLE_WARRIOR_XENON = 36121008; //Buff
     public static final int PINPOINT_SALVO_PERFECT_DESIGN = 36120015; //Sp. Attack Upgrade  (Passive Upgrade)
@@ -84,6 +84,7 @@ public class Xenon extends Job {
     private int supplyProp;
     private int hybridDefenseCount;
     private ScheduledFuture supplyTimer;
+    private static ScheduledFuture temporalPodTimer;
 
     private int[] addedSkills = new int[]{
             SUPPLY_SURPLUS,
@@ -236,6 +237,21 @@ public class Xenon extends Job {
                 summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
                 break;
+            case TEMPORAL_POD:
+                field = chr.getField();
+                AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
+                aa.setMobOrigin((byte) 0);
+                aa.setDelay((short) 0);
+                aa.setElemAttr(0);
+                aa.setPosition(chr.getPosition());
+                aa.setForce(0);
+                aa.setOption(0);
+                aa.setIdk(0);
+                aa.setField(chr.getField());
+                aa.setRect(chr.getPosition().getRectAround(si.getFirstRect()));
+                field.spawnAffectedArea(aa);
+                temporalPodTimer(chr);
+                break;
         }
         tsm.sendSetStatPacket();
     }
@@ -309,7 +325,7 @@ public class Xenon extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            //Increment Supply on attack
+            // Increment Supply on attack
             if (Util.succeedProp(supplyProp) &&
                     attackInfo.skillId != 0 &&
                     attackInfo.skillId != PINPOINT_SALVO &&
@@ -320,7 +336,7 @@ public class Xenon extends Job {
                 incrementSupply();
             }
 
-            //Triangulation
+            // Triangulation
             applyTriangulationOnMob(attackInfo);
         }
         applySupplyCost(skillID, (byte) slv, si);
@@ -505,6 +521,25 @@ public class Xenon extends Job {
                     tsm.removeAllDebuffs();
                     break;
             }
+        }
+    }
+
+
+    public static void temporalPodTimer(Char chr) {
+        if (temporalPodTimer != null && !temporalPodTimer.isDone()) {
+            temporalPodTimer.cancel(true);
+        }
+        temporalPodTimer = EventManager.addFixedRateEvent(() -> temporalPodEffect(chr), 1000, 1000);
+    }
+
+    public static void temporalPodEffect(Char chr) {
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        if (tsm.hasStatBySkillId(TEMPORAL_POD)) {
+            for(int skillId : chr.getSkillCoolTimes().keySet()) {
+                chr.reduceSkillCoolTime(skillId, 1000);
+            }
+        } else {
+            temporalPodTimer.cancel(true);
         }
     }
 

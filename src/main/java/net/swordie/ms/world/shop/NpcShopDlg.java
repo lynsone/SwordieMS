@@ -101,6 +101,10 @@ public class NpcShopDlg {
 		getItems().add(nsi);
 	}
 
+	public void setItems(List<NpcShopItem> items) {
+		this.items = items;
+	}
+
 	public NpcShopItem getItemByIndex(int idx) {
 		NpcShopItem nsi = null;
 		if (idx >= 0 || idx < getItems().size()) {
