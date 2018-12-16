@@ -1016,4 +1016,12 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket setPassenserRequest(int requestorChrId) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_PASSENSER_REQUEST);
+
+        outPacket.encodeInt(requestorChrId);
+
+        return outPacket;
+    }
 }

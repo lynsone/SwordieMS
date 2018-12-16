@@ -662,6 +662,12 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_RECIPE_OPEN_ITEM_USE_REQUEST:
                 WorldHandler.handleUserRecipeOpenItemUseRequest(chr, inPacket);
                 break;
+            case USER_FOLLOW_CHARACTER_REQUEST:
+                WorldHandler.handleUserFollowCharacterRequest(chr, inPacket);
+                break;
+            case SET_PASSENSER_RESULT:
+                WorldHandler.handleSetPassenserResult(chr, inPacket);
+                break;
             default:
                 handleUnknown(inPacket, op);
                 break;
