@@ -23,6 +23,7 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
@@ -3750,6 +3751,10 @@ public class Char {
 			int alteredcd = getJobHandler().alterCooldownSkill(skillID);
 			if (alteredcd >= 0) {
 				cdInMillis = alteredcd;
+			}
+			// RuneStone of Skill
+			if (getTemporaryStatManager().hasStatBySkillId(RuneStone.LIBERATE_THE_RUNE_OF_SKILL) && cdInMillis > 5000 && !si.isNotCooltimeReset()) {
+				cdInMillis = 5000;
 			}
 			if (!hasSkillCDBypass() && cdInMillis > 0) {
 				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
