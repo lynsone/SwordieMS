@@ -75,6 +75,11 @@ public class SkillData {
                 for (int i : si.getAddAttackSkills()) {
                     dataOutputStream.writeInt(i);
                 }
+                dataOutputStream.writeShort(si.getExtraSkillInfo().size());
+                for (Map.Entry<Integer, Integer> extraSkillInfo : si.getExtraSkillInfo().entrySet()) {
+                    dataOutputStream.writeInt(extraSkillInfo.getKey());
+                    dataOutputStream.writeInt(extraSkillInfo.getValue());
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -134,6 +139,10 @@ public class SkillData {
             short addAttackSize = dataInputStream.readShort();
             for (int j = 0; j < addAttackSize; j++) {
                 skillInfo.addAddAttackSkills(dataInputStream.readInt());
+            }
+            short extraSkillInfoSize = dataInputStream.readShort();
+            for (int j = 0; j < extraSkillInfoSize; j++) {
+                skillInfo.addExtraSkillInfo(dataInputStream.readInt(), dataInputStream.readInt());
             }
             getSkillInfos().put(skillInfo.getSkillId(), skillInfo);
         } catch (IOException e) {
@@ -277,6 +286,32 @@ public class SkillData {
                                                     skill.addAddAttackSkills(Integer.parseInt(skillPlusNodeValue));
                                                 }
                                                 break;
+                                        }
+                                    }
+                                    break;
+                                case "extraSkillInfo":
+                                    for (Node extraSkillInfoNode : XMLApi.getAllChildren(mainLevelNode)) {
+                                        Map<String, String> extraSkillInfoAttr = XMLApi.getAttributes(extraSkillInfoNode);
+                                        int extraSkillDelay = 0;
+                                        int extraSkillId = -1;
+                                        for (Node extraSkillInfoIndividual : XMLApi.getAllChildren(extraSkillInfoNode)) {
+                                            Map<String, String> extraSkillAttr = XMLApi.getAttributes(extraSkillInfoIndividual);
+                                            String extraSkillName = extraSkillAttr.get("name");
+                                            String extraSkillValue = extraSkillAttr.get("value");
+                                            switch (extraSkillName) {
+                                                case "delay":
+                                                    extraSkillDelay = Integer.parseInt(extraSkillValue);
+                                                    break;
+                                                case "skill":
+                                                    extraSkillId = Integer.parseInt(extraSkillValue);
+                                                    break;
+                                                default:
+                                                    log.error(String.format("Unknown Extra Skill Info Name: %s", extraSkillName));
+                                                    break;
+                                            }
+                                        }
+                                        if (extraSkillId > 0) {
+                                            skill.addExtraSkillInfo(extraSkillId, extraSkillDelay);
                                         }
                                     }
                                     break;

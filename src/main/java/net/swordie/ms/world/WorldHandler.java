@@ -406,6 +406,9 @@ public class WorldHandler {
             chr.chatMessage(Mob, "SkillID: " + skillID);
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si != null && si.getExtraSkillInfo().size() > 0) {
+                chr.getField().broadcastPacket(CField.registerExtraSkill(chr.getPosition(), skillID, si.getExtraSkillInfo().keySet(), attackInfo.left));
+            }
             if (si != null && si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
                 Rect r = si.getFirstRect();
                 if (r != null) {
@@ -478,7 +481,7 @@ public class WorldHandler {
                             }
                         }
                     }
-                    if (mob.getHp() < 0) {
+                    if (mob != null && mob.getHp() < 0) {
                         mob.onKilledByChar(chr);
                         // MultiKill +1,  per killed mob
                         multiKillMessage++;
@@ -1159,7 +1162,7 @@ public class WorldHandler {
             PsychicLockBall plb = new PsychicLockBall();
             plb.localKey = inPacket.decodeInt();
             plb.psychicLockKey = inPacket.decodeInt();
-            plb.psychicLockKey = 1;
+            //plb.psychicLockKey = i;
             int mobID = inPacket.decodeInt();
             plb.mob = (Mob) f.getLifeByObjectID(mobID);
             plb.stuffID = inPacket.decodeShort();

@@ -10,7 +10,6 @@ import net.swordie.ms.client.character.items.ScrollUpgradeInfo;
 import net.swordie.ms.client.character.keys.FuncKeyMap;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.PsychicArea;
-import net.swordie.ms.client.character.skills.PsychicLockBall;
 import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.ForceAtomInfo;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
@@ -28,7 +27,6 @@ import net.swordie.ms.loaders.MakingSkillRecipe;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
-import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.world.field.ClockPacket;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
@@ -938,6 +936,24 @@ public class CField {
             outPacket.encodeInt(itemCount);
         }
         outPacket.encodeInt(incSkillProficiency);
+
+        return outPacket;
+    }
+
+    public static OutPacket registerExtraSkill(Char chr, int mainSkillId, Set<Integer> extraSkillIds) {
+        return registerExtraSkill(chr.getPosition(), mainSkillId, extraSkillIds, chr.isLeft());
+    }
+
+    public static OutPacket registerExtraSkill(Position position, int mainSkilId, Set<Integer> extraSkillIds, boolean isLeft) {
+        OutPacket outPacket = new OutPacket(OutHeader.REGISTER_EXTRA_SKILL);
+
+        outPacket.encodePositionInt(position);
+        outPacket.encodeShort(isLeft ? -1 : 1);
+        outPacket.encodeInt(mainSkilId);
+        outPacket.encodeShort(extraSkillIds.size());
+        for (int extraSkillId : extraSkillIds) {
+            outPacket.encodeInt(extraSkillId);
+        }
 
         return outPacket;
     }
