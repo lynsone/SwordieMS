@@ -455,6 +455,7 @@ public class WorldHandler {
                         totalDamage += dmg;
                     }
                     mob.damage(chr, totalDamage);
+                    mob.handleDamageReflect(chr, skillID, totalDamage);
                     //TODO Horntail sponge damage, should make a separate function
                     if ((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810209)) {
                         Life life = field.getLifeByTemplateId(8810214);
@@ -497,6 +498,7 @@ public class WorldHandler {
                 chr.write(UserLocal.comboCounter((byte) 0, (int) totalBonusExp, multiKillMessage > 10 ? 10 : multiKillMessage));
                 chr.addExpNoMsg(totalBonusExp);
             }
+
         }
     }
 

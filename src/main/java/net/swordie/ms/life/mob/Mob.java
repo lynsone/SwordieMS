@@ -4,10 +4,15 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
+import net.swordie.ms.client.character.skills.info.AttackInfo;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyDamageInfo;
@@ -1872,5 +1877,30 @@ public class Mob extends Life {
 //        ForcedMobStat fms = getForcedMobStat();
 //        int base = (int) (50 + (fms.getLevel() / 2D) * (Math.pow(hp, (1 / 7D))));
 //        return Util.getRandom(base, (base + base / 10)); // base + 10% random
+    }
+
+    public void handleDamageReflect(Char chr, int skillID, long totalDamage) {
+        MobTemporaryStat mts = getTemporaryStat();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        SkillInfo si = SkillData.getSkillInfoById(skillID);
+        boolean hasIgnoreCounterCts =
+                tsm.hasStat(CharacterTemporaryStat.IgnoreAllCounter)
+                || tsm.hasStat(CharacterTemporaryStat.IgnoreAllImmune);
+        boolean ignoreCounter = hasIgnoreCounterCts || (si != null && si.isIgnoreCounter());
+        if ((mts.hasCurrentMobStat(MobStat.PCounter) || mts.hasCurrentMobStat(MobStat.MCounter)) && !ignoreCounter) {
+            // DR is always P and M
+            // nOption = % of hp, mOption = chance to reflect
+            Option o = mts.getCurrentOptionsByMobStat(MobStat.PCounter);
+            if (o == null) {
+                o = mts.getCurrentOptionsByMobStat(MobStat.MCounter);
+            }
+            int damagePerc = o.nOption;
+            int prop = o.mOption;
+            if (prop >= 100 || Util.succeedProp(prop)) {
+                int hpDamage = (chr.getMaxHP() * damagePerc) / 100;
+                chr.damage(hpDamage);
+                getField().broadcastPacket(User.userHitByCounter(chr.getId(), hpDamage));
+            }
+        }
     }
 }

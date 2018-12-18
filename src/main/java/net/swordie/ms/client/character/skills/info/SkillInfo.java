@@ -44,6 +44,7 @@ public class SkillInfo {
     private boolean psd;
     private Set<Integer> addAttackSkills = new HashSet<>();
     private Map<Integer, Integer> extraSkillInfo = new HashMap<>();
+    private boolean ignoreCounter;
 
     public int getSkillId() {
         return skillId;
@@ -333,5 +334,9 @@ public class SkillInfo {
 
     public void addExtraSkillInfo(int skillid, int delay) {
         getExtraSkillInfo().put(skillid, delay);
+    }
+
+    public boolean isIgnoreCounter() {
+        return getValue(SkillStat.ignoreCounter, 1) != 0;
     }
 }

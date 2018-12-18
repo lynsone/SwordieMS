@@ -249,6 +249,8 @@ public class SkillData {
                                     }
                                     break;
                                 case "common":
+                                case "info":
+                                case "info2":
                                     for (Node commonNode : XMLApi.getAllChildren(mainLevelNode)) {
                                         Map<String, String> commonAttr = XMLApi.getAttributes(commonNode);
                                         String nodeName = commonAttr.get("name");

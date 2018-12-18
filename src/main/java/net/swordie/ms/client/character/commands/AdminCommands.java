@@ -15,6 +15,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
@@ -24,6 +25,8 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
@@ -1637,6 +1640,32 @@ public class AdminCommands {
             List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
             for (Mob mob : mobs) {
                 mob.die();
+            }
+        }
+    }
+
+    @Command(names = {"mobstat"}, requiredType = Tester)
+    public static class MobStatTest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            if (mobs.size() > 0) {
+                Mob mob = mobs.get(0);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                Option o = new Option();
+                o.nOption = 1000;
+                o.rOption = 145;
+                o.slv = 1;
+                o.tOption = 1000;
+
+                o.wOption = 1000;
+
+                o.mOption = 1000;
+                o.bOption = 1000;
+                o.nReason = 1000;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PCounter, o);
+            } else {
+                chr.chatMessage("Could not find a mob.");
             }
         }
     }

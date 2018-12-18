@@ -150,4 +150,13 @@ public class User {
 
         return outPacket;
     }
+
+    public static OutPacket userHitByCounter(int charID, int damage) {
+        OutPacket outPacket = new OutPacket(OutHeader.USER_HIT_BY_COUNTER);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(damage);
+
+        return outPacket;
+    }
 }
