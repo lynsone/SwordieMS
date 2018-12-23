@@ -2,7 +2,6 @@ package net.swordie.ms.client.character.commands;
 
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
-import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
@@ -16,14 +15,18 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
+import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
@@ -41,6 +44,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
+import static net.swordie.ms.enums.AccountType.*;
 import static net.swordie.ms.enums.ChatType.*;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
 
@@ -50,17 +54,15 @@ import static net.swordie.ms.enums.InventoryOperation.ADD;
 public class AdminCommands {
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
+    @Command(names = {"test"}, requiredType = Admin)
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            PetItem item = (PetItem) chr.getCashInventory().getItemBySlot((short) 1);
-            item.setDateExpire(FileTime.fromDate(LocalDateTime.now().plusHours(3)));
-            item.setDateDead(item.getDateExpire());
-            item.updateToChar(chr);
-            System.out.println(item.getDateExpire().toLocalDateTime().toInstant(ZoneOffset.UTC));
+
         }
     }
 
+    @Command(names = {"showinvinfo", "invinfo"}, requiredType = Tester)
     public static class ShowInvInfo extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -78,6 +80,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testcts", "cts"}, requiredType = Admin)
     public static class TestCTS extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -140,12 +143,14 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"checkid","getid","charid"}, requiredType = Tester)
     public static class CheckID extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             chr.chatMessage(SpeakerChannel, "your charID = " + chr.getId() + " \r\nYour accID = " + chr.getAccId());
         }
     }
 
+    @Command(names = {"getphantomstolenskills"}, requiredType = Tester)
     public static class GetPhantomStolenSkills extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -155,6 +160,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"stealskilllist"}, requiredType = Tester)
     public static class StealSkillList extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -430,6 +436,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"np", "nearestportal"}, requiredType = Tester)
     public static class NP extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             Rect rect = new Rect(
@@ -455,6 +462,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"stats"}, requiredType = Tester)
     public static class Stats extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int strength = chr.getStat(Stat.str);
@@ -474,6 +482,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"spawn"}, requiredType = GameMaster)
     public static class Spawn extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -510,6 +519,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"npc", "spawnnpc"}, requiredType = GameMaster)
     public static class NPC extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -534,6 +544,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testdrop"}, requiredType = Tester)
     public static class TestDrop extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int id = Integer.parseInt(args[1]);
@@ -566,6 +577,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"proitem"}, requiredType = GameMaster)
     public static class ProItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
@@ -596,6 +608,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getitem"}, requiredType = GameMaster)
     public static class GetItem extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (Util.isNumber(args[1])) {
@@ -660,67 +673,25 @@ public class AdminCommands {
         }
     }
 
-    public static class GetProjectiles extends AdminCommand {
-        public static void execute(Char chr, String[] args) {
-            int[] projectiles = new int[]{
-                    2070000,
-                    2060000,
-                    2061000,
-                    2330000
-            };
-            for (int projectile : projectiles) {
-                Item item = ItemData.getItemDeepCopy(projectile);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                item.setQuantity(1000);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            }
-        }
-    }
-
+    @Command(names = {"done"}, requiredType = Tester)
     public static class Done extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int[] projectiles = new int[]{
-                    2070000,
-                    2060000,
-                    2061000,
-                    2330000
-            };
-            for (int projectile : projectiles) {
-                Item item = ItemData.getItemDeepCopy(projectile);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                item.setQuantity(1000);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
-            }
-
             int num = 1000;
             int hp = 250000;
-            int lv = 200;
-            chr.setStat(Stat.hp, hp);
-            chr.setStat(Stat.mhp, hp);
-            chr.setStat(Stat.mp, hp);
-            chr.setStat(Stat.mmp, hp);
-            chr.setStat(Stat.str, (short) num);
-            chr.setStat(Stat.dex, (short) num);
-            chr.setStat(Stat.inte, (short) num);
-            chr.setStat(Stat.luk, (short) num);
-            chr.setStat(Stat.level, (short) lv);
-            Map<Stat, Object> stats = new HashMap<>();
-            stats.put(Stat.hp, hp);
-            stats.put(Stat.mhp, hp);
-            stats.put(Stat.mp, hp);
-            stats.put(Stat.mmp, hp);
-            stats.put(Stat.str, (short) num);
-            stats.put(Stat.dex, (short) num);
-            stats.put(Stat.inte, (short) num);
-            stats.put(Stat.luk, (short) num);
-            stats.put(Stat.level, (byte) lv);
-            stats.put(Stat.exp, (long) 0);
-            chr.getClient().write(WvsContext.statChanged(stats));
+            int lv = 235;
+            chr.setStatAndSendPacket(Stat.hp, hp);
+            chr.setStatAndSendPacket(Stat.mhp, hp);
+            chr.setStatAndSendPacket(Stat.mp, hp);
+            chr.setStatAndSendPacket(Stat.mmp, hp);
+            chr.setStatAndSendPacket(Stat.str, (short) num);
+            chr.setStatAndSendPacket(Stat.dex, (short) num);
+            chr.setStatAndSendPacket(Stat.inte, (short) num);
+            chr.setStatAndSendPacket(Stat.luk, (short) num);
+            chr.setStatAndSendPacket(Stat.level, (short) lv);
         }
     }
 
+    @Command(names = {"hypertp"}, requiredType = Tester)
     public static class HyperTP extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int hyperTP = 5040004;
@@ -731,6 +702,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"job", "setjob"}, requiredType = Tester)
     public static class Job extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             short id = Short.parseShort(args[1]);
@@ -739,11 +711,12 @@ public class AdminCommands {
                 chr.setJob(id);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.subJob, id);
-                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
 
+    @Command(names = {"sp", "setsp"}, requiredType = Tester)
     public static class Sp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -751,113 +724,97 @@ public class AdminCommands {
                 chr.setSpToCurrentJob(num);
                 Map<Stat, Object> stats = new HashMap<>();
                 stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-                chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+                chr.getClient().write(WvsContext.statChanged(stats));
             }
         }
     }
 
+    @Command(names = {"ap", "setap"}, requiredType = Tester)
     public static class Ap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.ap, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.ap, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.ap, (short) num);
             }
         }
     }
 
+    @Command(names = {"hp", "sethp"}, requiredType = Tester)
     public static class Hp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, num);
-                chr.setStat(Stat.mhp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.hp, num);
-                stats.put(Stat.mhp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.hp, num);
+                chr.setStatAndSendPacket(Stat.mhp, num);
             }
         }
     }
 
+    @Command(names = {"mp", "setmp"}, requiredType = Tester)
     public static class Mp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, num);
-                chr.setStat(Stat.mmp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.mp, num);
-                stats.put(Stat.mmp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.mp, num);
+                chr.setStatAndSendPacket(Stat.mmp, num);
             }
         }
     }
 
+    @Command(names = {"str", "setstr"}, requiredType = Tester)
     public static class Str extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.str, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.str, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.str, (short) num);
             }
         }
     }
 
+    @Command(names = {"dex", "setdex"}, requiredType = Tester)
     public static class Dex extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.dex, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.dex, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.dex, (short) num);
             }
         }
     }
 
+    @Command(names = {"int", "setint"}, requiredType = Tester)
     public static class SetInt extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.inte, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.inte, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.inte, (short) num);
             }
         }
     }
 
+    @Command(names = {"luk", "setluk"}, requiredType = Tester)
     public static class Luk extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.luk, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.luk, (short) num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.luk, (short) num);
             }
         }
     }
 
+    @Command(names = {"level", "setlevel", "lvl", "lv"}, requiredType = Tester)
     public static class Level extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.level, (short) num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.level, (byte) num);
-                stats.put(Stat.exp, (long) 0);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.level, (short) num);
+                chr.setStatAndSendPacket(Stat.exp, 0);
                 chr.getJobHandler().handleLevelUp();
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.levelUpEffect()));
             }
         }
     }
+
+    @Command(names = {"leveluntil", "levelupuntil"}, requiredType = Tester)
     public static class LevelUntil extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
@@ -875,60 +832,42 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"heal"}, requiredType = Tester)
     public static class Heal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            int maxHp = chr.getTotalStat(BaseStat.mhp);
-            int maxMp = chr.getTotalStat(BaseStat.mmp);
-            chr.getAvatarData().getCharacterStat().setHp(maxHp);
-            chr.getAvatarData().getCharacterStat().setMp(maxMp);
-            Map<Stat, Object> stats = new HashMap<>();
-            stats.put(Stat.hp, maxHp);
-            stats.put(Stat.mp, maxMp);
-            chr.getClient().write(WvsContext.statChanged(stats));
+            chr.heal(Integer.parseInt(args[1]));
         }
     }
 
+    @Command(names = {"curhp"}, requiredType = Tester)
     public static class CurHp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.hp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.hp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.hp, num);
             }
         }
     }
 
+    @Command(names = {"curmp"}, requiredType = Tester)
     public static class CurMp extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int num = Integer.parseInt(args[1]);
             if (num >= 0) {
-                chr.setStat(Stat.mp, num);
-                Map<Stat, Object> stats = new HashMap<>();
-                stats.put(Stat.mp, num);
-                chr.getClient().write(WvsContext.statChanged(stats));
+                chr.setStatAndSendPacket(Stat.mp, num);
             }
         }
     }
 
+    @Command(names = {"invincible"}, requiredType = Tester)
     public static class Invincible extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            Client c = chr.getClient();
-            TemporaryStatManager tsm = chr.getTemporaryStatManager();
-            Option o1 = new Option();
-            if (tsm.getOption(CharacterTemporaryStat.NotDamaged).nOption == 3) {
-                tsm.removeStat(CharacterTemporaryStat.NotDamaged, false);
-                chr.chatMessage(Notice2, "You are no longer invincible.");
-            } else {
-                o1.nOption = 3;
-                tsm.putCharacterStatValue(CharacterTemporaryStat.NotDamaged, o1);
-                tsm.sendSetStatPacket();
-                chr.chatMessage(Notice2, "You are invincible.");
-            }
+            chr.setInvincible(!chr.isInvincible());
+            chr.chatMessage("Invincibility: " + chr.isInvincible());
         }
     }
 
+    @Command(names = {"morph"}, requiredType = Tester)
     public static class Morph extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int morphID = Integer.parseInt(args[1]);
@@ -944,6 +883,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mount"}, requiredType = Tester)
     public static class Mount extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int mountID = Integer.parseInt(args[1]);
@@ -959,6 +899,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"testtempstat"}, requiredType = Admin)
     public static class TestTempStat extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             List<Life> lifes = new ArrayList<>(chr.getField().getLifes().values());
@@ -971,6 +912,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"setmap"}, requiredType = Tester)
     public static class SetMap extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length > 1 && Util.isNumber(args[1])) {
@@ -986,6 +928,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"setportal"}, requiredType = Tester)
     public static class SetPortal extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int portalID = Integer.parseInt(args[1]);
@@ -999,6 +942,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"atom"}, requiredType = Admin)
     public static class Atom extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int charID = chr.getId();
@@ -1020,6 +964,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"getskill"}, requiredType = Tester)
     public static class GetSkill extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 4) {
@@ -1033,20 +978,45 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"maxskills"}, requiredType = Tester)
     public static class MaxSkills extends AdminCommand {
         public static void execute(Char chr, String[] args) {
-            for (Skill skill : chr.getSkills()) {
-                byte maxLevel = (byte) skill.getMaxLevel();
-                skill.setCurrentLevel(maxLevel);
-                skill.setMasterLevel(maxLevel);
-                List<Skill> list = new ArrayList<>();
-                list.add(skill);
-                chr.addSkill(skill);
-                chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+            List<Skill> list = new ArrayList<>();
+            Set<Short> jobs = new HashSet<>();
+            short job = chr.getJob();
+            // TODO add evan checks
+            // giant hack, but it's for a command, so it's k
+            if (job % 100 == 12) {
+                jobs.add(job);
+                jobs.add((short) (job - 1));
+                jobs.add((short) (job - 2));
+                jobs.add((short) (job - 12));
+            } else if (job % 100 == 11) {
+                jobs.add(job);
+                jobs.add((short) (job - 1));
+                jobs.add((short) (job - 11));
+            } else if (job % 100 == 10) {
+                jobs.add(job);
+                jobs.add((short) (job - 10));
+            } else {
+                jobs.add(job);
+            }
+            for (short j : jobs) {
+                for (Skill skill : SkillData.getSkillsByJob(j)) {
+                    byte maxLevel = (byte) skill.getMaxLevel();
+                    skill.setCurrentLevel(maxLevel);
+                    skill.setMasterLevel(maxLevel);
+                    list.add(skill);
+                    chr.addSkill(skill);
+                }
+                if (list.size() > 0) {
+                    chr.getClient().write(WvsContext.changeSkillRecordResult(list, true, false, false, false));
+                }
             }
         }
     }
 
+    @Command(names = {"lookup", "find"}, requiredType = Tester)
     public static class Lookup extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 3) {
@@ -1125,6 +1095,18 @@ public class AdminCommands {
                 } else {
                     Map<Integer, String> map;
                     switch (queryType) {
+                        case "equip":
+                            map = StringData.getItemStringByName(query.toString());
+                            Set<Integer> nonEquips = new HashSet<>();
+                            for (int itemId : map.keySet()) {
+                                if (!ItemConstants.isEquip(itemId)) {
+                                    nonEquips.add(itemId);
+                                }
+                            }
+                            for (int itemId : nonEquips) {
+                                map.remove(itemId);
+                            }
+                            break;
                         case "item":
                             map = StringData.getItemStringByName(query.toString());
                             break;
@@ -1143,8 +1125,10 @@ public class AdminCommands {
                     }
                     if (map.size() == 0) {
                         chr.chatMessage(Mob, "No " + queryType + "s found for query " + query);
+                        return;
                     }
-                    for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                    TreeMap<Integer, String> sortedMap = new TreeMap<>(map);
+                    for (Map.Entry<Integer, String> entry : sortedMap.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
                         if (queryType.equalsIgnoreCase("item")) {
@@ -1164,6 +1148,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mesos", "money"}, requiredType = GameMaster)
     public static class Mesos extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             long mesos = Long.parseLong(args[1]);
@@ -1171,6 +1156,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"goto"}, requiredType = Tester)
     public static class GoTo extends AdminCommand {
         public static void execute(Char chr, String[] args) {
 
@@ -1269,6 +1255,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"clearcache"}, requiredType = Admin)
     public static class ClearCache extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             chr.getScriptManager().dispose(false);
@@ -1277,6 +1264,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"savemap"}, requiredType = Tester)
     public static class SaveMap extends AdminCommand {
         private static HashMap<String, Integer> quickmaps = new HashMap<>();
 
@@ -1312,6 +1300,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"warriorequips"}, requiredType = Tester)
     public static class WarriorEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] warEquips = new int[]{
@@ -1331,13 +1320,12 @@ public class AdminCommands {
             };
             for (int warEquip : warEquips) {
                 Item item = ItemData.getItemDeepCopy(warEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
 
+    @Command(names = {"mageequips"}, requiredType = Tester)
     public static class MageEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] mageEquips = new int[]{
@@ -1350,13 +1338,12 @@ public class AdminCommands {
             };
             for (int mageEquip : mageEquips) {
                 Item item = ItemData.getItemDeepCopy(mageEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
 
+    @Command(names = {"archerequips"}, requiredType = Tester)
     public static class ArcherEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] archerEquips = new int[]{
@@ -1367,13 +1354,12 @@ public class AdminCommands {
             };
             for (int archerEquip : archerEquips) {
                 Item item = ItemData.getItemDeepCopy(archerEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
 
+    @Command(names = {"thiefequips"}, requiredType = Tester)
     public static class ThiefEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] thiefEquips = new int[]{
@@ -1386,13 +1372,12 @@ public class AdminCommands {
             };
             for (int thiefEquip : thiefEquips) {
                 Item item = ItemData.getItemDeepCopy(thiefEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
 
+    @Command(names = {"pirateequips"}, requiredType = Tester)
     public static class PirateEquips extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             int[] pirateEquips = new int[]{
@@ -1406,29 +1391,34 @@ public class AdminCommands {
             };
             for (int pirateEquip : pirateEquips) {
                 Item item = ItemData.getItemDeepCopy(pirateEquip);
-                chr.addItemToInventory(item.getInvType(), item, false);
-                chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                        ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                chr.addItemToInventory(item);
             }
         }
     }
 
+    @Command(names = {"clearinv"}, requiredType = Tester)
     public static class ClearInv extends AdminCommand {
         public static void execute(Char chr, String[] args) {
             if (args.length < 2) {
-                chr.chatMessage(Notice2, "Syntax Error: !ClearInv [Start Index] [End Index]");
+                chr.chatMessage(Notice2, "Syntax Error: !ClearInv <Inventory Type> <Start Index> <End Index>");
                 return;
             }
-            short startIndex = Short.parseShort(args[1]);
-            short endIndex = Short.parseShort(args[2]);
+            InvType invType = InvType.getInvTypeByString(args[1]);
+            if (invType == null) {
+                chr.chatMessage("Please fill in a correct inventory type:  equip / use / etc / setup / cash");
+                return;
+            }
+            short startIndex = Short.parseShort(args[2]);
+            short endIndex = Short.parseShort(args[3]);
             for (int i = startIndex; i < endIndex; i++) {
-                Item removeItem = chr.getInventoryByType(InvType.EQUIP).getItemBySlot((short) i);
+                Item removeItem = chr.getInventoryByType(invType).getItemBySlot((short) i);
                 chr.consumeItem(removeItem);
             }
             chr.dispose();
         }
     }
 
+    @Command(names = {"mobinfo"}, requiredType = Tester)
     public static class MobInfo extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1458,6 +1448,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"completequest"}, requiredType = Tester)
     public static class CompleteQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1465,6 +1456,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"removequest"}, requiredType = Tester)
     public static class RemoveQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1472,6 +1464,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"sethonor, honor"}, requiredType = Tester)
     public static class SetHonor extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1485,6 +1478,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"startquest"}, requiredType = Tester)
     public static class StartQuest extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1501,20 +1495,20 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"bypassskillcd", "ignoreskillcd", "bypasskillcd"}, requiredType = Tester)
     public static class BypassSkillCD extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-            if (!chr.hasSkillCDBypass()) {
-                chr.setSkillCDBypass(true);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: ON");
-            } else {
-                chr.setSkillCDBypass(false);
-                chr.chatMessage(Notice2, "Skill Cooldown bypass: OFF");
+            chr.setSkillCDBypass(!chr.hasSkillCDBypass());
+            if(chr.hasSkillCDBypass()) {
+                chr.getSkillCoolTimes().keySet().forEach(chr::resetSkillCoolTime);
             }
+            chr.chatMessage(Notice2, "Skill Cooldown bypass: "+ chr.hasSkillCDBypass());
             chr.dispose();
         }
     }
 
+    @Command(names = {"toggledamagecap"}, requiredType = Tester)
     public static class ToggleDamageCap extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1528,6 +1522,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"shop"}, requiredType = Tester)
     public static class Shop extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1535,6 +1530,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"reloadcs"}, requiredType = Admin)
     public static class ReloadCS extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1542,11 +1538,42 @@ public class AdminCommands {
         }
     }
 
+    // lie detector
+    @Command(names = {"ld", "liedetector"}, requiredType = GameMaster)
+    public static class LD extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 1) {
+                chr.chatMessage(SpeakerChannel, "Not enough args! Use !ld <name> or !ld @me to test.");
+                return;
+            }
+
+            String name = args[1];
+            Char chrToLD = chr;
+
+            if (!name.equals("@me")) {
+                chrToLD = Server.getInstance().getWorldById(chr.getClient().getWorldId()).getCharByName(name);
+
+                if (chrToLD == null) {
+                    chr.chatMessage(SpeakerChannel, String.format("Character '%s' is not online.", name));
+                    return;
+                }
+            }
+
+            if (chrToLD.sendLieDetector()) {
+                chr.chatMessage(SpeakerChannel, String.format("Sent lie detector to '%s'.", chrToLD.getName()));
+            } else {
+                chr.chatMessage(SpeakerChannel, "Lie detector failed.");
+            }
+        }
+    }
+
+    @Command(names = {"ban"}, requiredType = GameMaster)
     public static class Ban extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
             if (args.length < 5) {
                 chr.chatMessage(SpeakerChannel, "Not enough args! Use !ban <name> <amount> <min/hour/day/year> <reason>");
+                return;
             }
             String name = args[1];
             int amount = Integer.parseInt(args[2]);
@@ -1600,6 +1627,7 @@ public class AdminCommands {
             }
             banAccount.setBanExpireDate(FileTime.fromDate(banDate));
             banAccount.setBanReason(reason);
+            banAccount.getOffenseManager().addOffense(reason, chr.getId());
             chr.chatMessage(SpeakerChannel, String.format("Character %s has been banned. Expire date: %s", name, banDate));
             if (online) {
                 banChr.write(WvsContext.returnToTitle());
@@ -1607,6 +1635,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"killmobs"}, requiredType = GameMaster)
     public static class KillMobs extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1617,10 +1646,38 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mobstat"}, requiredType = Tester)
+    public static class MobStatTest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            if (mobs.size() > 0) {
+                Mob mob = mobs.get(0);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                Option o = new Option();
+                o.nOption = 1000;
+                o.rOption = 145;
+                o.slv = 1;
+                o.tOption = 1000;
+
+                o.wOption = 1000;
+
+                o.mOption = 1000;
+                o.bOption = 1000;
+                o.nReason = 1000;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PCounter, o);
+            } else {
+                chr.chatMessage("Could not find a mob.");
+            }
+        }
+    }
+
+    @Command(names = {"fp", "findportal"}, requiredType = Tester)
     public static class FP extends AdminCommand { // FindPortal
         public static void execute(Char chr, String[] args) {
             if (args.length < 1) {
                 chr.chatMessage(SpeakerChannel, "Invalid args. Use !findportal <id/name>");
+                return;
             }
             Field field = chr.getField();
             Portal portal;
@@ -1644,6 +1701,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"showbuffs"}, requiredType = Tester)
     public static class showBuffs extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1667,6 +1725,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"tohex"}, requiredType = Tester)
     public static class toHex extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1680,6 +1739,7 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"fromhex"}, requiredType = Tester)
     public static class fromHex extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
@@ -1706,6 +1766,14 @@ public class AdminCommands {
             chr.chatMessage("" + num);
         }
     }
+
+    @Command(names = {"lookupreactor", "reactors"}, requiredType = Tester)
+    public static class lookupreactor extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            chr.getField().getReactors().forEach(reactor -> chr.chatMessage(reactor.toString()));
+        }
+    }
+
 
 
 

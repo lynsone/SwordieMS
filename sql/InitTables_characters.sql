@@ -1,64 +1,68 @@
-drop table if exists damageskinsavedatas;
-drop table if exists friends;
-drop table if exists linkskills;
-drop table if exists accounts;
-drop table if exists monster_collection_rewards;
-drop table if exists monster_collection_mobs;
-drop table if exists monster_collection_explorations;
-drop table if exists monster_collections;
-drop table if exists macroskills;
-drop table if exists macros;
-drop table if exists familiars;
-drop table if exists stolenskills;
-drop table if exists chosenskills;
-drop table if exists hyperrockfields;
-drop table if exists characterpotentials;
-drop table if exists test;
-drop table if exists skills;
-drop table if exists characters;
-drop table if exists avatardata;
-drop table if exists alliance_gradenames;
-drop table if exists alliances;
-drop table if exists keymaps;
-drop table if exists funckeymap;
-drop table if exists characterstats;
-drop table if exists hairequips;
-drop table if exists unseenequips;
-drop table if exists petids;
-drop table if exists totems;
-drop table if exists spset;
-drop table if exists extendsp;
-drop table if exists noncombatstatdaylimit;
-drop table if exists systemtimes;
-drop table if exists charactercards;
-drop table if exists avatarlook;
-drop table if exists sockets;
-drop table if exists options;
-drop table if exists equips;
-drop table if exists petitems;
-drop table if exists items;
-drop table if exists inventories;
-drop table if exists questprogressrequirements;
-drop table if exists questprogressitemrequirements;
-drop table if exists questprogresslevelrequirements;
-drop table if exists questprogressmoneyrequirements;
-drop table if exists questprogressmobrequirements;
-drop table if exists questlists;
-drop table if exists questmanagers;
-drop table if exists quests;
-drop table if exists bbs_replies;
-drop table if exists bbs_records;
-drop table if exists guildrequestors;
-drop table if exists gradenames;
-drop table if exists guildmembers;
-drop table if exists guildrequestors;
-drop table if exists guildskills;
-drop table if exists guildskill;
-drop table if exists guilds;
-drop table if exists monsterbookcards;
-drop table if exists monsterbookinfos;
-drop table if exists trunks;
-drop table if exists cashiteminfos;
+set FOREIGN_KEY_CHECKS = 0;
+drop table if exists damageskinsavedatas,
+friends,
+linkskills,
+accounts,
+monster_collection_rewards,
+monster_collection_mobs,
+monster_collection_explorations,
+monster_collections,
+macroskills,
+macros,
+familiars,
+stolenskills,
+chosenskills,
+skillcooltimes,
+hyperrockfields,
+characterpotentials,
+test,
+skills,
+characters,
+avatardata,
+alliance_gradenames,
+alliances,
+keymaps,
+funckeymap,
+offenses,
+offense_managers,
+characterstats,
+hairequips,
+unseenequips,
+petids,
+totems,
+spset,
+extendsp,
+noncombatstatdaylimit,
+systemtimes,
+charactercards,
+avatarlook,
+sockets,
+options,
+equips,
+petitems,
+items,
+inventories,
+questprogressrequirements,
+questprogressitemrequirements,
+questprogresslevelrequirements,
+questprogressmoneyrequirements,
+questprogressmobrequirements,
+questlists,
+questmanagers,
+quests,
+bbs_replies,
+bbs_records,
+gradenames,
+guildmembers,
+guildrequestors,
+guildskills,
+guildskill,
+guilds,
+monsterbookcards,
+monsterbookinfos,
+trunks,
+cashiteminfos;
+set FOREIGN_KEY_CHECKS = 1;
 
 create table trunks(
 	id int not null auto_increment,
@@ -205,6 +209,7 @@ create table equips (
     iincreq smallint,
     growthenchant smallint,
     psenchant smallint,
+    hyperupgrade smallint,
     bdr smallint,
     imdr smallint,
     damr smallint,
@@ -549,6 +554,25 @@ create table bbs_replies (
     foreign key (recordid) references bbs_records(id) on delete cascade
 );
 
+create table offense_managers (
+    id int not null auto_increment,
+    points int,
+    primary key (id)
+);
+
+create table offenses (
+    id bigint not null auto_increment,
+    manager_id int,
+    charid int,
+    accountid int,
+    msg text,
+    type varchar(255),
+    issuedate datetime(3),
+    issuerid int,
+    primary key (id),
+    foreign key (manager_id) references offense_managers(id) on delete cascade
+);
+
 create table characters (
 	id int not null auto_increment,
     accid int,
@@ -614,6 +638,15 @@ create table chosenskills (
     charid int,
     skillid int,
     position int,
+    primary key (id),
+    foreign key (charid) references characters(id)
+);
+
+create table skillcooltimes (
+	id int not null auto_increment,
+    charid int,
+    skillid int,
+    nextusabletime bigint,
     primary key (id),
     foreign key (charid) references characters(id)
 );
@@ -765,8 +798,7 @@ create table accounts (
 	password varchar(255),
 	pic varchar(255),
 	mac varchar(255),
-	gmlevel int default 0,
-	accounttypemask int default 2,
+	accounttype int default 0,
 	age int default 0,
 	vipgrade int default 0,
 	nblockreason int default 0,
@@ -774,7 +806,7 @@ create table accounts (
 	msg2 tinyint default 0,
 	purchaseexp tinyint default 0,
 	pblockreason tinyint default 3,
-	chatunblockdate long,
+	chatunblockdate bigint default 0,
 	hascensorednxloginid boolean default 0,
 	gradecode tinyint default 0,
 	censorednxloginid varchar(255),
@@ -787,9 +819,11 @@ create table accounts (
     monstercollectionid int,
     banExpireDate datetime(3),
     banReason varchar(255),
+    offensemanager int,
 	primary key (id),
     foreign key (trunkid) references trunks(id),
-    foreign key (monstercollectionid) references monster_collections(id)
+    foreign key (monstercollectionid) references monster_collections(id),
+    foreign key (offensemanager) references offense_managers(id)
 );
 
 
@@ -830,7 +864,7 @@ create table friends (
 );
 
 
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '7', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '7', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '7', '0', '111111', '40');
-insert into `accounts` (`name`, `password`, `gmlevel`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '7', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '4', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '4', '0', '111111', '40', '500000');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '4', '0', '111111', '40');
+insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '4', '0', '111111', '40');

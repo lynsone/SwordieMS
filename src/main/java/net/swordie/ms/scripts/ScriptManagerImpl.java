@@ -32,6 +32,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -45,6 +46,7 @@ import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.field.*;
@@ -512,6 +514,16 @@ public class ScriptManagerImpl implements ScriptManager {
 		return sendGeneralSay("", AskSlideMenu);
 	}
 
+	public int sendAskSelectMenu(int dlgType, int defaultSelect) {
+		return sendAskSelectMenu(dlgType, defaultSelect, new String[]{});
+	}
+
+	public int sendAskSelectMenu(int dlgType, int defaultSelect, String[] text) {
+		getNpcScriptInfo().setDlgType(dlgType);
+		getNpcScriptInfo().setDefaultSelect(defaultSelect);
+		getNpcScriptInfo().setSelectText(text);
+		return sendGeneralSay("", AskSelectMenu);
+	}
 
 
 	// Start of param methods ------------------------------------------------------------------------------------------
@@ -611,8 +623,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setJob(jobID);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.subJob, jobID);
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	public void addSP(int amount) {
@@ -634,8 +645,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.setSpToCurrentJob(amount);
 		Map<Stat, Object> stats = new HashMap<>();
 		stats.put(Stat.sp, chr.getAvatarData().getCharacterStat().getExtendSP());
-		chr.getClient().write(WvsContext.statChanged(stats, true, (byte) -1,
-				(byte) 0, (byte) 0, (byte) 0, false, 0, 0));
+		chr.getClient().write(WvsContext.statChanged(stats));
 	}
 
 	@Override
@@ -750,9 +760,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		giveSkill(skillId, 1);
 	}
 
+	public void giveSkill(int skillId, int slv) { giveSkill(skillId, slv, slv); }
+
 	@Override
-	public void giveSkill(int skillId, int slv) {
-		chr.addSkill(skillId, slv, slv);
+	public void giveSkill(int skillId, int slv, int maxLvl) { chr.addSkill(skillId, slv, maxLvl); }
+
+	public void removeSkill(int skillId) {
+		chr.removeSkillAndSendPacket(skillId);
 	}
 
 	public int getSkillByItem() {
@@ -980,6 +994,13 @@ public class ScriptManagerImpl implements ScriptManager {
 		return field.getMobs().size();
 	}
 
+	public void killMobs() {
+		List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+		for (Mob mob : mobs) {
+			mob.die();
+		}
+	}
+
 	public void showWeatherNoticeToField(String text, WeatherEffNoticeType type) {
 		showWeatherNoticeToField(text, type, 7000); // 7 seconds
 	}
@@ -1070,7 +1091,28 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
+	public Drop getDropInRect(int itemID, Rect rect) {
+	    Field field = getField();
+	    if (field == null) {
+	        field = chr.getField();
+        }
+	    return field.getDropsInRect(rect).stream()
+                .filter(drop -> drop.getItem() != null && drop.getItem().getItemId() == itemID)
+                .findAny().orElse(null);
+    }
 
+    @Override
+    public Drop getDropInRect(int itemID, int rectRange) {
+        return getDropInRect(itemID, new Rect(
+                new Position(
+                        chr.getPosition().getX() - rectRange,
+                        chr.getPosition().getY() - rectRange),
+                new Position(
+                        chr.getPosition().getX() + rectRange,
+                        chr.getPosition().getY() + rectRange))
+        );
+
+    }
 
 	// Life-related methods --------------------------------------------------------------------------------------------
 
@@ -1424,6 +1466,11 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void setChannelField() {
+		chr.setFieldInstanceType(FieldInstanceType.CHANNEL);
+	}
+
+	@Override
 	public boolean isPartyLeader() {
 		return chr.getParty() != null && chr.getParty().getPartyLeaderID() == chr.getId();
 	}
@@ -1552,11 +1599,13 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void giveMesos(long mesos) {
 		chr.addMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) mesos));
 	}
 
 	@Override
 	public void deductMesos(long mesos) {
 		chr.deductMoney(mesos);
+		chr.write(WvsContext.incMoneyMessage((int) -mesos));
 	}
 
 	@Override
@@ -1953,7 +2002,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int moveCamera(boolean back, int speed, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraMove(back, speed, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1972,7 +2021,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int zoomCamera(int inZoomDuration, int scale, int x, int y) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.cameraZoom(inZoomDuration, scale, 1000, new Position(x, y))));
         Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
         if (response == null) {
@@ -1992,7 +2041,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int sendDelay(int delay) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.InGameDirectionsAnswer);
+		getNpcScriptInfo().setMessageType(NpcMessageType.AskIngameDirection);
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.delay(delay)));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -2091,6 +2140,10 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.avatarLookSet(equipIDs)));
 	}
 
+	public void faceOff(int faceItemID) {
+		chr.write(UserLocal.inGameDirectionEvent(InGameDirectionEvent.faceOff(faceItemID)));
+	}
+
 	// Clock methods ---------------------------------------------------------------------------------------------------
 
 	public Clock createStopWatch(int seconds) {
@@ -2172,6 +2225,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	    chr.write(CField.blowWeather(itemID, message));
     }
 
+    public void playSound(String sound) { playSound(sound, 100); }// default
 	public void playSound(String sound, int vol) {
 		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
@@ -2208,6 +2262,16 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void reservedEffect(String effectPath) {
 		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+
+		String[] splitted = effectPath.split("/");
+		String sceneName = splitted[splitted.length - 2];
+		String sceneNumber = splitted[splitted.length - 1];
+		String xmlPath = effectPath.replace("/" + sceneName, "").replace("/" + sceneNumber, "").replace("Effect/", "Effect.wz/");
+
+		int fieldID = new Scene(chr, xmlPath, sceneName, sceneNumber).getTransferField();
+		if (fieldID != 0) {
+			chr.setTransferField(fieldID);
+		}
 	}
 
 	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
@@ -2215,6 +2279,8 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void reservedEffectRepeat(String effectPath) { reservedEffectRepeat(effectPath, true); }
 
 	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
+
+	public void blindEffect(boolean blind) { chr.write(User.effect(Effect.blindEffect(blind))); }
 
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
 		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
@@ -2274,7 +2340,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public int playVideoByScript(String videoPath) {
-		getNpcScriptInfo().setMessageType(NpcMessageType.CompletedVideo);
+		getNpcScriptInfo().setMessageType(NpcMessageType.PlayMovieClip);
 		chr.write(UserLocal.videoByScript(videoPath, false));
 		Object response = getScriptInfoByType(getLastActiveScriptType()).awaitResponse();
 		if (response == null) {
@@ -2306,6 +2372,32 @@ public class ScriptManagerImpl implements ScriptManager {
 			level++;
 		}
 	}
+
+	public void ballonMsg(String message) {
+		chr.write(UserLocal.balloonMsg(message, 100, 3, null));
+	}
+
+	public void hireTutor(boolean set) { chr.hireTutor(set); }
+
+	public void tutorAutomatedMsg(int id) { tutorAutomatedMsg(id, 10000); }
+
+	public void tutorAutomatedMsg(int id, int duration) { chr.tutorAutomatedMsg(id, duration); }
+
+	public void tutorCustomMsg(String message, int width, int duration) { chr.tutorCustomMsg(message, width, duration); }
+
+	public boolean hasTutor() { return chr.hasTutor(); }
+
+	public int getMakingSkillLevel(int skillID) { return chr.getMakingSkillLevel(skillID); }
+
+	public boolean isAbleToLevelUpMakingSkill(int skillID) {
+		int neededProficiency = SkillConstants.getNeededProficiency(chr.getMakingSkillLevel(skillID));
+		if (neededProficiency <= 0) {
+			return false;
+		}
+		return chr.getMakingSkillProficiency(skillID) >= neededProficiency;
+	}
+
+	public void makingSkillLevelUp(int skillID) { chr.makingSkillLevelUp(skillID); }
 
 	private ScriptMemory getMemory() {
 		return memory;

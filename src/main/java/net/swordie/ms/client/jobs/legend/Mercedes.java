@@ -16,7 +16,6 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.MoveAbility;
@@ -64,6 +63,7 @@ public class Mercedes extends Job {
 
     public static final int HEROIC_MEMORIES_MERC = 23121053;
     public static final int ELVISH_BLESSING = 23121054;
+    public static final int WRATH_OF_ENLIL = 23121052;
 
     //Final Attack
     public static final int FINAL_ATTACK_DBG = 23100006;
@@ -123,8 +123,6 @@ public class Mercedes extends Job {
         Item item = ItemData.getItemDeepCopy(1352000); // Secondary
         chr.addItemToInventory(item);
         chr.getAvatarData().getCharacterStat().setPosMap(910150000);
-
-        chr.addSkill(20021166, 1, 1); // Beginner Stunning Strikes
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         cs.setLevel(10);
@@ -250,7 +248,7 @@ public class Mercedes extends Job {
         eleKnightSummonID = random;
         Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
         Field field = chr.getField();
-        summon.setMoveAbility(MoveAbility.Fly.getVal());
+        summon.setMoveAbility(MoveAbility.Fly);
         summon.setSummonTerm(0);
 
         summonList.add(summon);
@@ -264,14 +262,6 @@ public class Mercedes extends Job {
 
         SkillInfo si = SkillData.getSkillInfoById(ELEMENTAL_KNIGHTS_BLUE);
         byte slv = (byte) chr.getSkill(ELEMENTAL_KNIGHTS_BLUE).getCurrentLevel();
-
-        o1.nReason = random;
-        o1.nValue = 1;
-        o1.summon = summon;
-        o1.tStart = (int) System.currentTimeMillis();
-        o1.tTerm = si.getValue(time, slv);
-        tsm.putCharacterStatValue(IndieEmpty, o1);
-        tsm.sendSetStatPacket();
     }
 
 
@@ -293,7 +283,7 @@ public class Mercedes extends Job {
             skillID = skill.getSkillId();
         }
         if (hasHitMobs) {
-            incrementIgnisRoarStackCount(SkillConstants.getActualSkillIDfromSkillID(skillID), tsm, attackInfo);
+            incrementIgnisRoarStackCount(tsm, attackInfo);
         }
         Option o1 = new Option();
         Option o2 = new Option();
@@ -408,43 +398,50 @@ public class Mercedes extends Job {
         super.handleAttack(c, attackInfo);
     }
 
-    private void incrementIgnisRoarStackCount(int skillID, TemporaryStatManager tsm, AttackInfo attackInfo) {
-        if (Arrays.asList(summonAttacks).contains(skillID)) {
+    private void incrementIgnisRoarStackCount(TemporaryStatManager tsm, AttackInfo attackInfo) {
+        if (Arrays.asList(summonAttacks).contains(attackInfo.skillId)
+                || attackInfo.skillId == getFinalAtkSkill().getSkillId()
+                || attackInfo.skillId == lastAttackSkill) {
             return;
-        } else {
-            Option o = new Option();
-            Option o1 = new Option();
-            SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(IGNIS_ROAR);
-            Skill skill = chr.getSkill(IGNIS_ROAR);
-            if (skill == null) {
-                return;
-            }
-            byte slv = (byte) skill.getCurrentLevel();
-            int amount = 1;
-            if(attackInfo.skillId == getFinalAttackSkill()) {
-                return;
-            }
-            if(attackInfo.skillId == lastAttackSkill) {
-                return;
-            }
-            if (tsm.hasStat(IgnisRore)) {
-                if (tsm.hasStat(AddAttackCount)) {
-                    amount = tsm.getOption(AddAttackCount).nOption;
-                    if (amount < ignisRoarInfo.getValue(y, slv)) {
-                        amount++;
-                    }
+        }
+        Option o = new Option();
+        Option o1 = new Option();
+        Skill skill = chr.getSkill(IGNIS_ROAR);
+        if (skill == null) {
+            return;
+        }
+        SkillInfo ignisRoarInfo = SkillData.getSkillInfoById(skill.getSkillId());
+        byte slv = (byte) skill.getCurrentLevel();
+        int amount = 1;
+        SkillInfo si = SkillData.getSkillInfoById(lastAttackSkill);
+        if(si != null && si.getAddAttackSkills().stream().noneMatch(aas -> aas == attackInfo.skillId)) {
+            return;
+        }
+        if(attackInfo.skillId != SPIKES_ROYALE) {
+            chr.reduceSkillCoolTime(SPIKES_ROYALE, 1000);
+        }
+        if(attackInfo.skillId != UNICORN_SPIKE) {
+            chr.reduceSkillCoolTime(UNICORN_SPIKE, 1000);
+        }
+        if(attackInfo.skillId != WRATH_OF_ENLIL) {
+            chr.reduceSkillCoolTime(WRATH_OF_ENLIL, 1000);
+        }
+        if (tsm.hasStat(IgnisRore)) {
+            if (tsm.hasStat(AddAttackCount)) {
+                amount = tsm.getOption(AddAttackCount).nOption;
+                if (amount < ignisRoarInfo.getValue(y, slv)) {
+                    amount++;
                 }
-
-                lastAttackSkill = attackInfo.skillId;
-                o.nOption = amount;
-                o.rOption = IGNIS_ROAR;
-                o.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(AddAttackCount, o);
-                o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
-                o1.rOption = IGNIS_ROAR;
-                o1.tOption = ignisRoarInfo.getValue(subTime, slv);
-                tsm.putCharacterStatValue(DamR, o1);
             }
+            lastAttackSkill = attackInfo.skillId;
+            o.nOption = amount;
+            o.rOption = IGNIS_ROAR;
+            o.tOption = ignisRoarInfo.getValue(subTime, slv);
+            tsm.putCharacterStatValue(AddAttackCount, o);
+            o1.nOption = (amount * ignisRoarInfo.getValue(x, slv));
+            o1.rOption = IGNIS_ROAR;
+            o1.tOption = ignisRoarInfo.getValue(subTime, slv);
+            tsm.putCharacterStatValue(DamR, o1);
             tsm.sendSetStatPacket();
         }
     }

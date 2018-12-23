@@ -14,6 +14,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
@@ -278,22 +279,15 @@ public class WindArcher extends Noblesse {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 summon.setAttackActive(false);
-                summon.setAssistType((byte) 0);
+                summon.setAssistType(AssistType.None);
                 summon.setMaxHP(si.getValue(x, slv));
                 summon.setHp(summon.getMaxHP());
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case GLORY_OF_THE_GUARDIANS_WA:
                 o1.nReason = skillID;

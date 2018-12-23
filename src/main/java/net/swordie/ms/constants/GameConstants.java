@@ -3,7 +3,6 @@ package net.swordie.ms.constants;
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
-import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.packet.QuickMoveInfo;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.EnchantStat;
@@ -21,16 +20,22 @@ import java.util.List;
  * Created on 1/23/2018.
  */
 public class GameConstants {
+    public static final int CHANNELS_PER_WORLD = 10;
+    public static final int BUFFED_CHANNELS = 7;
     public static final int MOB_EXP_RATE = 10;
     public static final long MAX_MONEY = 9_999_999_999L;
     public static final short DAMAGE_SKIN_MAX_SIZE = 100;
     public static final int MAX_PET_AMOUNT = 3;
     public static final int MAX_HP_MP = 500000;
     public static final long DAMAGE_CAP = 50_000_000;
+    public static final int BEGINNER_SP_MAX_LV = 7;
+    public static final int RESISTANCE_SP_MAX_LV = 10;
+    public static final int QUICKSLOT_LENGTH = 28;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
     public static final int VIDEO_FIELD = 931050990; // Used for Effects and/or Videos
+    public static final int ARDENTMILL = 910001000;
     public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
     public static final double DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT = 1.5;
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
@@ -98,6 +103,7 @@ public class GameConstants {
 
     // Mob
     public static final int MOB_SKILL_CHANCE = 20;
+    public static final int NX_DROP_CHANCE = 70;
 
     // Elite mob
     public static final int ELITE_MOB_SKILL_COUNT = 2;
@@ -124,7 +130,6 @@ public class GameConstants {
     public static final int MAX_CS_ITEMS_PER_PAGE = 12;
     public static final int MAX_LOCKER_SIZE = 9999;
 
-
     // START OF Party Quests
     public static final long PARTY_QUEST_GLOBAL_EXP = 30000000; // The minimum amount of Exp given from a PQ.
 
@@ -147,6 +152,10 @@ public class GameConstants {
 
     // END OF Party Quests
 
+    //Boss QR Values
+    public static final int EASY_HORNTAIL_QUEST = 99996; // Quest where the Spawn state of horntail's heads is stored
+    public static final int EASY_HILLA_QUEST = 99995; //Quest where the state of hilla portals is stored
+    public static final int ARKARIUM_QUEST = 99994; //Quest wehre difficulty of arkarium is stored
     // Trading
     public static final int MAX_TRADE_ITEMS = 9;
 
@@ -172,6 +181,10 @@ public class GameConstants {
     private static int[][] enchantSuccessRates = new int[25][2];
     private static int[][] enchantSuccessRatesSuperior = new int[15][2];
     private static int[] guildExp = new int[MAX_GUILD_LV];
+
+    // Skills
+    public static final int TIME_LEAP_QR_KEY = 99996; // Quest where personal Time Leap CDs get stored
+
 
     private static List<QuickMoveInfo> quickMoveInfos;
     public static int[][][] INC_HP_MP = {
@@ -316,11 +329,17 @@ public class GameConstants {
             } else if (level <= 117) {
                 return 10;
             } else if (level <= 127) {
+                // v197 introduced 25 stars system
                 return ServerConstants.VERSION >= 197 ? 15 : 12;
             } else if (level <= 137) {
                 return ServerConstants.VERSION >= 197 ? 20 : 13;
             } else {
-                return ServerConstants.VERSION >= 197 ? 25 : 15;
+                // v199 capped badges to 22 stars
+                if (ItemConstants.isBadge(equip.getItemId()) && ServerConstants.VERSION >= 199) {
+                    return 22;
+                } else {
+                    return ServerConstants.VERSION >= 197 ? 25 : 15;
+                }
             }
         }
     }
@@ -694,21 +713,8 @@ public class GameConstants {
     }
 
     public static long applyTax(long money) {
-        // https://gamefaqs.gamespot.com/pc/924697-maplestory/answers/56187-how-many-is-the-tax-on-meso-when-trading
-        if (money >= 100_000_000) {
-            return (long) (money - (money * 0.06));
-        } else if (money >= 25_000_000) {
-            return (long) (money - (money * 0.05));
-        } else if (money >= 10_000_000) {
-            return (long) (money - (money * 0.04));
-        } else if (money >= 5_000_000) {
-            return (long) (money - (money * 0.03));
-        } else if (money >= 1_000_000) {
-            return (long) (money - (money * 0.018));
-        } else if (money >= 100_000) {
-            return (long) (money - (money * 0.008));
-        }
-        return money;
+        // 5% global tax starting from v180ish
+        return Math.round(money * 0.95);
     }
 
     public static int getExpRequiredForNextGuildLevel(int curLevel) {

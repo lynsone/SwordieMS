@@ -29,4 +29,8 @@ public enum MoveAbility {
     public byte getVal() {
         return val;
     }
+
+    public boolean changeFieldWithOwner() {
+        return this != Stop;
+    }
 }

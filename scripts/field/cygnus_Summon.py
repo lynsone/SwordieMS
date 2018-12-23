@@ -1,1 +1,4 @@
-sm.spawnMob(8850011, -147, 115, False)
+if sm.getFieldID() == 271040100:
+    sm.spawnMob(8850111, -147, 115, False)
+elif sm.getFieldID() == 211070102:
+    sm.spawnMob(8850111, -147, 115, False)

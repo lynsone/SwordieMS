@@ -13,6 +13,7 @@ import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Shade;
+import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.life.mob.MobStat;
@@ -171,7 +172,7 @@ public class AffectedArea extends Life {
 
     public void handleMobInside(Mob mob) {
         Char chr = getField().getCharByID(getCharID());
-        if(chr == null) {
+        if (chr == null) {
             return;
         }
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
@@ -184,11 +185,11 @@ public class AffectedArea extends Life {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        switch(skillID) {
+        switch (skillID) {
             case Magician.POISON_MIST:
             case Archer.FLAME_SURGE:
             case Kanna.NIMBUS_CURSE:
-                if(!mts.hasBurnFromSkillAndOwner(skillID, getCharID())) {
+                if (!mts.hasBurnFromSkillAndOwner(skillID, getCharID())) {
                     mts.createAndAddBurnedInfo(chr, skill);
                 }
                 break;
@@ -227,7 +228,7 @@ public class AffectedArea extends Life {
 
     public void handleCharInside(Char chr) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(tsm.hasAffectedArea(this)) {
+        if (tsm.hasAffectedArea(this)) {
             return;
         }
         tsm.addAffectedArea(this);
@@ -238,29 +239,29 @@ public class AffectedArea extends Life {
         Option o1 = new Option();
         Option o2 = new Option();
         Option o3 = new Option();
-        switch(skillID) {
+        switch (skillID) {
             case Zero.TIME_DISTORTION:
                 tsm.removeAllDebuffs();
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
-                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                tsm.putCharacterStatValue(IndieBooster, o2); // Indie
                 break;
             case BlazeWizard.BURNING_CONDUIT:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(indieDamR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
-                tsm.putCharacterStatValue(IndieDamR, o1); //Indie
+                tsm.putCharacterStatValue(IndieDamR, o1); // Indie
                 o2.nReason = skillID;
                 o2.nValue = si.getValue(indieBooster, slv);
                 o2.tStart = (int) System.currentTimeMillis();
-                tsm.putCharacterStatValue(IndieBooster, o2); //Indie
+                tsm.putCharacterStatValue(IndieBooster, o2); // Indie
                 break;
             case Kanna.BELLFLOWER_BARRIER:
                 o1.nReason = skillID;
                 o1.nValue = si.getValue(bdR, slv);
                 o1.tStart = (int) System.currentTimeMillis();
-                tsm.putCharacterStatValue(IndieBDR, o1); //Indie
+                tsm.putCharacterStatValue(IndieBDR, o1); // Indie
                 break;
             case Kanna.BLOSSOM_BARRIER:
                 o1.nOption = si.getValue(SkillStat.x, slv);
@@ -272,8 +273,8 @@ public class AffectedArea extends Life {
                 tsm.putCharacterStatValue(TerR, o2);
                 break;
             case Aran.MAHAS_DOMAIN:
-                chr.heal((int)(chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
-                chr.healMP((int)(chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
+                chr.heal((int) (chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
+                chr.healMP((int) (chr.getMaxHP() / ((double) 100 / si.getValue(w, slv))));
                 tsm.removeAllDebuffs();
                 break;
             case Thief.SMOKE_SCREEN:
@@ -284,6 +285,12 @@ public class AffectedArea extends Life {
                 break;
             case BeastTamer.PURR_ZONE:
                 chr.heal(si.getValue(hp, slv));
+                break;
+            case Xenon.TEMPORAL_POD:
+                o1.nOption = 2;
+                o1.rOption = skillID;
+                tsm.putCharacterStatValue(OnCapsule, o1);
+                Xenon.temporalPodTimer(chr);
                 break;
         }
         tsm.sendSetStatPacket();

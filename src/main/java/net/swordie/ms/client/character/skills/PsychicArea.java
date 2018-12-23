@@ -1,5 +1,6 @@
 package net.swordie.ms.client.character.skills;
 
+import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.util.Position;
 
 /**
@@ -19,4 +20,20 @@ public class PsychicArea {
     public short skeletonLoop;
     public Position start;
     public int psychicAreaKey;
+    public int time;
+    public boolean success = true;
+
+    public void encode(OutPacket outPacket) {
+        outPacket.encodeByte(success);
+        outPacket.encodeInt(localPsychicAreaKey);
+        outPacket.encodeInt(time);
+        outPacket.encodeInt(skillID);
+        outPacket.encodeShort(slv);
+        outPacket.encodeInt(duration);
+        outPacket.encodeByte(isLeft);
+        outPacket.encodeShort(skeletonFilePathIdx);
+        outPacket.encodeShort(skeletonAniIdx);
+        outPacket.encodeShort(skeletonLoop);
+        outPacket.encodePositionInt(start);
+    }
 }

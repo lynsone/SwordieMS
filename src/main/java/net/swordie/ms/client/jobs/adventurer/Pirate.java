@@ -16,6 +16,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.MoveAbility;
@@ -62,7 +63,8 @@ public class Pirate extends Beginner {
     public static final int SUPERCHARGE = 5110014;
 
     public static final int OCTOPUNCH = 5121007; //Special Attack
-    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_BUCC = 5121013; //Special Attack
+    public static final int NAUTILUS_STRIKE_BUCC_FA = 5120021; // Final Attack
     public static final int DRAGON_STRIKE = 5121001; //Special Attack
     public static final int BUCCANEER_BLAST = 5121016; //Special Attack
     public static final int CROSSBONES = 5121015; //Buff
@@ -86,7 +88,7 @@ public class Pirate extends Beginner {
 
     public static final int QUICKDRAW = 5221021; //Buff
     public static final int PARROTARGETTING = 5221015; //Special Attack
-    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_SAIR = 5221013; //Special Attack
     public static final int MAPLE_WARRIOR_SAIR = 5221000; //Buff
     public static final int JOLLY_ROGER = 5221018; //Buff
     public static final int PIRATE_REVENGE_SAIR = 5220012;
@@ -109,7 +111,7 @@ public class Pirate extends Beginner {
     public static final int LUCK_OF_THE_DIE_DD = 5320007;
     public static final int ANCHOR_AWEIGH = 5321003; //Summon
     public static final int MONKEY_MALITIA = 5321004; //Summon
-    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff TODO Special Buff
+    public static final int NAUTILUS_STRIKE_CANNON = 5321001; //Special Attack / Buff
     public static final int PIRATE_SPIRIT = 5321010; //Buff
     public static final int MAPLE_WARRIOR_CANNON = 5321005; //Buff
     public static final int HEROS_WILL_CANNON = 5321006;
@@ -154,7 +156,7 @@ public class Pirate extends Beginner {
             ROLL_OF_THE_DICE_BUCC_DD,
             CROSSBONES,
             SPEED_INFUSION,
-            TIME_LEAP, //TODO
+            TIME_LEAP,
             MAPLE_WARRIOR_BUCC,
 
             SCURVY_SUMMONS,
@@ -261,9 +263,20 @@ public class Pirate extends Beginner {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Booster, o1);
                 break;
+            case TIME_LEAP:
+                long nextAvailableTime = System.currentTimeMillis() + (si.getValue(time, slv)*1000);
+                chr.getScriptManager().createQuestWithQRValue(chr, GameConstants.TIME_LEAP_QR_KEY, String.valueOf(nextAvailableTime), false);
+                if (chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue() == null
+                        || Long.parseLong(chr.getQuestManager().getQuestById(GameConstants.TIME_LEAP_QR_KEY).getQRValue()) < System.currentTimeMillis()) {
+                    for (int skillId : chr.getSkillCoolTimes().keySet()) {
+                        if (!SkillData.getSkillInfoById(skillId).isNotCooltimeReset() && SkillData.getSkillInfoById(skillId).getHyper() == 0) {
+                            chr.resetSkillCoolTime(skillId);
+                        }
+                    }
+                }
+                break;
             case SPEED_INFUSION:
                 PartyBooster pb = (PartyBooster) tsm.getTSBByTSIndex(TSIndex.PartyBooster);
-                pb.setDynamicTermSet(false);
                 pb.setNOption(-1);
                 pb.setROption(skillID);
                 pb.setCurrentTime((int) System.currentTimeMillis());
@@ -309,6 +322,8 @@ public class Pirate extends Beginner {
 
                 tsm.throwDice(random);
                 tsm.putCharacterStatValue(Dice, o1);
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case ROLL_OF_THE_DICE_BUCC_DD:
             case ROLL_OF_THE_DICE_SAIR_DD:
@@ -341,6 +356,8 @@ public class Pirate extends Beginner {
                 if(isCharged) {
                     updateViperEnergy(tsm.getOption(EnergyCharged).nOption);
                 }
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case MONKEY_MAGIC:
             case MEGA_MONKEY_MAGIC:
@@ -387,6 +404,7 @@ public class Pirate extends Beginner {
                 o1.tOption = si.getValue(time, slv);
                 tsm.putCharacterStatValue(Roulette, o1);
                 giveBarrelRouletteBuff(roulette);
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_CANNON, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_CANNON) * 0.5F));
                 break;
             case BOUNTY_CHASER:
                 o1.nOption = si.getValue(dexX, slv);
@@ -545,30 +563,16 @@ public class Pirate extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case OCTO_CANNON: //Stationary, Attacks
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnAddSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MONKEY_MALITIA: //Stationary, Attacks
                 int[] summons = new int[] {
@@ -580,15 +584,8 @@ public class Pirate extends Beginner {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
-                    summon.setMoveAbility((byte) 0);
+                    summon.setMoveAbility(MoveAbility.Stop);
                     field.spawnSummon(summon);
-
-                    o1.nReason = skillID;
-                    o1.nValue = 1;
-                    o1.summon = summon;
-                    o1.tStart = (int) System.currentTimeMillis();
-                    o1.tTerm = si.getValue(time, slv);
-                    tsm.putCharacterStatValue(IndieEmpty, o1);
                 }
                 break;
             case TURRET_DEPLOYMENT: //Stationary, Attacks
@@ -596,15 +593,8 @@ public class Pirate extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ALL_ABOARD: //Moves, Attacks
                 tsm.removeStatsBySkill(AHOY_MATEYS);
@@ -612,24 +602,18 @@ public class Pirate extends Beginner {
                 // Fallthrough intended
             case SCURVY_SUMMONS: //Moves, Attacks
                 corsairSummons();
+                chr.reduceSkillCoolTime(NAUTILUS_STRIKE_SAIR, (long) (chr.getRemainingCoolTime(NAUTILUS_STRIKE_SAIR) * 0.5F));
                 break;
             case ANCHOR_AWEIGH: //Stationary, Pulls mobs
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 Position position = new Position(chr.isLeft() ? chr.getPosition().getX() - 250 : chr.getPosition().getX() + 250, chr.getPosition().getY());
                 summon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
                 summon.setPosition(position);
                 summon.setSummonTerm(20);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
         }
         tsm.sendSetStatPacket();
@@ -667,15 +651,8 @@ public class Pirate extends Beginner {
             Summon summon = Summon.getSummonBy(chr, random, (byte) 1);
             Field field = chr.getField();
             summon.setFlyMob(false);
-            summon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+            summon.setMoveAbility(MoveAbility.WalkRandom);
             field.spawnSummon(summon);
-
-            o3.nReason = random;
-            o3.nValue = 1;
-            o3.summon = summon;
-            o3.tStart = (int) System.currentTimeMillis();
-            o3.tTerm = 120;
-            tsm.putCharacterStatValue(IndieEmpty, o3);
 
             switch (random) {
                 case 5210015:
@@ -946,7 +923,13 @@ public class Pirate extends Beginner {
                     mts.addStatOptionsAndBroadcast(MobStat.AddDamParty, o1);
                 }
                 break;
-
+            case NAUTILUS_STRIKE_BUCC:
+                o1.nOption = 1;
+                o1.rOption = skillID;
+                o1.tOption = si.getValue(time, slv);
+                tsm.putCharacterStatValue(VenomSnake, o1);
+                tsm.sendSetStatPacket();
+                break;
         }
 
         super.handleAttack(c, attackInfo);
@@ -1104,6 +1087,8 @@ public class Pirate extends Beginner {
         }
         else if(chr.hasSkill(MAJESTIC_PRESENCE)) {
             return MAJESTIC_PRESENCE;
+        } else if (chr.hasSkill(NAUTILUS_STRIKE_BUCC) && tsm.hasStatBySkillId(NAUTILUS_STRIKE_BUCC)) {
+            return NAUTILUS_STRIKE_BUCC_FA;
         }
         return 0;
     }

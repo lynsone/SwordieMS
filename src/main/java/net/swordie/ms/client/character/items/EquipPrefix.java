@@ -62,7 +62,7 @@ public enum EquipPrefix {
     Katana(154),
     Fan(155),
     Lapis(156), // zero
-    Lazuli(157),
+    Lazuli(157), //zero
     ArmCannon(158),
     SkillEffect(160),
     MachineEngine(161),

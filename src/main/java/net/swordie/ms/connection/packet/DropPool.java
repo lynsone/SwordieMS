@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.enums.DropMotionType;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.DropEnterType;
@@ -15,32 +16,31 @@ import net.swordie.ms.util.Position;
 public class DropPool {
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, DropEnterType dropEnterType) {
-        return DropPool.dropEnterField(drop, dropEnterType, 100, 0, 100,
+        return DropPool.dropEnterField(drop, dropEnterType, 100, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false, false);
     }
 
     public static OutPacket dropEnterField(Drop drop, Position dropPosition, int charID, boolean canBePickedUpByPet) {
-        return DropPool.dropEnterField(drop, DropEnterType.Instant, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Instant, 100, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 0, false, canBePickedUpByPet);
     }
 
     public static OutPacket dropEnterFieldCollisionPickUp(Drop drop, Position dropPosition, int charID) {
-        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 100,
                 (byte) 2, dropPosition, charID, dropPosition, 0, true, (short) 0, false,
                 (byte) 0, 1, false, false);
     }
 
     public static OutPacket dropEnterField(Drop drop, Position dropPositionFrom, Position dropPositionTo, int charID,
                                            boolean canBePickedUpByPet) {
-        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 0, 100,
+        return DropPool.dropEnterField(drop, DropEnterType.Floating, 100, 100,
                 (byte) 2, dropPositionTo, charID, dropPositionFrom, 0, true, (short) 0, false,
                 (byte) 0, 0, false, canBePickedUpByPet);
     }
 
-    public static OutPacket dropEnterField(Drop drop, DropEnterType dropEnterType, int rand, int dropMotionType,
-                                           int dropSpeed, byte ownType, Position dropPos, int sourceID,
+    public static OutPacket dropEnterField(Drop drop, DropEnterType dropEnterType, int rand, int dropSpeed, byte ownType, Position dropPos, int sourceID,
                                            Position tempPos, int delay, boolean unkBool, short fallingVY,
                                            boolean fadeInEffect, byte makeType, int collisionPickup,
                                            boolean prepareCollisionPickUp, boolean canBePickedUpByPet) {
@@ -51,7 +51,7 @@ public class DropPool {
         outPacket.encodeInt(drop.getObjectId());
 
         outPacket.encodeByte(drop.isMoney());
-        outPacket.encodeInt(dropMotionType); // 2 = Horizontal, 4 = Vertical movement
+        outPacket.encodeInt(drop.getDropMotionType().ordinal()); // 2 = Horizontal, 4 = Vertical movement
         outPacket.encodeInt(dropSpeed);
         outPacket.encodeInt(rand);
         outPacket.encodeInt(drop.getItem() == null ? drop.getMoney() : drop.getItem().getItemId());

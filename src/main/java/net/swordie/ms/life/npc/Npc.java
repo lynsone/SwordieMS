@@ -182,7 +182,14 @@ public class Npc extends Life {
             chr.write(NpcPool.npcChangeController(this, false, true));
         }
     }
-    
+
+    @Override
+    public void notifyControllerChange(Char controller) {
+        for (Char chr : getField().getChars()) {
+            chr.write(NpcPool.npcChangeController(this, chr == controller));
+        }
+    }
+
     public boolean isMove() {
         return move;
     }

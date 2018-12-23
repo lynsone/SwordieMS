@@ -419,15 +419,8 @@ public class Magician extends Beginner {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Walk.getVal());
+                summon.setMoveAbility(MoveAbility.Walk);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case MAPLE_WARRIOR_FP:
             case MAPLE_WARRIOR_IL:
@@ -588,7 +581,7 @@ public class Magician extends Beginner {
         viralSlime.setFlyMob(false);
         viralSlime.setPosition(position);
         viralSlime.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
-        viralSlime.setMoveAbility(MoveAbility.WalkRandom.getVal());
+        viralSlime.setMoveAbility(MoveAbility.WalkRandom);
         field.spawnAddSummon(viralSlime);
     }
 

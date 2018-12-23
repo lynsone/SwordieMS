@@ -42,7 +42,7 @@ public class ItemData {
         if (ret != null) {
             ret.setQuantity(1);
             ret.setCuttable((short) -1);
-            ret.setItemState((short) ItemState.AmazingHyperUpgradeChecked.getVal());
+            ret.setHyperUpgrade((short) ItemState.AmazingHyperUpgradeChecked.getVal());
             ret.setType(Item.Type.EQUIP);
             ret.setInvType(InvType.EQUIP);
             if (randomizeStats) {
@@ -140,6 +140,10 @@ public class ItemData {
                 options.add(0);
             }
             equip.setOptions(options);
+            short skillsLength = dataInputStream.readShort();
+            for (int i = 0; i < skillsLength; i++) {
+                equip.addItemSkill(new ItemSkill(dataInputStream.readInt(), dataInputStream.readByte()));
+            }
             equip.setFixedGrade(dataInputStream.readInt());
             equip.setSpecialGrade(dataInputStream.readInt());
             equips.put(equip.getItemId(), equip);
@@ -204,6 +208,11 @@ public class ItemData {
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
                 }
+                dataOutputStream.writeShort(equip.getItemSkills().size());
+                for (ItemSkill skill : equip.getItemSkills()) {
+                    dataOutputStream.writeInt(skill.getSkill());
+                    dataOutputStream.writeByte(skill.getSlv());
+                }
                 dataOutputStream.writeInt(equip.getFixedGrade());
                 dataOutputStream.writeInt(equip.getSpecialGrade());
             } catch (IOException e) {
@@ -211,7 +220,6 @@ public class ItemData {
             }
         }
     }
-
 
     public static void loadEquipsFromWz() {
         String wzDir = ServerConstants.WZ_DIR + "/Character.wz";
@@ -329,25 +337,25 @@ public class ItemData {
                                     equip.setAttackSpeed(Integer.parseInt(value));
                                     break;
                                 case "cash":
-                                    equip.setCash(Integer.parseInt(value)!= 0);
+                                    equip.setCash(Integer.parseInt(value) != 0);
                                     break;
                                 case "expireOnLogout":
-                                    equip.setExpireOnLogout(Integer.parseInt(value)!= 0);
+                                    equip.setExpireOnLogout(Integer.parseInt(value) != 0);
                                     break;
                                 case "exItem":
-                                    equip.setExItem(Integer.parseInt(value)!= 0);
+                                    equip.setExItem(Integer.parseInt(value) != 0);
                                     break;
                                 case "notSale":
-                                    equip.setNotSale(Integer.parseInt(value)!= 0);
+                                    equip.setNotSale(Integer.parseInt(value) != 0);
                                     break;
                                 case "only":
-                                    equip.setOnly(Integer.parseInt(value)!= 0);
+                                    equip.setOnly(Integer.parseInt(value) != 0);
                                     break;
                                 case "tradeBlock":
-                                    equip.setTradeBlock(Integer.parseInt(value)!= 0);
+                                    equip.setTradeBlock(Integer.parseInt(value) != 0);
                                     break;
                                 case "fixedPotential":
-                                    equip.setFixedPotential(Integer.parseInt(value)!= 0);
+                                    equip.setFixedPotential(Integer.parseInt(value) != 0);
                                     break;
                                 case "noPotential":
                                     equip.setNoPotential(Integer.parseInt(value) != 0);
@@ -370,16 +378,34 @@ public class ItemData {
                                 case "charmEXP":
                                     equip.setCharmEXP(Integer.parseInt(value));
                                     break;
-                            }
-                            boolean hasOptions = attributes.get("name").equalsIgnoreCase("option");
-                            if (hasOptions) {
-                                for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
-                                    attributes = XMLApi.getAttributes(whichOptionNode);
-                                    int index = Integer.parseInt(attributes.get("name"));
-                                    Node optionNode = XMLApi.getFirstChildByNameBF(whichOptionNode, "option");
-                                    Map<String, String> optionAttr = XMLApi.getAttributes(optionNode);
-                                    options.set(index, Integer.parseInt(optionAttr.get("value")));
-                                }
+                                case "level":
+                                    Node levelCase = XMLApi.getFirstChildByNameBF(n, "case");
+                                    if (levelCase != null) {
+                                        Node case0 = XMLApi.getFirstChildByNameBF(levelCase, "0");
+                                        if (case0 != null) {
+                                            Node case1 = XMLApi.getFirstChildByNameBF(case0, "1");
+                                            if (case1 != null) {
+                                                Node equipmentSkill = XMLApi.getFirstChildByNameBF(case1, "EquipmentSkill");
+                                                if (equipmentSkill != null) {
+                                                    for (Node equipSkill : XMLApi.getAllChildren(equipmentSkill)) {
+                                                        Map<String, String> idAttr = XMLApi.getAttributes(XMLApi.getFirstChildByNameBF(equipSkill, "id"));
+                                                        Map<String, String> levelAttr = XMLApi.getAttributes(XMLApi.getFirstChildByNameBF(equipSkill, "level"));
+                                                        equip.addItemSkill(new ItemSkill(Integer.parseInt(idAttr.get("value")), Byte.parseByte(levelAttr.get("value"))));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case "option":
+                                    for (Node whichOptionNode : XMLApi.getAllChildren(n)) {
+                                        attributes = XMLApi.getAttributes(whichOptionNode);
+                                        int index = Integer.parseInt(attributes.get("name"));
+                                        Node optionNode = XMLApi.getFirstChildByNameBF(whichOptionNode, "option");
+                                        Map<String, String> optionAttr = XMLApi.getAttributes(optionNode);
+                                        options.set(index, Integer.parseInt(optionAttr.get("value")));
+                                    }
+                                    break;
                             }
                             for (int i = 0; i < 7 - options.size(); i++) {
                                 options.add(0);
@@ -1693,8 +1719,8 @@ public class ItemData {
     public static void generateDatFiles() {
         log.info("Started generating item data.");
         long start = System.currentTimeMillis();
-        loadMountItemsFromFile();
         loadEquipsFromWz();
+        loadMountItemsFromFile();
         loadItemsFromWZ();
         loadPetsFromWZ();
         loadItemOptionsFromWZ();

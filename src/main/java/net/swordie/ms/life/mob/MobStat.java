@@ -29,7 +29,7 @@ public enum MobStat {
     SealSkill(23),
 
     Dazzle(24),
-    PCounter(25),
+    PCounter(25), // nOption = % of dmg, mOption = % chance
     MCounter(26),
     RiseByToss(27),
     BodyPressure(28),

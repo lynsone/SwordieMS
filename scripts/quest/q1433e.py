@@ -2,6 +2,7 @@
 
 blackCharm = 4031059
 job = "Berserker"
+sm.setSpeakerID(2020008)
 
 if sm.hasItem(blackCharm, 1):
     sm.sendNext("I am impressed, you surpassed the test. Only few are talented enough.\r\n"
@@ -13,6 +14,6 @@ else:
 
 sm.consumeItem(blackCharm, 1)
 sm.completeQuestNoRewards(parentID)
-sm.sendSayOkay("You are now a #b"+ job +"#k.")
 sm.jobAdvance(131) # Crusader
+sm.sendSayOkay("You are now a #b"+ job +"#k.")
 sm.dispose()

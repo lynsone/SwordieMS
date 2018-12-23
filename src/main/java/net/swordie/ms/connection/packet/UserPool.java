@@ -160,10 +160,10 @@ public class UserPool {
          */
         outPacket.encodeByte(0);
         outPacket.encodeByte(0); // StarPlanetRank::Decode
-        // start CUser::DecodeStarPlanetTrendShopLook
-        outPacket.encodeInt(1); // 0 will go to -1 -> not breaking the loop
+        // CUser::DecodeStarPlanetTrendShopLook not interesting, will break REMOTE_AVATAR_MODIFIED if 1st int is != 0
         outPacket.encodeInt(0);
-        // end CUser::DecodeStarPlanetTrendShopLook
+        outPacket.encodeInt(0);
+        // ~CUser::DecodeStarPlanetTrendShopLook
         outPacket.encodeInt(0); // CUser::DecodeTextEquipInfo
         chr.getFreezeHotEventInfo().encode(outPacket);
         outPacket.encodeInt(chr.getEventBestFriendAID());

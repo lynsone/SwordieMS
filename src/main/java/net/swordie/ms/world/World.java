@@ -76,7 +76,7 @@ public class World {
         return boomUpEventNotice;
     }
 
-    public boolean isStarplanet() {
+    public boolean isStarPlanet() {
         return starplanet;
     }
 

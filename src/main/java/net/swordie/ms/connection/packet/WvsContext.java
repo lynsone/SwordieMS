@@ -25,6 +25,7 @@ import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.util.AntiMacro;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import org.apache.log4j.LogManager;
@@ -49,7 +50,7 @@ public class WvsContext {
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats) {
-        return statChanged(stats, true, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
+        return statChanged(stats, false, (byte) -1, (byte) 0, (byte) 0, (byte) 0, false, 0, 0);
     }
 
     public static OutPacket statChanged(Map<Stat, Object> stats, boolean exclRequestSent, byte mixBaseHairColor,
@@ -214,6 +215,12 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket changeSkillRecordResult(Skill skill) {
+        List<Skill> skills = new ArrayList<>();
+        skills.add(skill);
+        return changeSkillRecordResult(skills, true, false, false, false);
+    }
+
     public static OutPacket changeSkillRecordResult(List<Skill> skills, boolean exclRequestSent, boolean showResult,
                                                     boolean removeLinkSkill, boolean sn) {
         OutPacket outPacket = new OutPacket(OutHeader.CHANGE_SKILL_RECORD_RESULT);
@@ -374,13 +381,12 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket incMoneyMessage(String clientName, int amount, int charID) {
+    public static OutPacket incMoneyMessage(int amount) {
         OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
 
         outPacket.encodeByte(INC_MONEY_MESSAGE.getVal());
         outPacket.encodeInt(amount);
-        outPacket.encodeInt(1);
-        outPacket.encodeString(clientName);
+        outPacket.encodeInt(amount > 0 ? 1 : -1);
 
         return outPacket;
     }
@@ -422,6 +428,17 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket incNonCombatStatEXPMessage(Stat trait, int amount) {
+        OutPacket outPacket = new OutPacket(OutHeader.MESSAGE);
+
+        outPacket.encodeByte(INC_NON_COMBAT_STAT_EXP_MESSAGE.getVal());
+        long mask = 0;
+        mask |= trait.getVal();
+        outPacket.encodeLong(mask);
+        outPacket.encodeInt(amount);
+
+        return outPacket;
+    }
     /**
      * Returns a net.swordie.ms.connection.packet for messages with the following {@link MessageType}:<br>
      * int: <br>
@@ -775,6 +792,16 @@ public class WvsContext {
         return outPacket;
     }
 
+    public static OutPacket whiteCubeResult(Equip equip, MemorialCubeInfo mci) {
+        OutPacket outPacket = new OutPacket(OutHeader.WHITE_ADDTIONAL_CUBE_RESULT);
+
+        outPacket.encodeLong(equip.getSerialNumber());
+        mci.encode(outPacket);
+        outPacket.encodeInt(equip.getBagIndex());
+
+        return outPacket;
+    }
+
     public static OutPacket broadcastMsg(BroadcastMsg broadcastMsg) {
         OutPacket outPacket = new OutPacket(OutHeader.BROADCAST_MSG);
 
@@ -958,6 +985,42 @@ public class WvsContext {
         outPacket.encodeInt(type.getVal());
         outPacket.encodeInt(arg1);
         outPacket.encodeInt(arg2);
+
+        return outPacket;
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType) {
+        return antiMacroResult(image, notificationType, antiMacroType, (byte) 0, (byte) 1);
+    }
+
+    public static OutPacket antiMacroResult(final byte[] image, byte notificationType, byte antiMacroType, byte first, byte refreshAntiMacroCount) {
+        OutPacket outPacket = new OutPacket(OutHeader.ANTI_MACRO_RESULT);
+
+        outPacket.encodeByte(notificationType);
+        outPacket.encodeByte(antiMacroType);
+
+        if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes.getVal()) {
+            outPacket.encodeByte(first);
+            outPacket.encodeByte(refreshAntiMacroCount);
+
+            if (image == null) {
+                outPacket.encodeInt(0);
+            } else {
+                outPacket.encodeInt(image.length);
+                outPacket.encodeArr(image);
+            }
+        } else if (notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Fail.getVal() ||
+                notificationType == AntiMacro.AntiMacroResultType.AntiMacroRes_Success.getVal()) {
+            outPacket.encodeString(""); // unused?
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket setPassenserRequest(int requestorChrId) {
+        OutPacket outPacket = new OutPacket(OutHeader.SET_PASSENSER_REQUEST);
+
+        outPacket.encodeInt(requestorChrId);
 
         return outPacket;
     }

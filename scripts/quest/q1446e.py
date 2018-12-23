@@ -1,7 +1,7 @@
 #   [Job Adv] (Lv.60)   Way of the Outlaw
 
 blackCharm = 4031059
-job = "Outlaw"
+job = "Blade Lord"
 
 if sm.hasItem(blackCharm, 1):
     sm.sendNext("I am impressed, you surpassed the test. Only few are talented enough.\r\n"
@@ -14,5 +14,5 @@ else:
 sm.consumeItem(blackCharm, 1)
 sm.completeQuestNoRewards(parentID)
 sm.sendSayOkay("You are now a #b"+ job +"#k.")
-sm.jobAdvance(521) # Outlaw
+sm.jobAdvance(533) # Blade Lord
 sm.dispose()

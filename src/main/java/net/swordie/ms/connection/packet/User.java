@@ -3,7 +3,9 @@ package net.swordie.ms.connection.packet;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.enums.ChatUserType;
+import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.util.Position;
 
 /**
  * Created on 2/3/2018.
@@ -120,6 +122,40 @@ public class User {
         outPacket.encodeInt(charID);
         outPacket.encodeByte(success);
         outPacket.encodeInt(itemID);
+
+        return outPacket;
+    }
+
+    public static OutPacket createPsychicLock(int charID, PsychicLock pl) {
+        OutPacket outPacket = new OutPacket(OutHeader.CREATE_PSYCHIC_LOCK);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeByte(pl.success);
+        pl.encode(outPacket);
+
+
+        return outPacket;
+    }
+
+    public static OutPacket followCharacter(int driverChrId, boolean transferField, Position position) {
+        OutPacket outPacket = new OutPacket(OutHeader.FOLLOW_CHARACTER);
+
+        outPacket.encodeInt(driverChrId);
+        if (driverChrId < 0) {
+            outPacket.encodeByte(transferField);
+            if (transferField) {
+                outPacket.encodePositionInt(position);
+            }
+        }
+
+        return outPacket;
+    }
+
+    public static OutPacket userHitByCounter(int charID, int damage) {
+        OutPacket outPacket = new OutPacket(OutHeader.USER_HIT_BY_COUNTER);
+
+        outPacket.encodeInt(charID);
+        outPacket.encodeInt(damage);
 
         return outPacket;
     }

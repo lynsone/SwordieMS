@@ -28,11 +28,14 @@ public class NpcScriptInfo {
 	private boolean angelicBuster;
 	private boolean zeroBeta;
 	private int dlgType;
+	private int defaultSelect;
+	private String[] selectText;
 	private int templateID;
 
 	public NpcScriptInfo deepCopy() {
 		NpcScriptInfo nsi = new NpcScriptInfo();
 		if (options != null) {
+			nsi.options = new int[options.length];
 			System.arraycopy(options, 0, nsi.options, 0, options.length);
 		}
 		nsi.speakerType = speakerType;
@@ -60,6 +63,8 @@ public class NpcScriptInfo {
 		nsi.angelicBuster = angelicBuster;
 		nsi.zeroBeta = zeroBeta;
 		nsi.dlgType = dlgType;
+		nsi.defaultSelect = defaultSelect;
+		nsi.selectText = selectText;
 		nsi.templateID = templateID;
 		return nsi;
 	}
@@ -248,6 +253,21 @@ public class NpcScriptInfo {
         this.dlgType = dlgType;
     }
 
+	public void setDefaultSelect(int defaultSelect) {
+		this.defaultSelect = defaultSelect;
+	}
+
+	public int getDefaultSelect() {
+		return defaultSelect;
+	}
+
+	public void setSelectText(String[] selectText) {
+		this.selectText = selectText;
+	}
+
+	public String[] getSelectText() {
+		return selectText;
+	}
     public void addParam(Param param) {
 		setParam((byte) (getParam() | param.getVal()));
 	}

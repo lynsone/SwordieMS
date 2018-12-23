@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.enums.FieldOption;
 import net.swordie.ms.enums.FieldType;
 import net.swordie.ms.world.field.*;
 import net.swordie.ms.life.Life;
@@ -41,6 +42,7 @@ public class FieldData {
                     dataOutputStream.writeInt(field.getFieldType().getVal());
                     dataOutputStream.writeBoolean(field.isTown());
                     dataOutputStream.writeBoolean(field.isSwim());
+                    dataOutputStream.writeLong(field.getFieldLimit());
                     dataOutputStream.writeInt(field.getReturnMap());
                     dataOutputStream.writeInt(field.getForcedReturn());
                     dataOutputStream.writeDouble(field.getMobRate());
@@ -119,9 +121,12 @@ public class FieldData {
                         dataOutputStream.writeInt(l.getMobAliveReq());
                     }
                     dataOutputStream.writeShort(field.getDirectionInfo().size());
-                    for (Map.Entry<Integer, String> direction : field.getDirectionInfo().entrySet()) {
+                    for (Map.Entry<Integer, List<String>> direction : field.getDirectionInfo().entrySet()) {
                         dataOutputStream.writeInt(direction.getKey());
-                        dataOutputStream.writeUTF(direction.getValue());
+                        dataOutputStream.writeShort(direction.getValue().size());
+                        for (String directionInfo : direction.getValue()) {
+                            dataOutputStream.writeUTF(directionInfo);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -156,6 +161,9 @@ public class FieldData {
                             break;
                         case "swim":
                             field.setSwim(Integer.parseInt(value) != 0);
+                            break;
+                        case "fieldLimit":
+                            field.setFieldLimit(Long.parseLong(value));
                             break;
                         case "returnMap":
                             field.setReturnMap(Integer.parseInt(value));
@@ -483,11 +491,11 @@ public class FieldData {
                         for (Node n : XMLApi.getAllChildren(idNode)) {
                             // there are more values but only the client use it we need only eventQ
                             if (XMLApi.getNamedAttribute(n, "name").equals("EventQ")) {
+                                List<String> directionInfo = new ArrayList<>();
                                 for (Node event : XMLApi.getAllChildren(n)) {
-                                    if (XMLApi.getNamedAttribute(event, "name").equals("0")) {
-                                        field.addDirectionInfo(Integer.parseInt(name), XMLApi.getNamedAttribute(event, "value"));
-                                    }
+                                    directionInfo.add(XMLApi.getNamedAttribute(event, "value"));
                                 }
+                                field.addDirectionInfo(Integer.parseInt(name), directionInfo);
                             }
                         }
                     }
@@ -528,6 +536,7 @@ public class FieldData {
             field.setFieldType(FieldType.getByVal(dataInputStream.readInt()));
             field.setTown(dataInputStream.readBoolean());
             field.setSwim(dataInputStream.readBoolean());
+            field.setFieldLimit(dataInputStream.readLong());
             field.setReturnMap(dataInputStream.readInt());
             field.setForcedReturn(dataInputStream.readInt());
             field.setMobRate(dataInputStream.readDouble());
@@ -623,7 +632,13 @@ public class FieldData {
             }
             short directionSize = dataInputStream.readShort();
             for (int j = 0; j < directionSize; j++) {
-                field.addDirectionInfo(dataInputStream.readInt(), dataInputStream.readUTF());
+                int key = dataInputStream.readInt();
+                List<String> directions = new ArrayList<>();
+                short directionsSize = dataInputStream.readShort();
+                for (int k = 0; k < directionsSize; k++) {
+                    directions.add(dataInputStream.readUTF());
+                }
+                field.addDirectionInfo(key, directions);
             }
             getFields().add(field);
         } catch (IOException e) {
@@ -649,6 +664,7 @@ public class FieldData {
         copy.setFieldType(field.getFieldType());
         copy.setTown(field.isTown());
         copy.setSwim(field.isSwim());
+        copy.setFieldLimit(field.getFieldLimit());
         copy.setReturnMap(field.getReturnMap());
         copy.setForcedReturn(field.getForcedReturn());
         copy.setMobRate(field.getMobRate());

@@ -1,6 +1,7 @@
 package net.swordie.ms.client;
 
 import net.swordie.ms.Server;
+import net.swordie.ms.client.anticheat.OffenseManager;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
@@ -8,11 +9,14 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.AccountType;
 import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.FileTime;
+import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
@@ -33,12 +37,11 @@ public class Account {
     private int id;
     private String name;
     private String password;
-    @Column(name = "accountTypeMask")
-    private int accountType;
+    @Enumerated(EnumType.ORDINAL)
+    private AccountType accountType;
     private int age;
     private int vipGrade;
     private int nBlockReason;
-    private int gmLevel;
     private byte gender;
     private byte msg2;
     private byte purchaseExp;
@@ -50,7 +53,7 @@ public class Account {
     private String pic;
     private int characterSlots;
     @Convert(converter = FileTimeConverter.class)
-    private FileTime creationDate;
+    private FileTime creationDate = FileTime.currentTime();
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
@@ -70,17 +73,20 @@ public class Account {
     private Set<Char> characters = new HashSet<>();
     @Transient
     private Char currentChr;
-    private int NXCredit;
+    private int nxCredit;
     private int maplePoints;
-    private int NXPrepaid;
+    private int nxPrepaid;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
     @Convert(converter = FileTimeConverter.class)
-    private FileTime banExpireDate;
+    private FileTime banExpireDate = FileTime.fromType(FileTime.Type.ZERO_TIME);
     private String banReason;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "offensemanager")
+    private OffenseManager offenseManager;
 
-    public Account(String name, String password, int accountId, String pic, int accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
+    public Account(String name, String password, int accountId, String pic, AccountType accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
                    byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
                    byte gradeCode, String censoredNxLoginID, int characterSlots, FileTime creationDate) {
         this.name = name;
@@ -104,13 +110,12 @@ public class Account {
         this.monsterCollection = new MonsterCollection();
         this.friends = new HashSet<>();
         this.trunk = new Trunk((byte) 20);
-        setManager();
     }
 
     public Account(String id, int accountId) {
-        this(id, null, accountId, null, 0, 0, 0, 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3,
-                0, false, (byte) 0, "", 16,
-                FileTime.currentTime());
+        this(id, null, accountId, null, AccountType.Player, 0, 0, 0,
+                (byte) 0, (byte) 0, (byte) 0, (byte) 3, 0, false, (byte) 0,
+                "", 16, FileTime.currentTime());
     }
 
     public Account(){
@@ -132,32 +137,8 @@ public class Account {
         return id;
     }
 
-    public int getAccountType() {
+    public AccountType getAccountType() {
         return accountType;
-    }
-
-    public void setManager() {
-        accountType |= 1 << 4;
-    }
-
-    public boolean isManager() {
-        return accountType >> 4 == 1;
-    }
-
-    public void setTester() {
-        accountType |= 1 << 5;
-    }
-
-    public boolean isTester() {
-        return accountType >> 5 == 1;
-    }
-
-    public void setSubTester() {
-        accountType |= 1 << 13;
-    }
-
-    public boolean isSubTester() {
-        return accountType >> 13 == 1;
     }
 
     public int getAge() {
@@ -212,7 +193,7 @@ public class Account {
         return nBlockReason;
     }
 
-    public void setAccountType(int accountType) {
+    public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
     }
 
@@ -258,14 +239,6 @@ public class Account {
             picStatus = PicStatus.ENTER_PIC;
         }
         return picStatus;
-    }
-
-    public int getGmLevel() {
-        return gmLevel;
-    }
-
-    public void setGmLevel(int gmLevel) {
-        this.gmLevel = gmLevel;
     }
 
     public void setVipGrade(int vipGrade) {
@@ -404,12 +377,12 @@ public class Account {
         this.trunk = trunk;
     }
 
-    public int getNXCredit() {
-        return NXCredit;
+    public int getNxCredit() {
+        return nxCredit;
     }
 
-    public void setNXCredit(int nxCredit) {
-        this.NXCredit = nxCredit;
+    public void setNxCredit(int nxCredit) {
+        this.nxCredit = nxCredit;
     }
 
     public int getMaplePoints() {
@@ -420,12 +393,12 @@ public class Account {
         this.maplePoints = maplePoints;
     }
 
-    public int getNXPrepaid() {
-        return NXPrepaid;
+    public int getNxPrepaid() {
+        return nxPrepaid;
     }
 
-    public void setNXPrepaid(int nxPrepaid) {
-        this.NXPrepaid = nxPrepaid;
+    public void setNxPrepaid(int nxPrepaid) {
+        this.nxPrepaid = nxPrepaid;
     }
 
     public void addLinkSkill(LinkSkill linkSkill) {
@@ -453,7 +426,10 @@ public class Account {
     }
 
     public void addNXCredit(int credit) {
-        setNXCredit(getNXCredit() + credit);
+        int newCredit = getNxCredit() + credit;
+        if (newCredit >= 0) {
+            setNxCredit(newCredit);
+        }
     }
 
     public void deductNXCredit(int credit) {
@@ -461,7 +437,10 @@ public class Account {
     }
 
     public void addMaplePoints(int points) {
-        setMaplePoints(getMaplePoints() + points);
+        int newPoints = getMaplePoints() + points;
+        if (newPoints >= 0) {
+            setMaplePoints(newPoints);
+        }
     }
 
     public void deductMaplePoints(int points) {
@@ -469,7 +448,10 @@ public class Account {
     }
 
     public void addNXPrepaid(int prepaid) {
-        addNXPrepaid(getNXPrepaid() + prepaid);
+        int newPrepaid = getNxPrepaid() + prepaid;
+        if (newPrepaid >= 0) {
+            addNXPrepaid(newPrepaid);
+        }
     }
 
     public void deductNXPrepaid(int prepaid) {
@@ -509,11 +491,26 @@ public class Account {
     }
 
     public Char getCharById(int id) {
-        return getCharacters().stream().filter(charr -> charr.getId() == id).findAny().orElse(null);
+        return Util.findWithPred(getCharacters(), chr -> chr.getId() == id);
+    }
+
+    public Char getCharByName(String name) {
+        return Util.findWithPred(getCharacters(), chr -> chr.getName().equals(name));
     }
 
     public void unstuck() {
         Server.getInstance().removeAccount(this);
         DatabaseManager.saveToDB(this);
+    }
+
+    public OffenseManager getOffenseManager() {
+        if (offenseManager == null) {
+            setOffenseManager(new OffenseManager());
+        }
+        return offenseManager;
+    }
+
+    public void setOffenseManager(OffenseManager offenseManager) {
+        this.offenseManager = offenseManager;
     }
 }

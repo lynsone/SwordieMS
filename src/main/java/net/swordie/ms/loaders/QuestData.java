@@ -423,6 +423,9 @@ public class QuestData {
                         case "pop":
                             quest.addReward(new QuestPopReward(Integer.parseInt(value)));
                             break;
+                        case "buffItemID":
+                            quest.addReward(new QuestBuffItemReward(Integer.parseInt(value), status));
+                            break;
                         case "item":
                             for (Node itemNode : XMLApi.getAllChildren(rewardNode)) {
                                 QuestItemReward qir = new QuestItemReward();

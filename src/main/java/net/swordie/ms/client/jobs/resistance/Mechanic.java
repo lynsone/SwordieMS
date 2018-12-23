@@ -16,10 +16,7 @@ import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.enums.ChatType;
-import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.MoveAbility;
-import net.swordie.ms.enums.TSIndex;
+import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.Mob;
@@ -240,17 +237,10 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
 
                 if(supportUnitTimer != null && !supportUnitTimer.isDone()) {
                     supportUnitTimer.cancel(true);
@@ -261,48 +251,27 @@ public class Mechanic extends Citizen {
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
             case ROCK_N_SHOCK:      //TODO TeslaCoil
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(true);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 //field.spawnAddSummon(summon);
-/*
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
-*/
+
                 break;
             case BOTS_N_TOTS:
                 summon = Summon.getSummonBy(c.getChr(), skillID, slv);
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
-                summon.setAssistType((byte) 0);
+                summon.setMoveAbility(MoveAbility.Stop);
+                summon.setAssistType(AssistType.None);
                 summon.setAttackActive(false);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
 
                 if(botsNTotsTimer != null && !botsNTotsTimer.isDone()) {
                     botsNTotsTimer.cancel(true);
@@ -356,7 +325,7 @@ public class Mechanic extends Citizen {
             subSummon.setCurFoothold((short) chr.getField().findFootHoldBelow(position).getId());
             subSummon.setPosition(position);
             subSummon.setAttackActive(false);
-            subSummon.setMoveAbility(MoveAbility.WalkRandom.getVal());
+            subSummon.setMoveAbility(MoveAbility.WalkRandom);
 
             chr.getField().spawnAddSummon(subSummon);
 

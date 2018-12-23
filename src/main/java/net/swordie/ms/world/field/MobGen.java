@@ -1,5 +1,6 @@
 package net.swordie.ms.world.field;
 
+import net.swordie.ms.constants.CustomConstants;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
@@ -31,13 +32,19 @@ public class MobGen extends Life {
     /**
      * Spawns a Mob at the position of this MobGen.
      */
-    public void spawnMob(Field field) {
+    public void spawnMob(Field field, boolean buffed) {
         Mob mob = getMob().deepCopy();
         Position pos = mob.getHomePosition();
         mob.setPosition(pos.deepCopy());
         mob.setHomePosition(pos.deepCopy());
+        if (buffed) {
+            mob.setMaxHp(mob.getMaxHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
+            mob.setHp(mob.getHp() * CustomConstants.BUFFED_MOB_HP_MULTIPLIER);
+            mob.setScale(CustomConstants.BUFFED_MOB_SCALE);
+            mob.setPad(mob.getPad() + 250);
+            mob.setMad(mob.getMad() + 250);
+        }
         field.spawnLife(mob, null);
-        mob.broadcastSpawnPacket(null);
         setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
         setHasSpawned(true);
     }

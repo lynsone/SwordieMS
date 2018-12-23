@@ -1,18 +1,14 @@
 package net.swordie.ms.client.character.commands;
 
-import net.swordie.ms.client.character.Char;
+import net.swordie.ms.enums.AccountType;
 
-/**
- * Created on 12/22/2017.
- */
-public interface Command {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    char prefix = '@';
-    static void execute(Char chr, String[] args){
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Command {
 
-    }
+    String[] names();
+    AccountType requiredType();
 
-	static char getPrefix() {
-        return prefix;
-    }
 }

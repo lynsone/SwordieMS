@@ -82,7 +82,9 @@ public enum SpecStat {
     charmEXP,
     inflation,
     morph,
-    ;
+    repeatEffect,
+    recipe,
+    reqSkillLevel;
     public static SpecStat getSpecStatByName(String name) {
         if("int".equalsIgnoreCase(name)) {
             return inte;

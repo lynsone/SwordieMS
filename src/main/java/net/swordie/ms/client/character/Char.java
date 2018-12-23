@@ -6,6 +6,7 @@ import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.alliance.AllianceResult;
+import net.swordie.ms.client.anticheat.OffenseManager;
 import net.swordie.ms.client.character.avatar.AvatarData;
 import net.swordie.ms.client.character.avatar.AvatarLook;
 import net.swordie.ms.client.character.cards.MonsterBookInfo;
@@ -22,8 +23,10 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -34,12 +37,15 @@ import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
+import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.db.InlinedIntArrayConverter;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -65,6 +71,7 @@ import net.swordie.ms.world.field.Clock;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.FieldInstanceType;
 import net.swordie.ms.world.field.Portal;
+import net.swordie.ms.world.field.fieldeffect.FieldEffect;
 import net.swordie.ms.world.gach.GachaponManager;
 import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
@@ -72,8 +79,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.persistence.*;
+import java.awt.*;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -81,6 +91,7 @@ import java.util.stream.Collectors;
 
 import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
+import static net.swordie.ms.enums.ChatType.SpeakerChannel;
 import static net.swordie.ms.enums.ChatType.SystemNotice;
 import static net.swordie.ms.enums.InvType.EQUIP;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
@@ -114,11 +125,11 @@ public class Char {
 
 	@JoinColumn(name = "equippedInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 52);
+	private Inventory equippedInventory = new Inventory(EQUIPPED, 52);
 
 	@JoinColumn(name = "equipInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equipInventory = new Inventory(InvType.EQUIP, 52);
+	private Inventory equipInventory = new Inventory(EQUIP, 52);
 
 	@JoinColumn(name = "consumeInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -189,6 +200,12 @@ public class Char {
 
 	private int partyID = 0; // Just for DB purposes
 	private int previousFieldID;
+
+	@ElementCollection
+	@CollectionTable(name = "skillcooltimes", joinColumns = @JoinColumn(name = "charID"))
+	@MapKeyColumn(name = "skillid")
+	@Column(name = "nextusabletime")
+	private Map<Integer, Long> skillCoolTimes;
 
 	@Transient
 	private CharacterPotentialMan potentialMan;
@@ -334,8 +351,6 @@ public class Char {
 	@Transient
 	private ScheduledFuture timeLimitTimer;
 	@Transient
-	private Map<Integer, Long> skillCoolTimes = new HashMap<>();
-	@Transient
 	private int deathCount = -1;
 	@Transient
 	private long runeStoneCooldown;
@@ -358,6 +373,29 @@ public class Char {
 	private boolean battleRecordOn;
 	@Transient
 	private long nextRandomPortalTime;
+    @Transient
+    private Map<Integer, Integer> currentDirectionNode;
+	@Transient
+	private String lieDetectorAnswer = "";
+	@Transient
+	private long lastLieDetector = 0;
+	// TOOD: count and log lie detector passes and fails
+    @Transient
+	private boolean tutor = false;
+	@Transient
+	private int transferField = 0;
+	@Transient
+	private int transferFieldReq = 0;
+	@Transient
+	private String blessingOfFairy = null;
+	@Transient
+	private String blessingOfEmpress = null;
+	@Transient
+	private Map<Integer, Integer> hyperPsdSkillsCooltimeR = new HashMap<>();
+	@Transient
+	private boolean isInvincible = false;
+	@Convert(converter = InlinedIntArrayConverter.class)
+	private List<Integer> quickslotKeys;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -395,6 +433,7 @@ public class Char {
 		characterStat.setSkin(skin);
 		characterStat.setFace(items.length > 0 ? items[0] : 0);
 		characterStat.setHair(items.length > 1 ? items[1] : 0);
+		characterStat.setSubJob(curSelectedSubJob);
 		setFieldInstanceType(CHANNEL);
 		ranking = new Ranking();
 		pets = new ArrayList<>();
@@ -408,6 +447,7 @@ public class Char {
 		friends = new HashSet<>();
 		monsterBookInfo = new MonsterBookInfo();
 		potentialMan = new CharacterPotentialMan(this);
+		skillCoolTimes = new HashMap<>();
 		familiars = new HashSet<>();
 		hyperrockfields = new int[]{
 				999999999,
@@ -429,6 +469,7 @@ public class Char {
 				999999999,
 		};
 		monsterParkCount = 0;
+		currentDirectionNode = new HashMap<>();
 		potentials = new HashSet<>();
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
@@ -1139,7 +1180,7 @@ public class Char {
 				if (getZeroInfo() == null) {
 					initZeroInfo();
 				}
-				getZeroInfo().encode(outPacket); //ZeroInfo::Decode
+				getZeroInfo().encode(outPacket); // ZeroInfo::Decode
 			}
 		}
 		if (mask.isInMask(DBChar.ShopBuyLimit)) {
@@ -1404,11 +1445,19 @@ public class Char {
 	}
 
 	private String getBlessingOfEmpress() {
-		return null;
+		return blessingOfEmpress;
+	}
+
+	public void setBlessingOfEmpress(String blessingOfEmpress) {
+		this.blessingOfEmpress = blessingOfEmpress;
 	}
 
 	private String getBlessingOfFairy() {
-		return null;
+		return blessingOfFairy;
+	}
+
+	public void setBlessingOfFairy(String blessingOfFairy) {
+		this.blessingOfFairy = blessingOfFairy;
 	}
 
 	public void setCombatOrders(int combatOrders) {
@@ -1547,23 +1596,6 @@ public class Char {
 		return field;
 	}
 
-	public void resetStats() {
-		int total = getStat(Stat.str) + getStat(Stat.dex) + getStat(Stat.inte) + getStat(Stat.luk) + getStat(Stat.ap);
-		total -= 16;// 4 str, dex, luk, int
-		setStat(Stat.str, 4);
-		setStat(Stat.dex, 4);
-		setStat(Stat.inte, 4);
-		setStat(Stat.luk, 4);
-		setStat(Stat.ap, total);
-		Map<Stat, Object> stats = new HashMap<>();
-		stats.put(Stat.str, (short) getStat(Stat.str));
-		stats.put(Stat.dex, (short) getStat(Stat.dex));
-		stats.put(Stat.inte, (short) getStat(Stat.inte));
-		stats.put(Stat.luk, (short) getStat(Stat.luk));
-		stats.put(Stat.ap, (short) getStat(Stat.ap));
-		write(WvsContext.statChanged(stats));
-	}
-
 	/**
 	 * Sets the job of this Char with a given id. Does nothing if the id is invalid.
 	 * If it is valid, will set this Char's job, add all Skills that the job should have by default,
@@ -1579,12 +1611,9 @@ public class Char {
 		getAvatarData().getCharacterStat().setJob(id);
 		setJobHandler(JobManager.getJobById((short) id, this));
 		List<Skill> skills = SkillData.getSkillsByJob((short) id);
-		skills.forEach(this::addSkill);
+		skills.forEach(skill -> addSkill(skill, true));
 		getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
 		notifyChanges();
-		if (id == 5100) {// should be for all beginner jobs after first advance, for now I am handling after each tutorial I code.
-			resetStats();
-		}
 	}
 
 	public short getJob() {
@@ -1613,7 +1642,7 @@ public class Char {
 	public void addSpToJobByCurrentLevel(int num) {
 		CharacterStat cs = getAvatarData().getCharacterStat();
 		if (JobConstants.isExtendSpJob(getJob())) {
-			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getLevel());
+			byte jobLevel = (byte) JobConstants.getJobLevelByCharLevel(getJob(), getLevel());
 			num += cs.getExtendSP().getSpByJobLevel(jobLevel);
 			getAvatarData().getCharacterStat().getExtendSP().setSpToJobLevel(jobLevel, num);
 		} else {
@@ -1632,11 +1661,27 @@ public class Char {
 
 	/**
 	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
-	 * with the same id.
+	 * with the same id. Removes the skill if the given skill's id is 0.
 	 *
 	 * @param skill The Skill this Char should get.
 	 */
 	public void addSkill(Skill skill) {
+		addSkill(skill, false);
+	}
+
+	/**
+	 * Adds a {@link Skill} to this Char. Changes the old Skill if the Char already has a Skill
+	 * with the same id. Removes the skill if the given skill's id is 0.
+	 *
+	 * @param skill The Skill this Char should get.
+	 * @param addRegardlessOfLevel if this is true, the skill will not be removed from the char, even if the cur level
+	 *                             of the given skill is 0.
+	 */
+	public void addSkill(Skill skill, boolean addRegardlessOfLevel) {
+		if (!addRegardlessOfLevel && skill.getCurrentLevel() == 0) {
+			removeSkill(skill.getSkillId());
+			return;
+		}
 		skill.setCharId(getId());
 		boolean isPassive = SkillConstants.isPassiveSkill(skill.getSkillId());
 		boolean isChanged;
@@ -1659,6 +1704,36 @@ public class Char {
 	}
 
 	/**
+	 * Removes a Skill from this Char.
+	 * @param skillID the id of the skill that should be removed
+	 */
+	public void removeSkill(int skillID) {
+		Skill skill = Util.findWithPred(getSkills(), s -> s.getSkillId() == skillID);
+		if (skill != null) {
+			if (SkillConstants.isPassiveSkill(skillID)) {
+				removeFromBaseStatCache(skill);
+			}
+			getSkills().remove(skill);
+
+		}
+	}
+
+    /**
+     * Removes a Skill from this Char.
+     * Sends change skill record to remove the skill from the client.
+     * @param skillID the id of the skill that should be removed
+     */
+	public void removeSkillAndSendPacket(int skillID) {
+        Skill skill = getSkill(skillID);
+        if (skill != null) {
+            removeSkill(skillID);
+            skill.setCurrentLevel(-1);
+            skill.setMasterLevel(-1);
+            write(WvsContext.changeSkillRecordResult(Collections.singletonList(skill), true, false, false, false));
+        }
+    }
+
+	/**
 	 * Initializes the BaseStat cache, by going through all the needed passive stat changers.
 	 */
 	public void initBaseStats() {
@@ -1671,7 +1746,8 @@ public class Char {
 		stats.put(BaseStat.mdd, 9L);
 		stats.put(BaseStat.acc, 11L);
 		stats.put(BaseStat.eva, 8L);
-		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill(skill.getSkillId())).
+		stats.put(BaseStat.buffTimeR, 100L);
+		getSkills().stream().filter(skill -> SkillConstants.isPassiveSkill_NoPsdSkillsCheck(skill.getSkillId())).
 				forEach(this::addToBaseStatCache);
 	}
 
@@ -1682,8 +1758,15 @@ public class Char {
 	 */
 	public void addToBaseStatCache(Skill skill) {
 		SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-		Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
-		stats.forEach(this::addBaseStat);
+		if(SkillConstants.isPassiveSkill(skill.getSkillId())) {
+			Map<BaseStat, Integer> stats = si.getBaseStatValues(this, skill.getCurrentLevel());
+			stats.forEach(this::addBaseStat);
+		}
+		if (si.isPsd() && si.getSkillStatInfo().containsKey(SkillStat.coolTimeR)) {
+			for(int psdSkill : si.getPsdSkills()) {
+				getHyperPsdSkillsCooltimeR().put(psdSkill, si.getValue(SkillStat.coolTimeR, 1));
+			}
+		}
 	}
 
 	/**
@@ -1734,6 +1817,21 @@ public class Char {
 			}
 		}
 		return createIfNull ? createAndReturnSkill(id) : null;
+	}
+
+	public int getSkillLevel(int skillID) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			return skill.getCurrentLevel();
+		}
+		return 0;
+	}
+
+	public int getRemainRecipeUseCount(int recipeID) {
+		if (SkillConstants.isMakingSkillRecipe(recipeID)) {
+			return getSkillLevel(recipeID);
+		}
+		return 0;
 	}
 
 	/**
@@ -1927,6 +2025,7 @@ public class Char {
 		switch (charStat) {
 			case level:
 			case skin:
+			case fatigue:
 				stats.put(charStat, (byte) getStat(charStat));
 				break;
 			case str:
@@ -1934,6 +2033,7 @@ public class Char {
 			case inte:
 			case luk:
 			case ap:
+			case subJob:
 				stats.put(charStat, (short) getStat(charStat));
 				break;
 			case hp:
@@ -2041,10 +2141,28 @@ public class Char {
 		al.removeItem(itemID);
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
-		if (getTemporaryStatManager().hasStat(SoulMP)) {
+		if (getTemporaryStatManager().hasStat(SoulMP) && ItemConstants.isWeapon(item.getItemId())) {
 			getTemporaryStatManager().removeStat(SoulMP, false);
 			getTemporaryStatManager().removeStat(FullSoulMP, false);
 			getTemporaryStatManager().sendResetStatPacket();
+		}
+        List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(item.getItemId()).getItemSkills()) {
+            Skill skill = getSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(0);
+            removeSkill(itemSkill.getSkill());
+            skill.setCurrentLevel(-1); // workaround to remove skill from window without a cc
+            skills.add(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(item.getItemId(), getJob());
+		if (equippedSummonSkill != 0) {
+			getField().removeSummon(equippedSummonSkill, getId());
+
+            getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
+            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(RepeatEffect).rOption);
 		}
 	}
 
@@ -2053,10 +2171,10 @@ public class Char {
 	 *
 	 * @param item The Item to equip.
 	 */
-	public void equip(Item item) {
+	public boolean equip(Item item) {
 		Equip equip = (Equip) item;
 		if (equip.hasSpecialAttribute(EquipSpecialAttribute.Vestige)) {
-			return;
+			return false;
 		}
 		if (equip.isEquipTradeBlock()) {
 			equip.setTradeBlock(true);
@@ -2079,9 +2197,29 @@ public class Char {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
 			equip.addAttribute(EquipAttribute.NoNonCombatStatGain);
 		}
+		List<Skill> skills = new ArrayList<>();
+        for (ItemSkill itemSkill : ItemData.getEquipById(equip.getItemId()).getItemSkills()) {
+            Skill skill = SkillData.getSkillDeepCopyById(itemSkill.getSkill());
+            byte slv = itemSkill.getSlv();
+            // support for Tower of Oz rings
+            if (equip.getLevel() > 0) {
+                slv = (byte) Math.min(equip.getLevel(), skill.getMaxLevel());
+            }
+            skill.setCurrentLevel(slv);
+            skills.add(skill);
+            addSkill(skill);
+        }
+        if (skills.size() > 0) {
+            getClient().write(WvsContext.changeSkillRecordResult(skills, true, false, false, false));
+        }
+		int equippedSummonSkill = ItemConstants.getEquippedSummonSkillItem(equip.getItemId(), getJob());
+        if (equippedSummonSkill != 0) {
+			getJobHandler().handleSkill(getClient(), equippedSummonSkill, (byte) 1, null);
+		}
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
+		return true;
 	}
 
 	public TemporaryStatManager getTemporaryStatManager() {
@@ -2240,6 +2378,7 @@ public class Char {
 		setField(toField);
 		toField.addChar(this);
 		getAvatarData().getCharacterStat().setPortal(portal.getId());
+		setPosition(new Position(portal.getX(), portal.getY()));
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
 		if (characterData) {
@@ -2268,14 +2407,17 @@ public class Char {
 		}
 		toField.spawnLifesForChar(this);
 
+		if (JobConstants.isEvan(getJob()) && getJob() != JobConstants.JobEnum.EVAN_NOOB.getJobId()) {
+			((Evan) getJobHandler()).spawnMir();
+		}
+		if (JobConstants.isKanna(getJob())) {
+			((Kanna) getJobHandler()).spawnHaku();
+		}
 		if (tsm.hasStat(IndieEmpty)) {
 			for (Iterator<Option> iterator = tsm.getCurrentStats().getOrDefault(IndieEmpty, new ArrayList<>()).iterator(); iterator.hasNext(); ) {
 				Summon summon = iterator.next().summon;
 				if (summon != null) {
-					if (summon.getMoveAbility() == MoveAbility.WalkClone.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Walk.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Fly.getVal() ||
-							summon.getMoveAbility() == MoveAbility.Jaguar.getVal()) {
+					if (summon.getMoveAbility().changeFieldWithOwner()) {
 						summon.setObjectId(getField().getNewObjectID());
 						getField().spawnSummon(summon);
 					} else {
@@ -2310,7 +2452,7 @@ public class Char {
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
 		}
-		if (getFieldInstanceType() == FieldInstanceType.CHANNEL) {
+		if (getFieldInstanceType() == CHANNEL) {
 			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
@@ -2384,6 +2526,18 @@ public class Char {
 	 */
 	public void addExpNoMsg(long amount) {
 		addExp(amount, null);
+	}
+
+	public void addTraitExp(Stat traitStat, int amount) {
+		if (amount <= 0) {
+			return;
+		}
+		Map<Stat, Object> stats = new HashMap<>();
+		addStat(traitStat, amount);
+		stats.put(traitStat, getStat(traitStat));
+		stats.put(Stat.dayLimit, getAvatarData().getCharacterStat().getNonCombatStatDayLimit());
+		write(WvsContext.statChanged(stats));
+		write(WvsContext.incNonCombatStatEXPMessage(traitStat, amount));
 	}
 
 	/**
@@ -2530,6 +2684,7 @@ public class Char {
 			addMoney(drop.getMoney());
 			getQuestManager().handleMoneyGain(drop.getMoney());
 			write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
+			dispose();
 			return true;
 		} else {
 			Item item = drop.getItem();
@@ -2771,7 +2926,7 @@ public class Char {
 	}
 
 	public int getTotalChuc() {
-		return getInventoryByType(InvType.EQUIPPED).getItems().stream().mapToInt(i -> ((Equip) i).getChuc()).sum();
+		return getInventoryByType(EQUIPPED).getItems().stream().mapToInt(i -> ((Equip) i).getChuc()).sum();
 	}
 
 	public int getDriverID() {
@@ -3101,6 +3256,7 @@ public class Char {
 	}
 
 	public void logout() {
+		punishLieDetectorEvasion();
 		log.info("Logging out " + getName());
 		if (getField().getForcedReturn() != GameConstants.NO_MAP_ID) {
 			setFieldID(getField().getForcedReturn());
@@ -3154,7 +3310,7 @@ public class Char {
 	}
 
 	public int calculateBulletIDForAttack() {
-		Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.Weapon);
+		Item weapon = getEquippedInventory().getFirstItemByBodyPart(Weapon);
 		if (weapon == null) {
 			return 0;
 		}
@@ -3525,6 +3681,36 @@ public class Char {
 		return skillCoolTimes;
 	}
 
+	public void addSkillCoolTime(int skillId, long nextusabletime) {
+		getSkillCoolTimes().put(skillId, nextusabletime);
+	}
+
+	public void removeSkillCoolTime(int skillId) {
+		getSkillCoolTimes().remove(skillId);
+	}
+
+	public void resetSkillCoolTime(int skillId) {
+		if(hasSkillOnCooldown(skillId)) {
+			addSkillCoolTime(skillId, 0);
+			write(UserLocal.skillCooltimeSetM(skillId, 0));
+		}
+	}
+
+	public void reduceSkillCoolTime(int skillId, long amountInMS) {
+		if (hasSkillOnCooldown(skillId)) {
+			long nextUsableTime = getSkillCoolTimes().get(skillId);
+			addSkillCoolTime(skillId, nextUsableTime - amountInMS);
+			write(UserLocal.skillCooltimeSetM(skillId, (int) ((nextUsableTime - amountInMS) - System.currentTimeMillis() < 0 ? 0 : (nextUsableTime - amountInMS) - System.currentTimeMillis())));
+		}
+	}
+
+	public long getRemainingCoolTime(int skillId) {
+		if (hasSkillOnCooldown(skillId)) {
+			return getSkillCoolTimes().getOrDefault(skillId, System.currentTimeMillis()) - System.currentTimeMillis();
+		}
+		return 0L;
+	}
+
 	/**
 	 * Checks whether or not a skill is currently on cooldown.
 	 *
@@ -3566,8 +3752,16 @@ public class Char {
 		if (si != null) {
 			int cdInSec = si.getValue(SkillStat.cooltime, slv);
 			int cdInMillis = cdInSec > 0 ? cdInSec * 1000 : si.getValue(SkillStat.cooltimeMS, slv);
-			getSkillCoolTimes().put(skillID, System.currentTimeMillis() + cdInMillis);
-			if (!hasSkillCDBypass()) {
+			int alteredcd = getJobHandler().alterCooldownSkill(skillID);
+			if (alteredcd >= 0) {
+				cdInMillis = alteredcd;
+			}
+			// RuneStone of Skill
+			if (getTemporaryStatManager().hasStatBySkillId(RuneStone.LIBERATE_THE_RUNE_OF_SKILL) && cdInMillis > 5000 && !si.isNotCooltimeReset()) {
+				cdInMillis = 5000;
+			}
+			if (!hasSkillCDBypass() && cdInMillis > 0) {
+				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
 			}
 		}
@@ -3627,7 +3821,7 @@ public class Char {
 	 */
 	public void addSkill(int skillID, int currentLevel, int masterLevel) {
 		Skill skill = SkillData.getSkillDeepCopyById(skillID);
-		if (skill == null) {
+		if (skill == null && !SkillConstants.isMakingSkillRecipe(skillID)) {
 			log.error("No such skill found.");
 			return;
 		}
@@ -3954,5 +4148,313 @@ public class Char {
 
 	public void setNextRandomPortalTime(long nextRandomPortalTime) {
 		this.nextRandomPortalTime = nextRandomPortalTime;
+	}
+
+	public void clearCurrentDirectionNode() { this.currentDirectionNode.clear(); }
+
+	public int getCurrentDirectionNode(int node) {
+		Integer direction = currentDirectionNode.getOrDefault(node, null);
+		if (direction == null) {
+			currentDirectionNode.put(node, 0);
+		}
+		return currentDirectionNode.get(node);
+	}
+
+	public void increaseCurrentDirectionNode(int node) {
+		Integer direction = currentDirectionNode.getOrDefault(node, null);
+		if (direction == null) {
+			currentDirectionNode.put(node, 1);
+		} else {
+			currentDirectionNode.put(node, direction + 1);
+		}
+	}
+
+	public void punishLieDetectorEvasion() {
+		if (getLieDetectorAnswer().length() > 0) {
+			failedLieDetector();
+		}
+	}
+
+	public String getLieDetectorAnswer() {
+		return lieDetectorAnswer;
+	}
+
+	public void setLieDetectorAnswer(String answer) {
+		lieDetectorAnswer = answer;
+	}
+
+	public void failedLieDetector() {
+		setLieDetectorAnswer("");
+		chatMessage(SpeakerChannel, "You have failed the Lie Detector test.");
+
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.AntiMacroResultType.AntiMacroRes_Fail.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
+
+		// TODO: handle fail
+	}
+
+	public void passedLieDetector() {
+		setLieDetectorAnswer("");
+		chatMessage(SpeakerChannel, "You have passed the Lie Detector test!");
+
+		getClient().write(WvsContext.antiMacroResult(null, AntiMacro.AntiMacroResultType.AntiMacroRes_Success.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
+
+		// TODO: handle pass
+	}
+
+	public boolean sendLieDetector() {
+		return sendLieDetector(false);
+	}
+
+	public boolean sendLieDetector(boolean force) {
+		// LD ran too recently (15 min)
+		if (!force && lastLieDetector != 0 && System.currentTimeMillis() - lastLieDetector < 900_000L) {
+			return false;
+		}
+
+		// TODO: don't allow more than 3 refreshes
+
+		lieDetectorAnswer = "";
+		String font = AntiMacro.FONTS[Util.getRandom(AntiMacro.FONTS.length - 1)];
+
+		String options = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+		for (int i = 1; i <= 6; i++) {
+			if (Util.getRandom(1) == 0) {
+				options = options.toUpperCase();
+			} else {
+				options = options.toLowerCase();
+			}
+
+			lieDetectorAnswer += options.charAt(Util.getRandom(options.length() - 1));
+		}
+
+		try {
+			AntiMacro am = new AntiMacro(font, lieDetectorAnswer);
+			lastLieDetector = System.currentTimeMillis();
+
+			byte[] image = am.generateImage(196, 44, Color.BLACK, AntiMacro.getRandomColor());
+			getClient().write(WvsContext.antiMacroResult(image, AntiMacro.AntiMacroResultType.AntiMacroRes.getVal(), AntiMacro.AntiMacroType.AntiMacroFieldRequest.getVal()));
+		} catch (IOException|FontFormatException e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+		return true;
+	}
+
+    public OffenseManager getOffenseManager() {
+        return getAccount().getOffenseManager();
+    }
+
+	/**
+	 * Applies the mp consumption of a skill.
+	 * @param skillID the skill's id
+	 * @param slv the current skill level
+	 * @return whether the consumption was successful (unsuccessful = not enough mp)
+	 */
+	public boolean applyMpCon(int skillID, byte slv) {
+		int curMp = getStat(Stat.mp);
+		SkillInfo si = SkillData.getSkillInfoById(skillID);
+		if (si == null) {
+			return true;
+		}
+		int mpCon = si.getValue(SkillStat.mpCon, slv);
+		boolean hasEnough = curMp >= mpCon;
+		if (hasEnough) {
+			addStatAndSendPacket(Stat.mp, -mpCon);
+		}
+		return hasEnough;
+	}
+
+	public boolean hasTutor() {
+		return tutor;
+	}
+
+	public void hireTutor(boolean set) {
+		tutor = set;
+		write(UserLocal.hireTutor(set));
+	}
+
+	/**
+	 * Shows tutor automated message (the client is taking the message information from wz).
+	 * @param id the id of the message.
+	 * @param duration message duration
+	 */
+	public void tutorAutomatedMsg(int id, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(id, duration));
+	}
+
+	/**
+	 * Shows tutor custom message (you decide which message the tutor will say).
+	 * @param message your custom message
+	 * @param width size of the message box
+	 * @param duration message duration
+	 */
+	public void tutorCustomMsg(String message, int width, int duration) {
+		if (!tutor) {
+			hireTutor(true);
+		}
+		write(UserLocal.tutorMsg(message, width, duration));
+	}
+
+	public void setTransferField(int fieldID) {
+		this.transferField = fieldID;
+		this.transferFieldReq = fieldID == 0 ? 0 : getField().getId();
+	}
+
+	public int getTransferField() {
+		return transferField;
+	}
+
+	public int getTransferFieldReq() {
+		return transferFieldReq;
+	}
+
+	public void setMakingSkillLevel(int skillID, int level) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel((level << 24) + getMakingSkillProficiency(skillID));
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getMakingSkillLevel(int skillID) {
+		return (getSkillLevel(skillID) >> 24) <= 0 ? 0 : getSkillLevel(skillID) >> 24;
+	}
+
+	public void setMakingSkillProficiency(int skillID, int proficiency) {
+		Skill skill = getSkill(skillID);
+		if (skill != null) {
+			skill.setCurrentLevel((getMakingSkillLevel(skillID) << 24) + proficiency);
+			addSkill(skill);
+			write(WvsContext.changeSkillRecordResult(skill));
+		}
+	}
+
+	public int getMakingSkillProficiency(int skillID) {
+		return (getSkillLevel(skillID) & 0xFFFFFF) <= 0 ? 0 : getSkillLevel(skillID) & 0xFFFFFF;
+	}
+
+	public void addMakingSkillProficiency(int skillID, int amount) {
+		int makingSkillID = SkillConstants.recipeCodeToMakingSkillCode(skillID);
+		int level = getMakingSkillLevel(makingSkillID);
+
+		int neededExp = SkillConstants.getNeededProficiency(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getMakingSkillProficiency(makingSkillID);
+		if (exp >= neededExp) {
+			write(UserLocal.chatMsg(ChatType.GameDesc, "You can't gain any more Herbalism mastery until you level your skill."));
+			write(UserLocal.chatMsg(ChatType.GameDesc, "See the appropriate NPC in Ardentmill to level up."));
+			setMakingSkillProficiency(makingSkillID, neededExp);
+			return;
+		}
+		int newExp = exp + amount;
+		write(UserLocal.chatMsg(ChatType.GameDesc, SkillConstants.getMakingSkillName(makingSkillID) + "'s mastery increased. (+" + amount + ")"));
+		if (newExp >= neededExp) {
+			write(UserLocal.noticeMsg("You've accumulated " + SkillConstants.getMakingSkillName(makingSkillID) + " mastery. See an NPC in town to level up.", true));
+			setMakingSkillProficiency(makingSkillID, neededExp);
+		} else {
+			setMakingSkillProficiency(makingSkillID, newExp);
+		}
+	}
+
+	public void makingSkillLevelUp(int skillID) {
+		int level = getMakingSkillLevel(skillID);
+		int neededExp = SkillConstants.getNeededProficiency(level);
+		if (neededExp <= 0) {
+			return;
+		}
+		int exp = getMakingSkillProficiency(skillID);
+		if (exp >= neededExp) {
+			setMakingSkillProficiency(skillID, 0);
+			setMakingSkillLevel(skillID, level + 1);
+			Stat trait = Stat.craftEXP;
+			switch (skillID) {
+				case 92000000:
+					trait = Stat.senseEXP;
+					break;
+				case 92010000:
+					trait = Stat.willEXP;
+					break;
+			}
+			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
+			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+		}
+	}
+
+	public void addNx(int nx) {
+		getAccount().addNXCredit(nx);
+		chatScriptMessage("You have gained " + nx + " NX.");
+	}
+
+	public void initBlessingSkillNames() {
+		Account account = getAccount();
+		Char fairyChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& chr.getLevel() >= 10
+					&& (fairyChar == null || chr.getLevel() > fairyChar.getLevel())) {
+				fairyChar = chr;
+			}
+		}
+		if (fairyChar != null) {
+			setBlessingOfFairy(fairyChar.getName());
+		}
+		Char empressChar = null;
+		for (Char chr : account.getCharacters()) {
+			if (!chr.equals(this)
+					&& (JobConstants.isCygnusKnight(chr.getJob()) || JobConstants.isMihile(chr.getJob())
+					&& chr.getLevel() >= 5
+					&& (empressChar == null || chr.getLevel() > empressChar.getLevel()))) {
+				empressChar = chr;
+			}
+		}
+		if (empressChar != null) {
+			setBlessingOfEmpress(empressChar.getName());
+		}
+	}
+
+	public void initBlessingSkills() {
+		Char fairyChar = getAccount().getCharByName(getBlessingOfFairy());
+		if (fairyChar != null) {
+			addSkill(SkillConstants.getFairyBlessingByJob(getJob()),
+					Math.min(20, fairyChar.getLevel() / 10), 20);
+		}
+		Char empressChar = getAccount().getCharByName(getBlessingOfEmpress());
+		if (empressChar != null) {
+			addSkill(SkillConstants.getEmpressBlessingByJob(getJob()),
+					Math.min(30, empressChar.getLevel() / 5), 30);
+		}
+	}
+
+	public Map<Integer, Integer> getHyperPsdSkillsCooltimeR() {
+		return hyperPsdSkillsCooltimeR;
+	}
+
+	public void setHyperPsdSkillsCooltimeR(Map<Integer, Integer> hyperPsdSkillsCooltimeR) {
+		this.hyperPsdSkillsCooltimeR = hyperPsdSkillsCooltimeR;
+	}
+
+	public boolean isInvincible() {
+		return isInvincible;
+	}
+
+	public void setInvincible(boolean invincible) {
+		isInvincible = invincible;
+	}
+
+	public void setQuickslotKeys(List<Integer> quickslotKeys) {
+		this.quickslotKeys = quickslotKeys;
+	}
+
+	public List<Integer> getQuickslotKeys() {
+		return quickslotKeys;
 	}
 }

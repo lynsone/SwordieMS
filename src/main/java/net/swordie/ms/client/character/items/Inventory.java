@@ -79,6 +79,7 @@ public class Inventory {
 
     public int getFirstOpenSlot() {
         int oldIndex = 0;
+        sortItemsByIndex();
         for (Item item : getItems()) {
             // items are always sorted by bag index
             if (item.getBagIndex() - oldIndex > 1) {

@@ -7,12 +7,12 @@ import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.cygnus.ThunderBreaker;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Phantom;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.resistance.Demon;
-import net.swordie.ms.enums.SkillType;
 import net.swordie.ms.loaders.SkillData;
 import org.apache.log4j.Logger;
 
@@ -43,6 +43,11 @@ public class SkillConstants {
 
     public static final byte PASSIVE_HYPER_JOB_LEVEL = 6;
     public static final byte ACTIVE_HYPER_JOB_LEVEL = 7;
+
+    public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
+    public static final int MAKING_SKILL_MASTER_LEVEL = 11;
+    public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
+
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
@@ -119,7 +124,7 @@ public class SkillConstants {
         return (prefix >= 800000 && prefix <= 800099) || prefix == 8001;
     }
 
-    private static boolean isMakingSkillRecipe(int recipeId) {
+    public static boolean isMakingSkillRecipe(int recipeId) {
         boolean result = false;
         if (recipeId / 1000000 != 92 || recipeId % 10000 == 1) {
             int v1 = 10000 * (recipeId / 10000);
@@ -1019,7 +1024,7 @@ public class SkillConstants {
     public static int getLinkSkillByJob(short job) {
         if (JobConstants.isCannonShooter(job)) { // Pirate Blessing
             return 80000000;
-        } else if (JobConstants.isKoC(job)) { // Cygnus Blessing
+        } else if (JobConstants.isCygnusKnight(job)) { // Cygnus Blessing
             return 80000070;
         } else if (JobConstants.isMercedes(job)) { // Elven Blessing
             return 80001040;
@@ -1073,53 +1078,14 @@ public class SkillConstants {
         return skillID;
     }
 
+    public static boolean isPassiveSkill_NoPsdSkillsCheck(int skillId) {
+        SkillInfo si = SkillData.getSkillInfoById(skillId);
+        return si != null && si.isPsd();
+    }
+
     public static boolean isPassiveSkill(int skillId) {
         SkillInfo si = SkillData.getSkillInfoById(skillId);
-        return si != null && si.getPsdSkills().size()  == 0
-                && !isActiveSkillWithPassiveType(skillId)
-                && (si.getType() == SkillType.SKILL_TYPE_PASSIVE.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_PASSIVE_EX.getVal()
-                || si.getType() == SkillType.SKILL_TYPE_MOVE_JUMP.getVal())
-                || SkillConstants.isPassiveSkillImplementedAsBuff(skillId)
-                ;
-    }
-
-    private static boolean isPassiveSkillImplementedAsBuff(int skillId) {
-        switch (skillId) {
-            //Warrior
-            case 1000003: // Iron Body
-            case 1120014: // Power Stance --v
-            case 1220017:
-            case 1320017: // Power Stance --^
-
-
-
-            //Thief
-            case 4110008: // Enveloping Darkness --v
-            case 4330008:
-            case 14110026:
-            case 4210013:
-            case 14110009: // Enveloping Darkness --^
-            case 4120014: // Dark Harmony
-            case 4310005: // Channel Karma
-            case 4200009: // Channel Karma
-            case 4200010: // Shield Mastery (Shad)
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Helper function for a list of skills that have type 50 (passive), but are actually buffs.
-     * @param skillId the skill id to check
-     * @return if the skill is active, while having a passive type
-     */
-    private static boolean isActiveSkillWithPassiveType(int skillId) {
-        switch (skillId) {
-            case 25121131: // Spirit bond max
-                return true;
-        }
-        return false;
+        return si != null && si.isPsd() && si.getPsdSkills().size() == 0;
     }
 
     public static boolean isHyperstatSkill(int skillID) {
@@ -1276,8 +1242,215 @@ public class SkillConstants {
             case 5311010:
             case 5711021:
             case 22171063:
+            case 22141012:
+            case ThunderBreaker.GALE:
+            case ThunderBreaker.TYPHOON:
+            case Demon.DEMON_CRY:
                 return true;
         }
         return false;
+    }
+
+    public static boolean isMatching(int rootId, int job) {
+        boolean matchingStart = job / 100 == rootId / 100;
+        boolean matching = matchingStart;
+        if (matchingStart && rootId % 100 != 0) {
+            // job path must match
+            matching = (rootId % 100) / 10 == (job % 100) / 10;
+        }
+        return matching;
+    }
+
+    // is_skill_from_item(signed int nSkillID)
+    public static boolean isSkillFromItem(int skillID) {
+        switch (skillID) {
+            case 80011123: // New Destiny
+            case 80011247: // Dawn Shield
+            case 80011248: // Dawn Shield
+            case 80011249: // Divine Guardian
+            case 80011250: // Divine Shield
+            case 80011251: // Divine Brilliance
+            case 80011261: // Monolith
+            case 80011295: // Scouter
+            case 80011346: // Ribbit Ring
+            case 80011347: // Krrr Ring
+            case 80011348: // Rawr Ring
+            case 80011349: // Pew Pew Ring
+            case 80011475: // Elunarium Power (ATT & M. ATT)
+            case 80011476: // Elunarium Power (Skill EXP)
+            case 80011477: // Elunarium Power (Boss Damage)
+            case 80011478: // Elunarium Power (Ignore Enemy DEF)
+            case 80011479: // Elunarium Power (Crit Rate)
+            case 80011480: // Elunarium Power (Crit Damage)
+            case 80011481: // Elunarium Power (Status Resistance)
+            case 80011482: // Elunarium Power (All Stats)
+            case 80011492: // Firestarter Ring
+            case 80001768: // Rope Lift
+            case 80001705: // Rope Lift
+            case 80001941: // Scouter
+            case 80010040: // Altered Fate
+                return true;
+        }
+        // Tower of Oz skill rings
+        return (skillID >= 80001455 && skillID <= 80001479);
+    }
+
+    public static int getHyperPassiveSkillSpByLv(int level) {
+        // 1 sp per 10 levels, starting at 140, ending at 220
+        return level >= 140 && level <= 220 && level % 10 == 0 ? 1 : 0;
+    }
+
+    public static int getHyperActiveSkillSpByLv(int level) {
+        return level == 150 || level == 170 || level == 200 ? 1 : 0;
+    }
+
+    public static int getNoviceSkillRoot(short job) {
+        if (job / 100 == 22 || job == 2001) {
+            return JobConstants.JobEnum.EVAN_NOOB.getJobId();
+        }
+        if (job / 100 == 23 || job == 2002) {
+            return JobConstants.JobEnum.MERCEDES.getJobId();
+        }
+        if (job / 100 == 24 || job == 2003) {
+            return JobConstants.JobEnum.PHANTOM.getJobId();
+        }
+        if (JobConstants.isDemon(job)) {
+            return JobConstants.JobEnum.DEMON_SLAYER.getJobId();
+        }
+        if (JobConstants.isMihile(job)) {
+            return JobConstants.JobEnum.NAMELESS_WARDEN.getJobId();
+        }
+        if (JobConstants.isLuminous(job)) {
+            return JobConstants.JobEnum.LUMINOUS.getJobId();
+        }
+        if (JobConstants.isAngelicBuster(job)) {
+            return JobConstants.JobEnum.ANGELIC_BUSTER.getJobId();
+        }
+        if (JobConstants.isXenon(job)) {
+            return JobConstants.JobEnum.XENON.getJobId();
+        }
+        if (JobConstants.isShade(job)) {
+            return JobConstants.JobEnum.SHADE.getJobId();
+        }
+        if (JobConstants.isKinesis(job)) {
+            return JobConstants.JobEnum.KINESIS_0.getJobId();
+        }
+        if (JobConstants.isBlaster(job)) {
+            return JobConstants.JobEnum.CITIZEN.getJobId();
+        }
+        if (JobConstants.isHayato(job)) {
+            return JobConstants.JobEnum.HAYATO.getJobId();
+        }
+        if (JobConstants.isKanna(job)) {
+            return JobConstants.JobEnum.KANNA.getJobId();
+        }
+        return 1000 * (job / 1000);
+    }
+
+    public static int getNoviceSkillFromRace(int skillID) {
+        if (skillID == 50001215 || skillID == 10001215) {
+            return 1005;
+        }
+        if (isCommonSkill(skillID) || (skillID >= 110001500 && skillID <= 110001504)) {
+            return skillID;
+        }
+        if (isNoviceSkill(skillID)) {
+            return skillID % 10000;
+        }
+        return 0;
+    }
+
+    public static int getBuffSkillItem(int buffSkillID) {
+        int novice = getNoviceSkillFromRace(buffSkillID);
+        switch (novice) {
+            // Angelic Blessing
+            case 86:
+                return 2022746;
+            // Dark Angelic Blessing
+            case 88:
+                return 2022747;
+            // Angelic Blessing
+            case 91:
+                return 2022764;
+            // White Angelic Blessing
+            case 180:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80000086:
+                return 2023189;
+            // White Angelic Blessing
+            case 80000155:
+                return 2022823;
+            // Lightning God's Blessing
+            case 80010065:
+                return 2023189;
+            // Goddess' Guard
+            case 80011150:
+                return 1112932;
+        }
+        return 0;
+    }
+
+    public static String getMakingSkillName(int skillID) {
+        switch (skillID) {
+            case 92000000:
+                return "Herbalism";
+            case 92010000:
+                return "Mining";
+            case 92020000:
+                return "Smithing";
+            case 92030000:
+                return "Accessory Crafting";
+            case 92040000:
+                return "Alchemy";
+        }
+        return null;
+    }
+
+    public static int recipeCodeToMakingSkillCode(int skillID) {
+        return 10000 * (skillID / 10000);
+    }
+
+    public static int getNeededProficiency(int level) {
+        if (level <= 0 || level >= MAKING_SKILL_EXPERT_LEVEL) {
+            return 0;
+        }
+        return ((100 * level * level) + (level * 400)) / 2;
+    }
+
+    public static boolean isSynthesizeRecipe(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeID % 10000 == 9001;
+    }
+
+    public static boolean isDecompositionRecipeScroll(int recipeID) {
+        return isMakingSkillRecipe(recipeID)
+                && recipeCodeToMakingSkillCode(recipeID) == 92040000
+                && recipeID - 92040000 >= 9003
+                && recipeID - 92040000 <= 9006;
+    }
+
+    public static boolean isDecompositionRecipeCube(int recipeID) {
+        return isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049002;
+    }
+
+    public static boolean isDecompositionRecipe(int recipeID) {
+        if (isMakingSkillRecipe(recipeID) && recipeCodeToMakingSkillCode(recipeID) == 92040000 && recipeID == 92049000
+         || isDecompositionRecipeScroll(recipeID)
+         || isDecompositionRecipeScroll(recipeID)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static int getFairyBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0012, where xxxx is the "0th" job
+        return beginJob * 10000 + 12;
+    }
+
+    public static int getEmpressBlessingByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx0073, where xxxx is the "0th" job
+        return beginJob * 10000 + 73;
     }
 }

@@ -93,6 +93,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                     c.getChr().logout();
                 }
                 break;
+            case EXCEPTION_LOG:
+                LoginHandler.handleExceptionLog(c, inPacket);
+                break;
             case USER_ACTIVATE_NICK_ITEM:
                 WorldHandler.handleUserActiveNickItem(c, inPacket);
                 break;
@@ -134,6 +137,12 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_MACRO_SYS_DATA_MODIFIED:
                 WorldHandler.handleUserMacroSysDataModified(c, inPacket);
+                break;
+            case USER_ANTI_MACRO_QUESTION_RESULT:
+                WorldHandler.handleUserAntiMacroQuestionResult(c, inPacket);
+                break;
+            case USER_ANTI_MACRO_REFRESH_REQUEST:
+                WorldHandler.handleUserAntiMacroRefreshResult(c, inPacket);
                 break;
             case USER_ACTIVATE_DAMAGE_SKIN:
                 WorldHandler.handleUserActivateDamageSkin(c, inPacket);
@@ -405,19 +414,19 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 WorldHandler.handleRequestArrowPlatterObj(chr, inPacket);
                 break;
             case USER_FLAME_ORB_REQUEST:
-                WorldHandler.handleUserFlameOrbRequest(c, inPacket);
+                WorldHandler.handleUserFlameOrbRequest(chr, inPacket);
                 break;
             case CREATE_PSYCHIC_LOCK:
-                WorldHandler.handleCreatePsychicLock(c, inPacket);
+                WorldHandler.handleCreatePsychicLock(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_LOCK:
-                WorldHandler.handleReleasePsychicLock(c, inPacket);
+                WorldHandler.handleReleasePsychicLock(chr, inPacket);
                 break;
             case CREATE_KINESIS_PSYCHIC_AREA:
-                WorldHandler.handleCreateKinesisPsychicArea(c, inPacket);
+                WorldHandler.handleCreateKinesisPsychicArea(chr, inPacket);
                 break;
             case RELEASE_PSYCHIC_AREA:
-                WorldHandler.handleReleasePsychicArea(c, inPacket);
+                WorldHandler.handleReleasePsychicArea(chr, inPacket);
                 break;
             case MOB_MOVE:
                 WorldHandler.handleMoveMob(c, inPacket);
@@ -466,6 +475,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case FOX_MAN_ACTION_SET_USE_REQUEST:
                 WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
+                break;
+            case QUICKSLOT_KEY_MAPPED_MODIFIED:
+                WorldHandler.handleQuickslotKeyMappedModified(chr, inPacket);
                 break;
             case DIRECTION_NODE_COLLISION:
                 WorldHandler.handleDirectionNodeCollision(c, inPacket);
@@ -640,6 +652,24 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_MEDAL_REISSUE_REQUEST:
                 WorldHandler.handleUserMedalReissueRequest(chr, inPacket);
+                break;
+            case BROADCAST_EFFECT_TO_SPLIT:
+                WorldHandler.handleBroadcastEffectToSplit(chr, inPacket);
+                break;
+            case BROADCAST_ONE_TIME_ACTION_TO_SPLIT:
+                WorldHandler.handleBroadcastOneTimeActionToSplit(chr, inPacket);
+                break;
+            case MAKING_SKILL_REQUEST:
+                WorldHandler.handleMakingSkillRequest(chr, inPacket);
+                break;
+            case USER_RECIPE_OPEN_ITEM_USE_REQUEST:
+                WorldHandler.handleUserRecipeOpenItemUseRequest(chr, inPacket);
+                break;
+            case USER_FOLLOW_CHARACTER_REQUEST:
+                WorldHandler.handleUserFollowCharacterRequest(chr, inPacket);
+                break;
+            case SET_PASSENSER_RESULT:
+                WorldHandler.handleSetPassenserResult(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);

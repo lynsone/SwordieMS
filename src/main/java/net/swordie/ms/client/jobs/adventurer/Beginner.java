@@ -84,6 +84,12 @@ public class Beginner extends Job {
     public void setCharCreationStats(Char chr) {
         super.setCharCreationStats(chr);
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
-        cs.setPosMap(4000011); // Maple Road : Maple Tree Hill
+        if (chr.getSubJob() == 1) {
+            cs.setPosMap(103050900);
+        } else if (chr.getSubJob() == 2) {
+            cs.setPosMap(3000600);
+        } else {
+            cs.setPosMap(4000011);
+        }
     }
 }

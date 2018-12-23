@@ -2,6 +2,7 @@ package net.swordie.ms;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -22,6 +23,8 @@ import net.swordie.ms.util.container.Tuple;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,7 +72,7 @@ public class Server extends Properties {
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
-		worldList.add(new World(1, "Je Moeder", 3));
+		worldList.add(new World(1, "Je Moeder", GameConstants.CHANNELS_PER_WORLD));
 		long startCashShop = System.currentTimeMillis();
 		initCashShop();
 		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startCashShop) + "ms");
@@ -84,6 +87,10 @@ public class Server extends Properties {
 			}
 		}
 		log.info(String.format("Finished loading server in %dms", System.currentTimeMillis() - startNow));
+		new Thread(() -> {
+			// jvm warmup
+			new ScriptEngineManager().getEngineByName("python");
+		}).start();
 	}
 
 	private void checkAndCreateDat() {

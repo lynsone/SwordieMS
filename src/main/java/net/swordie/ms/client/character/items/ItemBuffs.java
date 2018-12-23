@@ -206,6 +206,9 @@ public class ItemBuffs {
                 case morph:
                     tsm.putCharacterStatValue(Morph, o);
                     break;
+                case repeatEffect:
+                    tsm.putCharacterStatValue(RepeatEffect, o);
+                    break;
             }
         }
         tsm.sendSetStatPacket();

@@ -404,4 +404,8 @@ public class Life extends Observable {
     public void broadcastLeavePacket() {
         // Life itself doesn't have a leave packet
     }
+
+    public void notifyControllerChange(Char controller) {
+        // Life doesn't have a controller
+    }
 }

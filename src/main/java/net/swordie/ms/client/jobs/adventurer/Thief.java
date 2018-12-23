@@ -17,6 +17,7 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.AssistType;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.enums.MoveAbility;
@@ -301,8 +302,8 @@ public class Thief extends Beginner {
                     field = c.getChr().getField();
                     summon.setFlyMob(false);
                     summon.setMoveAction((byte) 0);
-                    summon.setMoveAbility((byte) 0);
-                    summon.setAssistType((byte) 0);
+                    summon.setMoveAbility(MoveAbility.Stop);
+                    summon.setAssistType(AssistType.None);
                     summon.setAttackActive(false);
                     summon.setAvatarLook(chr.getAvatarData().getAvatarLook());
                     summon.setMaxHP(si.getValue(x, slv));
@@ -318,15 +319,8 @@ public class Thief extends Beginner {
                 field = c.getChr().getField();
                 summon.setFlyMob(false);
                 summon.setMoveAction((byte) 0);
-                summon.setMoveAbility(MoveAbility.Stop.getVal());
+                summon.setMoveAbility(MoveAbility.Stop);
                 field.spawnSummon(summon);
-
-                o1.nReason = skillID;
-                o1.nValue = 1;
-                o1.summon = summon;
-                o1.tStart = (int) System.currentTimeMillis();
-                o1.tTerm = si.getValue(time, slv);
-                tsm.putCharacterStatValue(IndieEmpty, o1);
                 break;
 
             case EPIC_ADVENTURE_DB:
@@ -676,6 +670,8 @@ public class Thief extends Beginner {
                 }
                 break;
             case SUDDEN_RAID_DB:
+                chr.reduceSkillCoolTime(FINAL_CUT, (long) (chr.getRemainingCoolTime(FINAL_CUT) * 0.2F));
+                // Fallthrough intended
             case SUDDEN_RAID_SHAD:
             case SUDDEN_RAID_NL:
                 for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
@@ -1100,7 +1096,7 @@ public class Thief extends Beginner {
                 Set<DropInfo> dropInfoSet = new HashSet<>();
                 for (int i = 0; i < slv; i++) {
                     if (Util.succeedProp(si.getValue(prop, slv))) {
-                        dropInfoSet.add(new DropInfo(0, 100, GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
+                        dropInfoSet.add(new DropInfo(GameConstants.MAX_DROP_CHANCE, 50, 150)); // min 50; max 150;
                     }
                 }
                 if (dropInfoSet.size() > 0) {

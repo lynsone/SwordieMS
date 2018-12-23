@@ -1,10 +1,10 @@
-#   [Job Adv] (Lv.30)   Way of the Spearman
+# 1413 - [Job Adv] (Lv.30)   Way of the Spearman
 
 darkMarble = 4031013
 job = "Spearman"
 
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
-            "a #b"+ job +"#k is specialised in long weapons such as #bSpears#k and #bPolearms#k. "
+            "A #b"+ job +"#k is specialised in long weapons such as #bSpears#k and #bPolearms#k. "
             "There are many useful skills you can acquire with both weapons, but I strongly recommend that you focus on one and stick to it.")
 
 

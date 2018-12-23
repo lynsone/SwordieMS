@@ -179,6 +179,9 @@ public class LoginHandler {
         DatabaseManager.saveToDB(c.getAccount());
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        if (curSelectedRace == JobConstants.LoginJob.DUAL_BLADE.getJobType()) {
+            cs.setSubJob(1);
+        }
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
@@ -306,5 +309,10 @@ public class LoginHandler {
         }
         c.setAuthorized(success);
         return success;
+    }
+
+    public static void handleExceptionLog(Client c, InPacket inPacket) {
+        String str = inPacket.decodeString();
+        log.error("Exception log: " + str);
     }
 }

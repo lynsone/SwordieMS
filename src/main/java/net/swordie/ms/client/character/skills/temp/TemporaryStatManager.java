@@ -6,6 +6,7 @@ import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.skills.GuidedBullet;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.PartyBooster;
+import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.connection.OutPacket;
@@ -19,6 +20,7 @@ import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
@@ -87,6 +89,16 @@ public class TemporaryStatManager {
     public void putCharacterStatValue(CharacterTemporaryStat cts, Option option) {
         boolean indie = cts.isIndie();
         option.setTimeToMillis();
+        SkillInfo skillinfo = SkillData.getSkillInfoById(indie ? option.nReason : option.rOption);
+        if(skillinfo != null && !skillinfo.isNotIncBuffDuration()) {
+            int duration = (indie ? option.tTerm : option.tOption);
+            long buffTimeR = getChr().getTotalStat(BaseStat.buffTimeR); // includes the 100% base
+            if (indie) {
+                option.tTerm = (int) ((buffTimeR * duration) / 100);
+            } else {
+                option.tOption = (int) ((buffTimeR * duration) / 100);
+            }
+        }
         if(cts == CombatOrders) {
             chr.setCombatOrders(option.nOption);
         }

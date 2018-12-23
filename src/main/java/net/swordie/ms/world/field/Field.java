@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static net.swordie.ms.client.character.skills.SkillStat.mesoR;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -56,6 +57,7 @@ public class Field {
     private double mobRate;
     private int id;
     private FieldType fieldType;
+    private long fieldLimit;
     private int returnMap, forcedReturn, createMobInterval, timeOut, timeLimit, lvLimit, lvForceMove;
     private int consumeItemCoolTime, link;
     private boolean town, swim, fly, reactorShuffle, expeditionOnly, partyOnly, needSkillForFly;
@@ -82,8 +84,9 @@ public class Field {
     private List<OpenGate> openGateList = new ArrayList<>();
     private List<TownPortal> townPortalList = new ArrayList<>();
     private boolean isChannelField;
-    private Map<Integer, String> directionInfo;
+    private Map<Integer, List<String>> directionInfo;
     private Clock clock;
+    private int channel;
 
     public Field(int fieldID) {
         this.id = fieldID;
@@ -161,6 +164,10 @@ public class Field {
     public FieldType getFieldType() { return fieldType; }
 
     public void setFieldType(FieldType fieldType) { this.fieldType = fieldType; }
+
+    public long getFieldLimit() { return fieldLimit; }
+
+    public void setFieldLimit(long fieldLimit) { this.fieldLimit = fieldLimit; }
     
     public Set<Portal> getPortals() {
         return portals;
@@ -435,6 +442,17 @@ public class Field {
         spawnLife(summon, null);
     }
 
+    public void removeSummon(int skillID, int chrID) {
+        Summon summon = (Summon) getLifes().values().stream()
+                .filter(s -> s instanceof Summon &&
+                        ((Summon) s).getChr().getId() == chrID &&
+                        ((Summon) s).getSkillID() == skillID)
+                .findFirst().orElse(null);
+        if (summon != null) {
+            removeLife(summon.getObjectId(), false);
+        }
+    }
+
     public void spawnLife(Life life, Char onlyChar) {
         addLife(life);
         if (getChars().size() > 0) {
@@ -443,11 +461,20 @@ public class Field {
                 controller = getLifeToControllers().get(life);
             }
             if (controller == null) {
-                controller = getChars().get(0);
-                putLifeController(life, controller);
+                setRandomController(life);
             }
             life.broadcastSpawnPacket(onlyChar);
         }
+    }
+
+    private void setRandomController(Life life) {
+        // No chars -> set controller to null, so a controller will be assigned next time someone enters this field
+        Char controller = null;
+        if (getChars().size() > 0) {
+            controller = Util.getRandomFromCollection(getChars());
+            life.notifyControllerChange(controller);
+        }
+        putLifeController(life, controller);
     }
 
     public void removeLife(Life life) {
@@ -469,10 +496,17 @@ public class Field {
     public void addChar(Char chr) {
         if (!getChars().contains(chr)) {
             getChars().add(chr);
-            if(!isUserFirstEnter() && hasUserFirstEnterScript()) {
-                chr.chatMessage("First enter script!");
-                chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
-                setUserFirstEnter(true);
+            if (!isUserFirstEnter()) {
+                if (hasUserFirstEnterScript()) {
+                    chr.chatMessage("First enter script!");
+                    chr.getScriptManager().startScript(getId(), getOnFirstUserEnter(), ScriptType.FirstEnterField);
+                    setUserFirstEnter(true);
+                } else if (CustomFUEFieldScripts.getByVal(getId()) != null) {
+                    chr.chatMessage("Custom First enter script!");
+                    String feFieldScript = CustomFUEFieldScripts.getByVal(getId()).toString();
+                    chr.getScriptManager().startScript(getId(), feFieldScript, ScriptType.FirstEnterField);
+                    setUserFirstEnter(true);
+                }
             }
         }
         broadcastPacket(UserPool.userEnterField(chr), chr);
@@ -491,10 +525,10 @@ public class Field {
     public void removeChar(Char chr) {
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
-        // set controllers to null
+        // change controllers for which the chr was the controller of
         for (Map.Entry<Life, Char> entry : getLifeToControllers().entrySet()) {
             if (entry.getValue() != null && entry.getValue().equals(chr)) {
-                putLifeController(entry.getKey(), null);
+                setRandomController(entry.getKey());
             }
         }
         // remove summons of that char & remove field attacks of that char
@@ -905,7 +939,7 @@ public class Field {
      * @param ownerID   The owner's character ID.
      */
     public void drop(Set<DropInfo> dropInfos, Position position, int ownerID) {
-        drop(dropInfos, findFootHoldBelow(position), position, ownerID);
+        drop(dropInfos, findFootHoldBelow(position), position, ownerID, 0, 0);
     }
 
     public void drop(Drop drop, Position position) {
@@ -934,14 +968,16 @@ public class Field {
      * @param fh        The Foothold this Set of DropInfos is bound to.
      * @param position  The Position the Drops originate from.
      * @param ownerID   The ID of the owner of all drops.
+     * @param mesoRate  The added meso rate of the character.
+     * @param dropRate  The added drop rate of the character.
      */
-    public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID) {
+    public void drop(Set<DropInfo> dropInfos, Foothold fh, Position position, int ownerID, int mesoRate, int dropRate) {
         int x = position.getX();
         int minX = fh == null ? position.getX() : fh.getX1();
         int maxX = fh == null ? position.getX() : fh.getX2();
         int diff = 0;
         for (DropInfo dropInfo : dropInfos) {
-            if (dropInfo.willDrop()) {
+            if (dropInfo.willDrop(dropRate)) {
                 x = (x + diff) > maxX ? maxX - 10 : (x + diff) < minX ? minX + 10 : x + diff;
                 Position posTo;
                 if (fh == null) {
@@ -949,7 +985,14 @@ public class Field {
                 } else {
                     posTo = new Position(x, fh.getYFromX(x));
                 }
-                drop(dropInfo, position, posTo, ownerID);
+                // Copy the drop info for money, as we chance the amount that's in there.
+                // Not copying -> original dropinfo will keep increasing in mesos
+                DropInfo copy = null;
+                if (dropInfo.isMoney()) {
+                    copy = dropInfo.deepCopy();
+                    copy.setMoney((int) (dropInfo.getMoney() * ((100 + mesoRate) / 100D)));
+                }
+                drop(copy != null ? copy : dropInfo, position, posTo, ownerID);
                 diff = diff < 0 ? Math.abs(diff - GameConstants.DROP_DIFF) : -(diff + GameConstants.DROP_DIFF);
                 dropInfo.generateNextDrop();
             }
@@ -974,11 +1017,18 @@ public class Field {
     }
 
     public void execUserEnterScript(Char chr) {
-        if(getOnUserEnter() == null || getOnUserEnter().equalsIgnoreCase("")) {
+        chr.clearCurrentDirectionNode();
+        if(getOnUserEnter() == null) {
             return;
         }
-        String script = getOnUserEnter();
-        chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
+        if (!getOnUserEnter().equalsIgnoreCase("")) {
+            String script = getOnUserEnter();
+            chr.getScriptManager().startScript(getId(), script, ScriptType.Field);
+        } else if (CustomFieldScripts.getByVal(getId()) != null) {
+            String customFieldScriptName = CustomFieldScripts.getByVal(getId()).toString();
+            chr.chatMessage("Custom Field Script:");
+            chr.getScriptManager().startScript(getId(), customFieldScriptName, ScriptType.Field);
+        }
     }
 
     public boolean isUserFirstEnter() {
@@ -1190,12 +1240,15 @@ public class Field {
      */
     public void generateMobs(boolean init) {
         if (init || getChars().size() > 0) {
+            boolean buffed = !isChannelField()
+                    && getChannel() > GameConstants.CHANNELS_PER_WORLD - GameConstants.BUFFED_CHANNELS;
             int currentMobs = getMobs().size();
             for (MobGen mg : getMobGens()) {
                 if (mg.canSpawnOnField(this)) {
-                    mg.spawnMob(this);
+                    mg.spawnMob(this, buffed);
                     currentMobs++;
-                    if (currentMobs > getFixedMobCapacity()) {
+                    if ((getFieldLimit() & FieldOption.NoMobCapacityLimit.getVal()) == 0
+                            && currentMobs > getFixedMobCapacity()) {
                         break;
                     }
                 }
@@ -1256,9 +1309,7 @@ public class Field {
     }
 
     public void removeTownPortal(TownPortal townPortal) {
-        if (getTownPortalList().contains(townPortal)) {
-            getTownPortalList().remove(townPortal);
-        }
+        getTownPortalList().remove(townPortal);
     }
 
     public TownPortal getTownPortalByChrId(int chrId) {
@@ -1267,27 +1318,27 @@ public class Field {
     
     public void increaseReactorState(Char chr, int templateId, int stateLength) {
         Life life = getLifeByTemplateId(templateId);
-        if (life != null && life instanceof Reactor) {
+        if (life instanceof Reactor) {
             Reactor reactor = (Reactor) life;
             reactor.increaseState();
             chr.write(ReactorPool.reactorChangeState(reactor, (short) 0, (byte) stateLength));
         }
     }
 
-    public Map<Integer, String> getDirectionInfo() {
+    public Map<Integer, List<String>> getDirectionInfo() {
         return directionInfo;
     }
 
-    public void setDirectionInfo(Map<Integer, String> directionInfo) {
+    public void setDirectionInfo(Map<Integer, List<String>> directionInfo) {
         this.directionInfo = directionInfo;
     }
 
-    public String getDirectionInfoScript(int node) {
+    public List<String> getDirectionNode(int node) {
         return directionInfo.getOrDefault(node, null);
     }
 
-    public void addDirectionInfo(int node, String script) {
-        directionInfo.put(node, script);
+    public void addDirectionInfo(int node, List<String> scripts) {
+        directionInfo.put(node, scripts);
     }
 
     public Clock getClock() {
@@ -1296,5 +1347,13 @@ public class Field {
 
     public void setClock(Clock clock) {
         this.clock = clock;
+    }
+
+    public int getChannel() {
+        return channel;
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
     }
 }

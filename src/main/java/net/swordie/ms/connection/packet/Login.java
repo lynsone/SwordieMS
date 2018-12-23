@@ -69,7 +69,7 @@ public class Login {
             outPacket.encodeInt(account.getId());
             outPacket.encodeByte(account.getGender());
             outPacket.encodeByte(account.getMsg2());
-            outPacket.encodeInt(account.getAccountType());
+            outPacket.encodeInt(account.getAccountType().getVal());
             outPacket.encodeInt(account.getAge());
             outPacket.encodeByte(!account.hasCensoredNxLoginID());
             if(account.hasCensoredNxLoginID()) {
@@ -163,7 +163,7 @@ public class Login {
         outPacket.encodeInt(account.getId());
         outPacket.encodeByte(account.getGender());
         outPacket.encodeByte(account.getGradeCode());
-        outPacket.encodeInt(account.getAccountType());
+        outPacket.encodeInt(account.getAccountType().getVal());
         outPacket.encodeInt(account.getVipGrade());
 //        outPacket.encodeInt(account.getAge());
         outPacket.encodeByte(account.getPurchaseExp());
@@ -230,13 +230,13 @@ public class Login {
         }
 
         outPacket.encodeByte(chars.size());
-        for(Char character : chars) {
-            character.getAvatarData().encode(outPacket);
+        for(Char chr : chars) {
+            chr.getAvatarData().encode(outPacket);
             outPacket.encodeByte(false); // family stuff, deprecated (v61 = &v2->m_abOnFamily.a[v59];)
-            boolean hasRanking = character.getRanking() != null;
+            boolean hasRanking = chr.getRanking() != null && !JobConstants.isGmJob(chr.getJob());
             outPacket.encodeByte(hasRanking);
-            if(hasRanking) {
-                character.getRanking().encode(outPacket);
+            if (hasRanking) {
+                chr.getRanking().encode(outPacket);
             }
         }
         outPacket.encodeByte(account.getPicStatus().getVal()); // bLoginOpt
