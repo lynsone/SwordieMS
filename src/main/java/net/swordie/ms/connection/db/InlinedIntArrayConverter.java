@@ -16,7 +16,13 @@ public class InlinedIntArrayConverter implements AttributeConverter<List<Integer
         for (int i : integers) {
             sb.append(i).append(",");
         }
-        return sb.toString().substring(0, sb.length() - 1); // removes last comma
+        String res;
+        if (integers.size() > 0) {
+            res = sb.toString().substring(0, sb.length() - 1); // removes last comma
+        } else {
+            res = "";
+        }
+        return res;
     }
 
     @Override
@@ -26,8 +32,10 @@ public class InlinedIntArrayConverter implements AttributeConverter<List<Integer
         }
         String[] split = s.split(",");
         List<Integer> ints = new ArrayList<>();
-        for (String str : split) {
-            ints.add(Integer.valueOf(str));
+        if (split.length > 0 && split[0].length() > 0) {
+            for (String str : split) {
+                ints.add(Integer.valueOf(str));
+            }
         }
         return ints;
     }
