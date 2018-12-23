@@ -1125,8 +1125,10 @@ public class AdminCommands {
                     }
                     if (map.size() == 0) {
                         chr.chatMessage(Mob, "No " + queryType + "s found for query " + query);
+                        return;
                     }
-                    for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                    TreeMap<Integer, String> sortedMap = new TreeMap<>(map);
+                    for (Map.Entry<Integer, String> entry : sortedMap.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
                         if (queryType.equalsIgnoreCase("item")) {

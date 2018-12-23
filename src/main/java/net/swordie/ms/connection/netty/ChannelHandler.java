@@ -476,6 +476,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case FOX_MAN_ACTION_SET_USE_REQUEST:
                 WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
                 break;
+            case QUICKSLOT_KEY_MAPPED_MODIFIED:
+                WorldHandler.handleQuickslotKeyMappedModified(chr, inPacket);
+                break;
             case DIRECTION_NODE_COLLISION:
                 WorldHandler.handleDirectionNodeCollision(c, inPacket);
                 break;

@@ -6155,4 +6155,13 @@ public class WorldHandler {
 
         }
     }
+
+    public static void handleQuickslotKeyMappedModified(Char chr, InPacket inPacket) {
+        final int length = GameConstants.QUICKSLOT_LENGTH;
+        List<Integer> quickslotKeys = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            quickslotKeys.add(inPacket.decodeInt());
+        }
+        chr.setQuickslotKeys(quickslotKeys);
+    }
 }

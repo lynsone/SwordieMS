@@ -30,6 +30,7 @@ public class GameConstants {
     public static final long DAMAGE_CAP = 50_000_000;
     public static final int BEGINNER_SP_MAX_LV = 7;
     public static final int RESISTANCE_SP_MAX_LV = 10;
+    public static final int QUICKSLOT_LENGTH = 28;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
