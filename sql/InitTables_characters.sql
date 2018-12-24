@@ -592,6 +592,7 @@ create table characters (
     partyid int,
     monsterparkcount tinyint default 0,
     previousFieldID bigint,
+    quickslotKeys varchar(255), # inlined array
 	primary key (id),
     foreign key (avatardata) references avatardata(id),
     foreign key (equippedinventory) references inventories(id),
