@@ -1,5 +1,4 @@
 # 223010100
-if sm.hasQuest(23023): # 2nd job advancement for BaM
-    sm.giveItem(4032737, 1)
-sm.warp(223010110, 0)
+if sm.hasQuest(23023): # 2nd job advancement for Resistance
+    sm.warpInstanceIn( 931000100, 0)
 sm.dispose()
