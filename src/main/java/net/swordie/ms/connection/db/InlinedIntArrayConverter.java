@@ -13,7 +13,12 @@ public class InlinedIntArrayConverter implements AttributeConverter<List<Integer
     @Override
     public String convertToDatabaseColumn(List<Integer> integers) {
         StringBuilder sb = new StringBuilder();
+        if (integers == null)
+        {
+            return null;
+        }
         for (int i : integers) {
+
             sb.append(i).append(",");
         }
         String res;
