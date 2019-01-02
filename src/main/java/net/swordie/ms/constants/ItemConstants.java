@@ -1,11 +1,13 @@
 package net.swordie.ms.constants;
 
 import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.EquipDrop;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.Util;
 
@@ -98,7 +100,7 @@ public class ItemConstants {
 
     // Self-made drops per mob
     public static final Map<Integer, Set<DropInfo>> consumableDropsPerLevel = new HashMap<>();
-    public static final Map<Integer, Map<ItemJob, Set<DropInfo>>> equipDropsPerLevel = new HashMap<>();
+    public static final Map<ItemJob, Map<Integer, Set<DropInfo>>> equipDropsPerLevel = new HashMap<>();
 
     static {
         initConsumableDrops();
@@ -136,7 +138,20 @@ public class ItemConstants {
     }
 
     private static void initEquipDrops() {
-
+        List<EquipDrop> drops = (List<EquipDrop>) DatabaseManager.getObjListFromDB(EquipDrop.class);
+        for (EquipDrop drop : drops) {
+            ItemJob job = drop.getJob();
+            int level = drop.getLevel();
+            if (!equipDropsPerLevel.containsKey(job)) {
+                equipDropsPerLevel.put(job, new HashMap<>());
+            }
+            Map<Integer, Set<DropInfo>> jobMap = equipDropsPerLevel.get(job);
+            if (!jobMap.containsKey(level)) {
+                jobMap.put(level, new HashSet<>());
+            }
+            Set<DropInfo> set = jobMap.get(level);
+            set.add(new DropInfo(drop.getId(), 100));
+        }
     }
 
     public static int getGenderFromId(int nItemID) {
@@ -1360,6 +1375,6 @@ public class ItemConstants {
         if (itemJob == null) {
             itemJob = ItemJob.BEGINNER;
         }
-        return equipDropsPerLevel.getOrDefault(level, new HashMap<>()).getOrDefault(itemJob, new HashSet<>());
+        return equipDropsPerLevel.getOrDefault(itemJob, new HashMap<>()).getOrDefault(level, new HashSet<>());
     }
 }

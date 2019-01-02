@@ -35,6 +35,7 @@ import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.drop.DropInfo;
+import net.swordie.ms.loaders.containerclasses.EquipDrop;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionGroupRewardInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionMobInfo;
 import net.swordie.ms.loaders.containerclasses.MonsterCollectionSessionRewardInfo;
@@ -126,6 +127,7 @@ public class DatabaseManager {
                 Offense.class,
                 OffenseManager.class,
                 NpcShopItem.class,
+                EquipDrop.class,
         };
         for(Class clazz : dbClasses) {
             configuration.addAnnotatedClass(clazz);
@@ -217,15 +219,27 @@ public class DatabaseManager {
         return o;
     }
 
+    public static Object getObjListFromDB(Class clazz) {
+        List list;
+        try (Session session = getSession()) {
+            Transaction transaction = session.beginTransaction();
+            // String.format for query, just to fill in the class
+            // Can't set the FROM clause with a parameter it seems
+            javax.persistence.Query query = session.createQuery(String.format("FROM %s", clazz.getName()));
+            list = ((org.hibernate.query.Query) query).list();
+            transaction.commit();
+            session.close();
+        }
+        return list;
+    }
+
     public static Object getObjListFromDB(Class clazz, String columnName, Object value) {
-        log.info(String.format("%s: Trying to get obj %s with value %s.", LocalDateTime.now(), clazz, value));
         List list;
         try (Session session = getSession()) {
             Transaction transaction = session.beginTransaction();
             // String.format for query, just to fill in the class
             // Can't set the FROM clause with a parameter it seems
             javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
-            System.out.println(((Query) query).getQueryString());
             query.setParameter("val", value);
             list = ((org.hibernate.query.Query) query).list();
             transaction.commit();
