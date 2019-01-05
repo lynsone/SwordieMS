@@ -244,17 +244,4 @@ public class DatabaseManager {
         }
         return list;
     }
-    public static Object getObjListFromDB(Class clazz) {
-        List list;
-        try (Session session = getSession()) {
-            Transaction transaction = session.beginTransaction();
-            // String.format for query, just to fill in the class
-            // Can't set the FROM clause with a parameter it seems
-            javax.persistence.Query query = session.createQuery(String.format("FROM %s", clazz.getName()));
-            list = ((org.hibernate.query.Query) query).list();
-            transaction.commit();
-            session.close();
-        }
-        return list;
-    }
 }

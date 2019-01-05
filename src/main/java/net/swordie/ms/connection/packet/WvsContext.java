@@ -611,48 +611,19 @@ public class WvsContext {
         return outPacket;
     }
 
-    public static OutPacket searchGeneralGuildResult(Client c, int searchType, int levMin, int levMax, int sizeMin, int sizeMax, int avgLevMin, int avgLevMax) {
+    public static OutPacket guildSearchResult(Collection<Guild> guilds) {
         OutPacket outPacket = new OutPacket(OutHeader.GUILD_SEARCH_RESULT);
-        List<Guild> guilds = c.getWorld().getGuildsWithCriteria(levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax);
-        outPacket.encodeInt(guilds.size());
-        System.out.println(guilds.size());
-        for (Guild g : guilds) {
 
+        outPacket.encodeInt(guilds.size());
+        for (Guild g : guilds) {
             outPacket.encodeInt(g.getId());
             outPacket.encodeInt(g.getLevel());
             outPacket.encodeString(g.getName());
-            outPacket.encodeString(Char.getFromDBById(g.getLeaderID()).getName());
+            outPacket.encodeString(g.getGuildLeader().getName());
             outPacket.encodeInt(g.getMembers().size());
-
-            //calculate lvl average of guild members
-            int averageLevel = 0;
-            for (int i = 0; i < g.getMembers().size(); i++) {
-                averageLevel += g.getMembers().get(i).getLevel();
-            }
-            outPacket.encodeInt(averageLevel / g.getMembers().size());
+            outPacket.encodeInt(g.getAverageMemberLevel());
         }
-        return outPacket;
-    }
 
-    public static OutPacket searchGuildResultByName(Client c, int searchType, boolean exactWord, String SearchTerm) {
-        OutPacket outPacket = new OutPacket(OutHeader.GUILD_SEARCH_RESULT);
-        List<Guild> guilds = c.getWorld().getGuildsByString(searchType, exactWord, SearchTerm);
-        outPacket.encodeInt(guilds.size());
-        for (Guild g : guilds) {
-
-            outPacket.encodeInt(g.getId());
-            outPacket.encodeInt(g.getLevel());
-            outPacket.encodeString(g.getName());
-            outPacket.encodeString(Char.getFromDBById(g.getLeaderID()).getName());
-            outPacket.encodeInt(g.getMembers().size());
-
-            //calculate lvl average of guild members
-            int averageLevel = 0;
-            for (int i = 0; i < g.getMembers().size(); i++) {
-                averageLevel += g.getMembers().get(i).getLevel();
-            }
-            outPacket.encodeInt(averageLevel / g.getMembers().size());
-        }
         return outPacket;
     }
 

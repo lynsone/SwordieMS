@@ -2850,6 +2850,8 @@ public class WorldHandler {
                 break;
             case Req_Search:
                 byte generalSearch = inPacket.decodeByte();
+                World world = c.getWorld();
+                Collection<Guild> guildCol;
                 if (generalSearch == 1) {
                     int levMin = inPacket.decodeUByte();
                     int levMax = inPacket.decodeUByte();
@@ -2857,13 +2859,14 @@ public class WorldHandler {
                     int sizeMax = inPacket.decodeUByte();
                     int avgLevMin = inPacket.decodeUByte();
                     int avgLevMax = inPacket.decodeUByte();
-                    chr.write(WvsContext.searchGeneralGuildResult(c, generalSearch, levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax));
+                    guildCol = world.getGuildsWithCriteria(levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax);
                 } else {
                     int searchType = inPacket.decodeShort();
                     boolean exactWord = inPacket.decodeByte() != 0;
                     String searchTerm = inPacket.decodeString();
-                    chr.write(WvsContext.searchGuildResultByName(c, searchType, exactWord, searchTerm));
+                    guildCol = world.getGuildsByString(searchType, exactWord, searchTerm);
                 }
+                chr.write(WvsContext.guildSearchResult(guildCol));
                 break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));

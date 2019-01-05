@@ -39,7 +39,7 @@ public class World {
         this.worldEventDrop_WSE = worldEventDrop_WSE;
         this.boomUpEventNotice = boomUpEventNotice;
         List<Channel> channelList = new ArrayList<>();
-        for(int i = 1; i <= amountOfChannels; i++){
+        for (int i = 1; i <= amountOfChannels; i++) {
             channelList.add(new Channel(name, worldId, i));
         }
         this.channels = channelList;
@@ -50,6 +50,14 @@ public class World {
     public World(int worldId, String name, int amountOfChannels) {
         this(worldId, name, 0, "", 100, 100,
                 0, amountOfChannels, false, false);
+        initGuilds();
+    }
+
+    private void initGuilds() {
+        List<Guild> guilds = (List<Guild>) DatabaseManager.getObjListFromDB(Guild.class);
+        for (Guild g : guilds) {
+            addGuild(g);
+        }
     }
 
     public int getWorldId() {
@@ -101,9 +109,9 @@ public class World {
     }
 
     public Char getCharByName(String name) {
-        for(Channel c : getChannels()) {
+        for (Channel c : getChannels()) {
             Char chr = c.getCharByName(name);
-            if(chr != null) {
+            if (chr != null) {
                 return chr;
             }
         }
@@ -111,9 +119,9 @@ public class World {
     }
 
     public Char getCharByID(int id) {
-        for(Channel c : getChannels()) {
+        for (Channel c : getChannels()) {
             Char chr = c.getCharById(id);
-            if(chr != null) {
+            if (chr != null) {
                 return chr;
             }
         }
@@ -128,7 +136,7 @@ public class World {
         int id = getPartyIdAndIncrement(); // sequential IDs should be fine here
         getParties().put(id, p);
         p.setId(id);
-        if(p.getWorld() == null) {
+        if (p.getWorld() == null) {
             p.setWorld(this);
         }
     }
@@ -145,73 +153,47 @@ public class World {
         return guilds;
     }
 
-    public List<Guild> getGuildsWithCriteria(int levMin, int levMax, int sizeMin, int sizeMax, int avgLevMin, int avgLevMax) {
-        List<Guild> guilds = (List<Guild>) DatabaseManager.getObjListFromDB(Guild.class);
-        for (int i = 0; i < guilds.size(); i++) {
-            Guild g = guilds.get(i);
+    public Collection<Guild> getGuildsWithCriteria(int levMin, int levMax, int sizeMin, int sizeMax, int avgLevMin, int avgLevMax) {
+        Collection<Guild> guilds = getGuilds().values();
+        Set<Guild> res = new HashSet<>(guilds);
+        for (Guild g : guilds) {
             //calculate average level of guild members
-            int averageLevel = 0;
-            for (int j = 0; j < g.getMembers().size(); j++) {
-                averageLevel += g.getMembers().get(i).getLevel();
-            }
-            if (g.getReqLevel() == 0) {
-
-            }
-            if (levMin != 0 && levMin > g.getReqLevel() + 1) { //getReqLevel is automatically set to 0
-                guilds.remove(g);
-                continue;
-            } else if (levMax != 0 && levMax < g.getReqLevel()) {
-                guilds.remove(g);
-                continue;
-            } else if (sizeMin != 0 && sizeMin > g.getMembers().size()) {
-                guilds.remove(g);
-                continue;
-            } else if (sizeMax != 0 && sizeMax < g.getMembers().size()) {
-                guilds.remove(g);
-                continue;
-            } else if (avgLevMin != 0 && avgLevMin > averageLevel) {
-                guilds.remove(g);
-                continue;
-            } else if (avgLevMax != 0 && avgLevMax < averageLevel) {
-                guilds.remove(g);
-                continue;
+            int averageLevel = g.getAverageMemberLevel();
+            if (levMin != 0 && levMin > g.getReqLevel() + 1 //getReqLevel is automatically set to 0
+                    || levMax != 0 && levMax < g.getReqLevel()
+                    || sizeMin != 0 && sizeMin > g.getMembers().size()
+                    || sizeMax != 0 && sizeMax < g.getMembers().size()
+                    || avgLevMin != 0 && avgLevMin > averageLevel
+                    || avgLevMax != 0 && avgLevMax < averageLevel) {
+                res.remove(g);
             }
         }
-        return guilds;
+        return res;
     }
 
-    public List<Guild> getGuildsByString(int searchType, boolean exactWord, String searchTerm) {
-        List<Guild> guilds = (List<Guild>) DatabaseManager.getObjListFromDB(Guild.class);
-        for (int i = 0; i < guilds.size(); i++) {
-            Guild g = guilds.get(i);
-            if (searchType == 2) { //guildName
-                if (exactWord) {
-                    if (!g.getName().equals(searchTerm)) {
-                        guilds.remove(g);
-                        continue;
-                    }
-                } else {
-                    if (!g.getName().contains(searchTerm)) {
-                        guilds.remove(g);
-                        continue;
-                    }
+    public Collection<Guild> getGuildsByString(int searchType, boolean exactWord, String searchTerm) {
+        Collection<Guild> guilds = getGuilds().values();
+        Set<Guild> res = new HashSet<>(guilds);
+        for (Guild g : guilds) {
+            if (searchType == 1) {
+                String guildName = g.getName();
+                String leaderName = g.getGuildLeader().getName();
+                if ((exactWord && !guildName.equals(searchTerm) && !leaderName.equals(searchTerm)
+                || (!exactWord && !guildName.contains(searchTerm) && !leaderName.contains(searchTerm)))) {
+                        res.remove(g);
                 }
-            }
-            if (searchType == 3) { //guildLeaderName
-                if (exactWord) {
-                    if (Char.getFromDBById(g.getLeaderID()).getName().equals(searchTerm)) {
-                        guilds.remove(g);
-                        continue;
-                    }
-                } else {
-                    if (!Char.getFromDBById(g.getLeaderID()).getName().contains(searchTerm)) {
-                        guilds.remove(g);
-                        continue;
-                    }
+            } else {
+                String name = searchType == 2
+                        ? g.getName()
+                        : searchType == 3
+                        ? g.getGuildLeader().getName()
+                        : "";
+                if ((exactWord && !name.equals(searchTerm)) || (!exactWord && !name.contains(searchTerm))) {
+                    res.remove(g);
                 }
             }
         }
-        return guilds;
+        return res;
     }
 
     public Guild getGuildByID(int id) {
@@ -257,9 +239,9 @@ public class World {
     }
 
     public Account getAccountByID(int accID) {
-        for(Channel c : getChannels()) {
+        for (Channel c : getChannels()) {
             Account res = c.getAccountByID(accID);
-            if(res != null) {
+            if (res != null) {
                 return res;
             }
         }
@@ -267,7 +249,7 @@ public class World {
     }
 
     public void broadcastPacket(OutPacket outPacket) {
-        for(Channel channel : getChannels()) {
+        for (Channel channel : getChannels()) {
             channel.broadcastPacket(outPacket);
         }
     }
@@ -301,6 +283,10 @@ public class World {
 
     public Map<Integer, Alliance> getAlliances() {
         return alliances;
+    }
+
+    private void addGuild(Guild guild) {
+        getGuilds().put(guild.getId(), guild);
     }
 
     private void addAlliance(Alliance ally) {

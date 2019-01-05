@@ -504,4 +504,13 @@ public class Guild implements Encodable {
     public GuildMember getGuildLeader() {
         return getMemberByCharID(getLeaderID());
     }
+
+    public int getAverageMemberLevel() {
+        int size = getMembers().size();
+        int averageLevel = 0;
+        for (GuildMember gm : getMembers()) {
+            averageLevel += gm.getLevel();
+        }
+        return averageLevel / size;
+    }
 }
