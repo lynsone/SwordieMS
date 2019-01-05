@@ -145,6 +145,75 @@ public class World {
         return guilds;
     }
 
+    public List<Guild> getGuildsWithCriteria(int levMin, int levMax, int sizeMin, int sizeMax, int avgLevMin, int avgLevMax) {
+        List<Guild> guilds = (List<Guild>) DatabaseManager.getObjListFromDB(Guild.class);
+        for (int i = 0; i < guilds.size(); i++) {
+            Guild g = guilds.get(i);
+            //calculate average level of guild members
+            int averageLevel = 0;
+            for (int j = 0; j < g.getMembers().size(); j++) {
+                averageLevel += g.getMembers().get(i).getLevel();
+            }
+            if (g.getReqLevel() == 0) {
+
+            }
+            if (levMin != 0 && levMin > g.getReqLevel() + 1) { //getReqLevel is automatically set to 0
+                guilds.remove(g);
+                continue;
+            } else if (levMax != 0 && levMax < g.getReqLevel()) {
+                guilds.remove(g);
+                continue;
+            } else if (sizeMin != 0 && sizeMin > g.getMembers().size()) {
+                guilds.remove(g);
+                continue;
+            } else if (sizeMax != 0 && sizeMax < g.getMembers().size()) {
+                guilds.remove(g);
+                continue;
+            } else if (avgLevMin != 0 && avgLevMin > averageLevel) {
+                guilds.remove(g);
+                continue;
+            } else if (avgLevMax != 0 && avgLevMax < averageLevel) {
+                guilds.remove(g);
+                continue;
+            }
+        }
+        return guilds;
+    }
+
+    public List<Guild> getGuildsByString(int searchType, boolean exactWord, String searchTerm) {
+        List<Guild> guilds = (List<Guild>) DatabaseManager.getObjListFromDB(Guild.class);
+        for (int i = 0; i < guilds.size(); i++) {
+            Guild g = guilds.get(i);
+            if (searchType == 2) { //guildName
+                if (exactWord) {
+                    if (!g.getName().equals(searchTerm)) {
+                        guilds.remove(g);
+                        continue;
+                    }
+                } else {
+                    if (!g.getName().contains(searchTerm)) {
+                        guilds.remove(g);
+                        continue;
+                    }
+                }
+            }
+            if (searchType == 3) { //guildLeaderName
+                if (exactWord) {
+                    if (Char.getFromDBById(g.getLeaderID()).getName().equals(searchTerm)) {
+                        guilds.remove(g);
+                        continue;
+                    }
+                } else {
+                    if (!Char.getFromDBById(g.getLeaderID()).getName().contains(searchTerm)) {
+                        guilds.remove(g);
+                        continue;
+                    }
+                }
+            }
+        }
+        return guilds;
+    }
+
     public Guild getGuildByID(int id) {
         Guild guild = getGuilds().get(id);
         if (guild == null) {

@@ -2848,6 +2848,23 @@ public class WorldHandler {
                 chr.getSkillCoolTimes().put(skillID, System.currentTimeMillis() + 1000 * si.getValue(SkillStat.cooltime, gs.getLevel()));
                 chr.getJobHandler().handleJoblessBuff(c, inPacket, skillID, (byte) gs.getLevel());
                 break;
+            case Req_Search:
+                byte generalSearch = inPacket.decodeByte();
+                if (generalSearch == 1) {
+                    int levMin = inPacket.decodeUByte();
+                    int levMax = inPacket.decodeUByte();
+                    int sizeMin = inPacket.decodeUByte();
+                    int sizeMax = inPacket.decodeUByte();
+                    int avgLevMin = inPacket.decodeUByte();
+                    int avgLevMax = inPacket.decodeUByte();
+                    chr.write(WvsContext.searchGeneralGuildResult(c, generalSearch, levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax));
+                } else {
+                    int searchType = inPacket.decodeShort();
+                    boolean exactWord = inPacket.decodeByte() != 0;
+                    String searchTerm = inPacket.decodeString();
+                    chr.write(WvsContext.searchGuildResultByName(c, searchType, exactWord, searchTerm));
+                }
+                break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;

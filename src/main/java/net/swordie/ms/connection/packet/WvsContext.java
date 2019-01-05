@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.cards.CharacterCard;
@@ -15,6 +16,8 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
@@ -22,6 +25,7 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -606,6 +610,52 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket searchGeneralGuildResult(Client c, int searchType, int levMin, int levMax, int sizeMin, int sizeMax, int avgLevMin, int avgLevMax) {
+        OutPacket outPacket = new OutPacket(OutHeader.GUILD_SEARCH_RESULT);
+        List<Guild> guilds = c.getWorld().getGuildsWithCriteria(levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax);
+        outPacket.encodeInt(guilds.size());
+        System.out.println(guilds.size());
+        for (Guild g : guilds) {
+
+            outPacket.encodeInt(g.getId());
+            outPacket.encodeInt(g.getLevel());
+            outPacket.encodeString(g.getName());
+            outPacket.encodeString(Char.getFromDBById(g.getLeaderID()).getName());
+            outPacket.encodeInt(g.getMembers().size());
+
+            //calculate lvl average of guild members
+            int averageLevel = 0;
+            for (int i = 0; i < g.getMembers().size(); i++) {
+                averageLevel += g.getMembers().get(i).getLevel();
+            }
+            outPacket.encodeInt(averageLevel / g.getMembers().size());
+        }
+        return outPacket;
+    }
+
+    public static OutPacket searchGuildResultByName(Client c, int searchType, boolean exactWord, String SearchTerm) {
+        OutPacket outPacket = new OutPacket(OutHeader.GUILD_SEARCH_RESULT);
+        List<Guild> guilds = c.getWorld().getGuildsByString(searchType, exactWord, SearchTerm);
+        outPacket.encodeInt(guilds.size());
+        for (Guild g : guilds) {
+
+            outPacket.encodeInt(g.getId());
+            outPacket.encodeInt(g.getLevel());
+            outPacket.encodeString(g.getName());
+            outPacket.encodeString(Char.getFromDBById(g.getLeaderID()).getName());
+            outPacket.encodeInt(g.getMembers().size());
+
+            //calculate lvl average of guild members
+            int averageLevel = 0;
+            for (int i = 0; i < g.getMembers().size(); i++) {
+                averageLevel += g.getMembers().get(i).getLevel();
+            }
+            outPacket.encodeInt(averageLevel / g.getMembers().size());
+        }
+        return outPacket;
+    }
+
 
     public static OutPacket allianceResult(AllianceResult ar) {
         OutPacket outPacket = new OutPacket(OutHeader.ALLIANCE_RESULT);
