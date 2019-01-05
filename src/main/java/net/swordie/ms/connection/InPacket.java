@@ -60,6 +60,10 @@ public class InPacket extends Packet {
         return byteBuf.readByte();
     }
 
+    public short decodeUByte() {
+            return byteBuf.readUnsignedByte();
+    }
+
     /**
      * Reads an <code>amount</code> of bytes from the ByteBuf.
      * @param amount The amount of bytes to read.

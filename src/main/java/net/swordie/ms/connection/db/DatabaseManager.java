@@ -25,10 +25,7 @@ import net.swordie.ms.client.character.skills.ChosenSkill;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.StolenSkill;
 import net.swordie.ms.client.friend.Friend;
-import net.swordie.ms.client.guild.Guild;
-import net.swordie.ms.client.guild.GuildMember;
-import net.swordie.ms.client.guild.GuildRequestor;
-import net.swordie.ms.client.guild.GuildSkill;
+import net.swordie.ms.client.guild.*;
 import net.swordie.ms.client.guild.bbs.BBSRecord;
 import net.swordie.ms.client.guild.bbs.BBSReply;
 import net.swordie.ms.client.trunk.Trunk;
@@ -241,6 +238,19 @@ public class DatabaseManager {
             // Can't set the FROM clause with a parameter it seems
             javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
             query.setParameter("val", value);
+            list = ((org.hibernate.query.Query) query).list();
+            transaction.commit();
+            session.close();
+        }
+        return list;
+    }
+    public static Object getObjListFromDB(Class clazz) {
+        List list;
+        try (Session session = getSession()) {
+            Transaction transaction = session.beginTransaction();
+            // String.format for query, just to fill in the class
+            // Can't set the FROM clause with a parameter it seems
+            javax.persistence.Query query = session.createQuery(String.format("FROM %s", clazz.getName()));
             list = ((org.hibernate.query.Query) query).list();
             transaction.commit();
             session.close();
