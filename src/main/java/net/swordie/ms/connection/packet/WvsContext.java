@@ -1,5 +1,6 @@
 package net.swordie.ms.connection.packet;
 
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.*;
 import net.swordie.ms.client.character.cards.CharacterCard;
@@ -15,6 +16,8 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.result.FriendResult;
+import net.swordie.ms.client.guild.Guild;
+import net.swordie.ms.client.guild.GuildMember;
 import net.swordie.ms.client.guild.bbs.GuildBBSPacket;
 import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
@@ -22,6 +25,7 @@ import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.enums.MessageType;
 import net.swordie.ms.handlers.header.OutHeader;
@@ -606,6 +610,23 @@ public class WvsContext {
 
         return outPacket;
     }
+
+    public static OutPacket guildSearchResult(Collection<Guild> guilds) {
+        OutPacket outPacket = new OutPacket(OutHeader.GUILD_SEARCH_RESULT);
+
+        outPacket.encodeInt(guilds.size());
+        for (Guild g : guilds) {
+            outPacket.encodeInt(g.getId());
+            outPacket.encodeInt(g.getLevel());
+            outPacket.encodeString(g.getName());
+            outPacket.encodeString(g.getGuildLeader().getName());
+            outPacket.encodeInt(g.getMembers().size());
+            outPacket.encodeInt(g.getAverageMemberLevel());
+        }
+
+        return outPacket;
+    }
+
 
     public static OutPacket allianceResult(AllianceResult ar) {
         OutPacket outPacket = new OutPacket(OutHeader.ALLIANCE_RESULT);

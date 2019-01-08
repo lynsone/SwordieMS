@@ -36,8 +36,6 @@ noncombatstatdaylimit,
 systemtimes,
 charactercards,
 avatarlook,
-sockets,
-options,
 equips,
 petitems,
 items,
@@ -90,6 +88,7 @@ create table cashiteminfos(
     storebank boolean,
     cashitemsn bigint,
     grade int,
+    options varchar(255),
     trunkid int,
     position int,
     primary key (id)
@@ -179,6 +178,8 @@ create table equips (
     title varchar(255),
     equippeddate datetime(3),
     prevbonusexprate int,
+    options varchar(255),
+    sockets varchar(255),
     tuc smallint,
     cuc smallint,
     istr smallint,
@@ -264,24 +265,6 @@ create table equips (
     superioreqp tinyint,
     primary key (itemid),
     foreign key (itemid) references items(id) on delete cascade
-);
-
-create table options (
-	id int not null auto_increment,
-    ordercol int,
-    equipid bigint, # either equip or cash item, so no FK
-    cashitemid bigint,
-    optionid int,
-    primary key (id)
-);
-
-create table sockets (
-	id bigint not null auto_increment,
-    equipid bigint,
-    ord int,
-    socketid int,
-    primary key (id),
-    foreign key (equipid) references equips(itemid) on delete cascade
 );
 
 create table monsterbookinfos (

@@ -1528,12 +1528,12 @@ public class WorldHandler {
                 case 5750001: // Nebulite Diffuser
                     ePos = inPacket.decodeShort();
                     equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-                    if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                    if (equip == null || equip.getSocket(0) == 0 || equip.getSocket(0) == ItemConstants.EMPTY_SOCKET_ID) {
                         chr.chatMessage("That item currently does not have an active socket.");
                         chr.dispose();
                         return;
                     }
-                    equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+                    equip.setSocket(0, ItemConstants.EMPTY_SOCKET_ID);
                     equip.updateToChar(chr);
                     break;
                 case 5072000: // Super Megaphone
@@ -2848,6 +2848,26 @@ public class WorldHandler {
                 chr.getSkillCoolTimes().put(skillID, System.currentTimeMillis() + 1000 * si.getValue(SkillStat.cooltime, gs.getLevel()));
                 chr.getJobHandler().handleJoblessBuff(c, inPacket, skillID, (byte) gs.getLevel());
                 break;
+            case Req_Search:
+                byte generalSearch = inPacket.decodeByte();
+                World world = c.getWorld();
+                Collection<Guild> guildCol;
+                if (generalSearch == 1) {
+                    int levMin = inPacket.decodeUByte();
+                    int levMax = inPacket.decodeUByte();
+                    int sizeMin = inPacket.decodeUByte();
+                    int sizeMax = inPacket.decodeUByte();
+                    int avgLevMin = inPacket.decodeUByte();
+                    int avgLevMax = inPacket.decodeUByte();
+                    guildCol = world.getGuildsWithCriteria(levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax);
+                } else {
+                    int searchType = inPacket.decodeShort();
+                    boolean exactWord = inPacket.decodeByte() != 0;
+                    String searchTerm = inPacket.decodeString();
+                    guildCol = world.getGuildsByString(searchType, exactWord, searchTerm);
+                }
+                chr.write(WvsContext.guildSearchResult(guildCol));
+                break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
@@ -3993,9 +4013,9 @@ public class WorldHandler {
             return;
         }
         boolean success = true;
-        if (equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
+        if (equip.getSocket(0) == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
             chr.consumeItem(item);
-            equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+            equip.setSocket(0, ItemConstants.EMPTY_SOCKET_ID);
         } else {
             success = false;
         }
@@ -4016,7 +4036,7 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-        if (equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
+        if (equip.getSocket(0) != ItemConstants.EMPTY_SOCKET_ID) {
             log.error("Tried to Nebulite an item without an empty socket.");
             chr.chatMessage("You can only insert a Nebulite into empty socket slots.");
             chr.dispose();
@@ -4029,7 +4049,7 @@ public class WorldHandler {
             return;
         }
         chr.consumeItem(item);
-        equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
+        equip.setSocket(0, nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
     }
 
@@ -4946,6 +4966,7 @@ public class WorldHandler {
         }
         Skill skill = chr.getSkill(skillID, true);
         if (si.getHyper() != 0) { // Passive hyper
+
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             SPSet spSet = si.getHyper() == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);

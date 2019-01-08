@@ -512,26 +512,25 @@ public class Evan extends Job {
     @Override
     public void handleLevelUp() {
         super.handleLevelUp();
-        //TODO add checks or warp into instances, haven't tested this during instances but i'm scared it could reset zakum or other things
         //TODO give sp to proper job advancement, now gives sp to the old one(probably not enough time inbetween setting job and sp)
         if (chr.getLevel() == 10) {
             chr.setJob(2210);
-            chr.warp(chr.getField());
+            chr.setStatAndSendPacket(Stat.subJob, 2210);
             chr.addSpToJobByCurrentLevel(3);
         }
         if (chr.getLevel() == 30) {
             chr.setJob(2212);
-            chr.warp(chr.getField());
+            chr.setStatAndSendPacket(Stat.subJob, 2212);
             chr.addSpToJobByCurrentLevel(3);
         }
         if (chr.getLevel() == 60) {
             chr.setJob(2214);
-            chr.warp(chr.getField());
+            chr.setStatAndSendPacket(Stat.subJob, 2214);
             chr.addSpToJobByCurrentLevel(3);
         }
         if (chr.getLevel() == 100) {
             chr.setJob(2218);
-            chr.warp(chr.getField());
+            chr.setStatAndSendPacket(Stat.subJob, 2218);
             chr.addSpToJobByCurrentLevel(3);
         }
 

@@ -3,6 +3,7 @@ package net.swordie.ms.world.shop.cashshop;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.FileTimeConverter;
+import net.swordie.ms.connection.db.InlinedIntArrayConverter;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
@@ -38,10 +39,7 @@ public class CashItemInfo {
     private long cashItemSN;
     private int grade;
     private int position;
-    @ElementCollection
-    @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "cashitemid"))
-    @OrderColumn(name = "orderCol")
-    @Column(name = "optionid")
+    @Convert(converter = InlinedIntArrayConverter.class)
     private int[] options = new int[3];
 
     public void encode(OutPacket outPacket) {

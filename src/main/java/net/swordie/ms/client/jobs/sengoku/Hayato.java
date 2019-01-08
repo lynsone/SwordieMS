@@ -2,6 +2,7 @@ package net.swordie.ms.client.jobs.sengoku;
 
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -9,6 +10,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
+import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.connection.InPacket;
@@ -667,6 +669,27 @@ public class Hayato extends Job {
                 tsm.putCharacterStatValue(DamageReduce, o);
                 tsm.sendSetStatPacket();
             }
+        }
+    }
+
+    @Override
+    public void setCharCreationStats(Char chr) {
+        super.setCharCreationStats(chr);
+        CharacterStat cs = chr.getAvatarData().getCharacterStat();
+        cs.setPosMap(807100000);
+    }
+    @Override
+    public void handleLevelUp() {
+        super.handleLevelUp();
+        if (chr.getLevel() == 60) {
+            chr.setJob(4111);
+            chr.setStatAndSendPacket(Stat.subJob, 4111);
+            chr.addSpToJobByCurrentLevel(3);
+        }
+        if (chr.getLevel() == 100) {
+            chr.setJob(4112);
+            chr.setStatAndSendPacket(Stat.subJob, 4112);
+            chr.addSpToJobByCurrentLevel(3);
         }
     }
 }
