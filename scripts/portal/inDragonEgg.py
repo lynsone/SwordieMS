@@ -1,3 +1,6 @@
 # Farm Street | Farm Center
-sm.warp(900020100, 0)
-sm.dispose()
+
+if sm.hasQuest(22005): # only if intro quest is active "Rescuing the Piglet"
+    sm.warp(900020100, 0)
+else:
+    sm.warp(100030301, 0)
