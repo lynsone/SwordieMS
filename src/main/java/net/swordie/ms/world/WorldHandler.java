@@ -6191,7 +6191,7 @@ public class WorldHandler {
     }
 
     public static void handleTransferFreeMarketRequest(Char chr, InPacket inPacket) {
-        byte channelID = inPacket.decodeByte();
+        byte toChannelID = (byte) (inPacket.decodeByte() + 1);
         int fieldID = inPacket.decodeInt();
 
         Field toField = chr.getClient().getChannelInstance().getField(fieldID);
@@ -6202,11 +6202,11 @@ public class WorldHandler {
         }
         int currentChannelID = chr.getClient().getChannel();
 
-        if(currentChannelID != channelID) {
-            chr.changeChannelAndWarp((byte) (channelID + 1), fieldID);
+        if(currentChannelID != toChannelID) {
+            chr.changeChannelAndWarp(toChannelID, fieldID);
         } else {
-            chr.warp(toField);
-        }
+        chr.warp(toField);
+    }
 
         inPacket.decodeInt(); // tick
     }
