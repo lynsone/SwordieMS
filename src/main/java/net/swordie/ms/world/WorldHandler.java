@@ -6206,7 +6206,7 @@ public class WorldHandler {
         if(currentChannelID != toChannelID) {
             chr.changeChannelAndWarp(toChannelID, fieldID);
         } else {
-        chr.warp(toField);
+            chr.warp(toField);
         }
 
         inPacket.decodeInt(); // tick
