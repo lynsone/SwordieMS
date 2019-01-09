@@ -1419,12 +1419,16 @@ public class WorldHandler {
                         int worldID = chr.getClient().getChannelInstance().getWorldId();
                         World world = Server.getInstance().getWorldById(worldID);
                         Char targetChr = world.getCharByName(targetName);
-                        Position targetPosition = targetChr.getPosition();
 
                         // Target doesn't exist
                         if (targetChr == null) {
                             chr.chatMessage(String.format("%s is not online.", targetName));
+                            chr.dispose();
+                            return;
                         }
+
+                        Position targetPosition = targetChr.getPosition();
+
                         Field targetField = targetChr.getField();
                         if (targetField == null || (targetField.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
                             chr.chatMessage("You may not warp to that map.");
@@ -6184,5 +6188,25 @@ public class WorldHandler {
             quickslotKeys.add(inPacket.decodeInt());
         }
         chr.setQuickslotKeys(quickslotKeys);
+    }
+
+    public static void handleTransferFreeMarketRequest(Char chr, InPacket inPacket) {
+        byte channelID = inPacket.decodeByte();
+        int fieldID = inPacket.decodeInt();
+
+        Field toField = chr.getClient().getChannelInstance().getField(fieldID);
+
+        if (toField == null) {
+            chr.dispose();
+            return;
+        }
+
+        if (channelID > 0) {
+            chr.changeChannelAndWarp((byte) (channelID + 1), fieldID);
+        } else {
+            chr.warp(toField);
+        }
+
+        inPacket.decodeInt(); // tick
     }
 }

@@ -72,7 +72,7 @@ public class Server extends Properties {
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();
-		worldList.add(new World(1, "Je Moeder", GameConstants.CHANNELS_PER_WORLD));
+		worldList.add(new World(ServerConfig.WORLD_ID, ServerConfig.SERVER_NAME, GameConstants.CHANNELS_PER_WORLD, ServerConfig.EVENT_MSG));
 		long startCashShop = System.currentTimeMillis();
 		initCashShop();
 		log.info("Loaded Cash Shop in " + (System.currentTimeMillis() - startCashShop) + "ms");
