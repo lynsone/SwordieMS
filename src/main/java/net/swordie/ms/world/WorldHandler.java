@@ -6200,8 +6200,9 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
+        int currentChannelID = chr.getClient().getChannel();
 
-        if (channelID > 0) {
+        if(currentChannelID != channelID) {
             chr.changeChannelAndWarp((byte) (channelID + 1), fieldID);
         } else {
             chr.warp(toField);
