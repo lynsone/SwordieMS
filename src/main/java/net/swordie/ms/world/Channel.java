@@ -94,7 +94,13 @@ public class Channel {
      * @return The (possibly newly created) Field.
      */
     public Field getField(int id) {
-        return getFields().stream().filter(field -> field.getId() == id).findFirst().orElse(createAndReturnNewField(id));
+        for (Field field : getFields()) {
+            if (field.getId() == id) {
+                return field;
+            }
+        }
+        return createAndReturnNewField(id);
+
     }
 
     private Field createAndReturnNewField(int id) {
@@ -152,7 +158,7 @@ public class Channel {
     }
 
     public void broadcastPacket(OutPacket outPacket) {
-        for(Char chr : getChars().values()) {
+        for (Char chr : getChars().values()) {
             chr.write(outPacket);
         }
     }
