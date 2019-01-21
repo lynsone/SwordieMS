@@ -1,9 +1,13 @@
 package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
+import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.ReactorInfo;
 import net.swordie.ms.loaders.ReactorData;
 import net.swordie.ms.connection.packet.ReactorPool;
+import net.swordie.ms.world.field.Field;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 4/21/2018.
@@ -89,12 +93,17 @@ public class Reactor extends Life {
     
     @Override
     public void broadcastLeavePacket() {
-        getField().broadcastPacket(ReactorPool.reactorLeaveField(this));
+        Field field = getField();
+        field.broadcastPacket(ReactorPool.reactorLeaveField(this));
+        if (field.isChannelField()) {
+            Reactor reactor = (Reactor) deepCopy();
+            reactor.init();
+            EventManager.addEvent(() -> field.spawnLife(reactor, null), 5, TimeUnit.SECONDS);
+        }
     }
 
     public Life deepCopy() {
         Reactor copy = new Reactor(getTemplateId());
-        copy.setObjectId(getObjectId());
         copy.setLifeType(getLifeType());
         copy.setX(getX());
         copy.setY(getY());
