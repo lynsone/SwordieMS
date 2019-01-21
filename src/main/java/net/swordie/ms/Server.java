@@ -9,6 +9,7 @@ import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.netty.ChannelAcceptor;
 import net.swordie.ms.connection.netty.ChatAcceptor;
 import net.swordie.ms.connection.netty.LoginAcceptor;
+import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
@@ -88,9 +89,10 @@ public class Server extends Properties {
 		}
 		log.info(String.format("Finished loading server in %dms", System.currentTimeMillis() - startNow));
 		new Thread(() -> {
-			// jvm warmup
-			new ScriptEngineManager().getEngineByName("python");
+			// inits the script engine
+			log.info(String.format("Starting script engine for %s", ScriptManagerImpl.SCRIPT_ENGINE_NAME));
 		}).start();
+
 	}
 
 	private void checkAndCreateDat() {

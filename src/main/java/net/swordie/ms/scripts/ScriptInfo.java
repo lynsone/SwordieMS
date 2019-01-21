@@ -1,5 +1,6 @@
 package net.swordie.ms.scripts;
 
+import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import java.util.LinkedList;
@@ -12,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ScriptInfo {
     private ScriptType scriptType;
-    private ScriptEngine scriptEngine;
+    private Bindings bindings;
     private int parentID;
     private String scriptName;
     private Invocable invocable;
@@ -22,16 +23,16 @@ public class ScriptInfo {
     private String fileDir;
     private boolean isActive;
 
-    public ScriptInfo(ScriptType scriptType, ScriptEngine scriptEngine, int parentID, String scriptName) {
+    public ScriptInfo(ScriptType scriptType, Bindings bindings, int parentID, String scriptName) {
         this.scriptType = scriptType;
-        this.scriptEngine = scriptEngine;
         this.parentID = parentID;
         this.scriptName = scriptName;
+        this.bindings = bindings;
     }
 
-    public ScriptInfo(ScriptType scriptType, ScriptEngine scriptEngine, int parentID, String scriptName, Invocable invocable) {
+    public ScriptInfo(ScriptType scriptType, Bindings bindings, int parentID, String scriptName, Invocable invocable) {
         this.scriptType = scriptType;
-        this.scriptEngine = scriptEngine;
+        this.bindings = bindings;
         this.parentID = parentID;
         this.scriptName = scriptName;
         this.invocable = invocable;
@@ -45,12 +46,12 @@ public class ScriptInfo {
         this.scriptType = scriptType;
     }
 
-    public ScriptEngine getScriptEngine() {
-        return scriptEngine;
+    public Bindings getBindings() {
+        return bindings;
     }
 
-    public void setScriptEngine(ScriptEngine scriptEngine) {
-        this.scriptEngine = scriptEngine;
+    public void setBindings(Bindings bindings) {
+        this.bindings = bindings;
     }
 
     public int getParentID() {

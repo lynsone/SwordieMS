@@ -84,13 +84,14 @@ import static net.swordie.ms.life.npc.NpcMessageType.*;
  */
 public class ScriptManagerImpl implements ScriptManager {
 
-	private static final String SCRIPT_ENGINE_NAME = "python";
+	public static final String SCRIPT_ENGINE_NAME = "python";
 	private static final String SCRIPT_ENGINE_EXTENSION = ".py";
 	private static final String DEFAULT_SCRIPT = "undefined";
 	public static final String QUEST_START_SCRIPT_END_TAG = "s";
 	public static final String QUEST_COMPLETE_SCRIPT_END_TAG = "e";
 	private static final String INTENDED_NPE_MSG = "Intended NPE by forceful script stop.";
 	private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+	private static final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
 
 	private Char chr;
 	private Field field;
@@ -122,9 +123,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		this(null, field);
 	}
 
-	private ScriptEngine getScriptEngineByType(ScriptType scriptType) {
+	private Bindings getBindingsByType(ScriptType scriptType) {
 		ScriptInfo si = getScriptInfoByType(scriptType);
-		return si == null ? null : si.getScriptEngine();
+		return si == null ? null : si.getBindings();
 	}
 
 	public ScriptInfo getScriptInfoByType(ScriptType scriptType) {
@@ -182,24 +183,24 @@ public class ScriptManagerImpl implements ScriptManager {
 			log.debug(String.format("Starting script %s, scriptType %s.", scriptName, scriptType));
 		}
 		resetParam();
-		ScriptEngine scriptEngine = getScriptEngineByType(scriptType);
-		if (scriptEngine == null) {
-			scriptEngine = new ScriptEngineManager().getEngineByName(SCRIPT_ENGINE_NAME);
-			scriptEngine.put("sm", this);
-			scriptEngine.put("chr", chr);
-			scriptEngine.put("field", chr == null ? field : chr.getField());
+		Bindings bindings = getBindingsByType(scriptType);
+		if (bindings == null) {
+			bindings = scriptEngine.createBindings();
+			bindings.put("sm", this);
+			bindings.put("chr", chr);
+			bindings.put("field", chr == null ? field : chr.getField());
 		}
-		scriptEngine.put("parentID", parentID);
-		scriptEngine.put("scriptType", scriptType);
-		scriptEngine.put("objectID", objID);
+		bindings.put("parentID", parentID);
+		bindings.put("scriptType", scriptType);
+		bindings.put("objectID", objID);
 		if (scriptType == ScriptType.Reactor) {
-			scriptEngine.put("reactor", chr.getField().getLifeByObjectID(objID));
+			bindings.put("reactor", chr.getField().getLifeByObjectID(objID));
 		}
 		if (scriptType == ScriptType.Quest) {
-			scriptEngine.put("startQuest",
+			bindings.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
 		}
-		ScriptInfo scriptInfo = new ScriptInfo(scriptType, scriptEngine, parentID, scriptName);
+		ScriptInfo scriptInfo = new ScriptInfo(scriptType, bindings, parentID, scriptName);
 		if (scriptType == ScriptType.Npc) {
 			getNpcScriptInfo().setTemplateID(parentID);
 		}
@@ -237,7 +238,8 @@ public class ScriptManagerImpl implements ScriptManager {
 		CompiledScript cs;
 		getScriptInfoByType(scriptType).setFileDir(dir);
 		StringBuilder script = new StringBuilder();
-		ScriptEngine se = getScriptEngineByType(scriptType);
+		ScriptEngine se = scriptEngine;
+		Bindings bindings = getBindingsByType(scriptType);
 		si.setInvocable((Invocable) se);
 		try {
 			fileReadLock.lock();
@@ -250,7 +252,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 		try {
 			cs = ((Compilable) se).compile(script.toString());
-			cs.eval();
+			cs.eval(bindings);
 		} catch (ScriptException e) {
 			if (!e.getMessage().contains(INTENDED_NPE_MSG)) {
 				log.error(String.format("Unable to compile script %s!", name));
@@ -259,11 +261,12 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		} finally {
 			if (si.isActive() && name.equals(si.getScriptName()) &&
-                    ((scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField)
+					((scriptType != ScriptType.Field && scriptType != ScriptType.FirstEnterField)
 							|| (chr != null && chr.getFieldID() == si.getParentID()))) {
-                // gracefully stop script if it's still active with the same script info (scriptName, or scriptName +
-                // current chr fieldID == fieldscript's fieldID if scriptType == Field).
-                stop(scriptType);
+				// gracefully stop script if it's still active with the same script info (scriptName, or scriptName +
+				// current chr fieldID == fieldscript's fieldID if scriptType == Field).
+				// This makes it so field scripts won't cancel new field scripts when having a warp() in them.
+				stop(scriptType);
 			}
 		}
 	}
