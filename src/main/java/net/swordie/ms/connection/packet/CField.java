@@ -663,8 +663,23 @@ public class CField {
 
         return outPacket;
     }
-    public static OutPacket openUI(int uiID){
+
+    public static OutPacket openUI(UIType uiType) {
+        return openUI(uiType.getVal());
+    }
+
+    public static OutPacket openUI(int uiID) {
         OutPacket outpacket = new OutPacket(OutHeader.OPEN_UI);
+        outpacket.encodeInt(uiID);
+        return outpacket;
+    }
+
+    public static OutPacket closeUI(UIType uiType) {
+        return closeUI(uiType.getVal());
+    }
+
+    public static OutPacket closeUI(int uiID) {
+        OutPacket outpacket = new OutPacket(OutHeader.CLOSE_UI);
         outpacket.encodeInt(uiID);
         return outpacket;
     }

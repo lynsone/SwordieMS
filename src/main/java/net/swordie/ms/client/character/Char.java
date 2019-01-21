@@ -2381,6 +2381,7 @@ public class Char {
 		setPosition(new Position(portal.getX(), portal.getY()));
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
+		showProperUI(toField.getId());
 		if (characterData) {
 			initSoulMP();
 			Party party = getParty();
@@ -3307,6 +3308,14 @@ public class Char {
 
 	public Field getPersonalById(int id) {
 		return getFields().get(id);
+	}
+
+	private void showProperUI(int toField) {
+		if (GameConstants.getMaplerunnerField(toField) > 0) {
+			write(CField.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+		} else {
+			write(CField.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+		}
 	}
 
 	public int calculateBulletIDForAttack() {

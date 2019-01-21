@@ -709,6 +709,17 @@ public class GameConstants {
         return guildExp[curLevel];
     }
 
+    // -1 if not in Maplerunner
+    // 0 for lobby
+    // N (1-50) for Maplerunner stages
+    public static int getMaplerunnerField(int fieldId) {
+        // Forest of Tenacity prefix
+        if (fieldId / 10000 != 99300) {
+            return -1;
+        }
+        return fieldId % 1000 / 10;
+    }
+
     public static int[][] getIncValArray(int job) {
         int jobRace = job / 1000;
         int jobCategory = JobConstants.getJobCategory((short) job);
