@@ -29,6 +29,7 @@ import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -1773,8 +1774,34 @@ public class AdminCommands {
             chr.getField().getReactors().forEach(reactor -> chr.chatMessage(reactor.toString()));
         }
     }
+    
+    @Command(names = {"script"}, requiredType = Tester)
+    public static class StartScriptTest extends AdminCommand {
 
-
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 3) {
+                chr.chatMessage("!script <type> <name>");
+                return;
+            }
+            ScriptType st = null;
+            for (ScriptType type : ScriptType.values()) {
+                if (type.toString().equalsIgnoreCase(args[1])) {
+                    st = type;
+                    break;
+                }
+            }
+            if (st == null) {
+                StringBuilder str = new StringBuilder();
+                for (ScriptType t : ScriptType.values()) {
+                    str.append(t.toString()).append(", ");
+                }
+                String res = str.toString().substring(0, str.length() - 2);
+                chr.chatMessage(String.format("Unknown script type %s, known types: %s", args[1], res));
+                return;
+            }
+            chr.getScriptManager().startScript(0, args[2], st);
+        }
+    }
 
 
 }
