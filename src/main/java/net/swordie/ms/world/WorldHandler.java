@@ -1768,36 +1768,31 @@ public class WorldHandler {
         if (success) {
             short val;
             int thirdLineChance = ItemConstants.THIRD_LINE_CHANCE;
-            switch (scrollID) {
-                case 2049400: // Rare Pot
-                case 2049401:
-                case 2049402:
-                case 2049403:
-                case 2049404:
-                case 2049405:
-                case 2049406:
-                case 2049407:
-                case 2049408:
-                case 2049412:
-                case 2049413:
-                case 2049414:
-                case 2049415:
-                case 2049416:
-                case 2049417:
-                case 2049418:
-                case 2049419:
+            switch (scrollID / 10) {
+                case 204940: // Rare Pot
+                case 204941:
+                case 204942:
+                case 204943:
+                case 204944:
+                case 204945:
+                case 204946:
                     val = ItemGrade.HiddenRare.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
-                case 2049700: // Epic pot
-                case 2049708:
+                case 204970: // Epic pot
+                case 204971:
                     val = ItemGrade.HiddenEpic.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
-                case 2049762: // Unique Pot
-                case 2049764:
-                case 2049758:
+                case 204974: // Unique Pot
+                case 204975:
+                case 204976:
+                case 204979:
                     val = ItemGrade.HiddenUnique.getVal();
+                    equip.setHiddenOptionBase(val, thirdLineChance);
+                    break;
+                case 204978: // Legendary Pot
+                    val = ItemGrade.HiddenLegendary.getVal();
                     equip.setHiddenOptionBase(val, thirdLineChance);
                     break;
 
