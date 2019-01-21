@@ -47,8 +47,8 @@ public class World {
         this.reboot = reboot;
     }
 
-    public World(int worldId, String name, int amountOfChannels) {
-        this(worldId, name, 0, "", 100, 100,
+    public World(int worldId, String name, int amountOfChannels, String worldEventMsg) {
+        this(worldId, name, 0, worldEventMsg, 100, 100,
                 0, amountOfChannels, false, false);
         initGuilds();
     }

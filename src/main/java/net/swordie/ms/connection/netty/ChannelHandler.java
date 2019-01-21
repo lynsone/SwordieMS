@@ -671,6 +671,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case SET_PASSENSER_RESULT:
                 WorldHandler.handleSetPassenserResult(chr, inPacket);
                 break;
+            case USER_TRANSFER_FREE_MARKET_REQUEST:
+                WorldHandler.handleTransferFreeMarketRequest(chr, inPacket);
+                break;
             default:
                 handleUnknown(inPacket, op);
                 break;

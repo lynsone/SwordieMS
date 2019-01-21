@@ -316,4 +316,12 @@ public class Login {
 
         return outPacket;
     }
+
+    public static OutPacket sendRecommendWorldMessage(int nWorldID, String nMsg) {
+        OutPacket oPacket = new OutPacket(OutHeader.RECOMMENDED_WORLD_MESSAGE);
+        oPacket.encodeByte(1);
+        oPacket.encodeInt(nWorldID);
+        oPacket.encodeString(nMsg);
+        return oPacket;
+    }
 }

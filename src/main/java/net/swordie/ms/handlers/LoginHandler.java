@@ -1,5 +1,6 @@
 package net.swordie.ms.handlers;
 
+import net.swordie.ms.ServerConfig;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.BroadcastMsg;
@@ -119,6 +120,7 @@ public class LoginHandler {
     public static void handleWorldListRequest(Client c, InPacket packet) {
         c.write(Login.sendWorldInformation(null));
         c.write(Login.sendWorldInformationEnd());
+        c.write(Login.sendRecommendWorldMessage(ServerConfig.WORLD_ID, ServerConfig.RECOMMEND_MSG));
     }
 
     public static void handleServerStatusRequest(Client c, InPacket inPacket) {
