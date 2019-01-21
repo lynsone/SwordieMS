@@ -23,6 +23,7 @@ import net.swordie.ms.client.character.potential.CharacterPotential;
 import net.swordie.ms.client.character.potential.CharacterPotentialMan;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
+import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
@@ -44,6 +45,7 @@ import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.party.PartyResult;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
+import net.swordie.ms.connection.db.InlinedIntArrayConverter;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
@@ -123,11 +125,11 @@ public class Char {
 
 	@JoinColumn(name = "equippedInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equippedInventory = new Inventory(InvType.EQUIPPED, 52);
+	private Inventory equippedInventory = new Inventory(EQUIPPED, 52);
 
 	@JoinColumn(name = "equipInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Inventory equipInventory = new Inventory(InvType.EQUIP, 52);
+	private Inventory equipInventory = new Inventory(EQUIP, 52);
 
 	@JoinColumn(name = "consumeInventory")
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -392,6 +394,8 @@ public class Char {
 	private Map<Integer, Integer> hyperPsdSkillsCooltimeR = new HashMap<>();
 	@Transient
 	private boolean isInvincible = false;
+	@Convert(converter = InlinedIntArrayConverter.class)
+	private List<Integer> quickslotKeys;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -2158,7 +2162,7 @@ public class Char {
 			getField().removeSummon(equippedSummonSkill, getId());
 
             getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
-            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(CharacterTemporaryStat.RepeatEffect).rOption);
+            getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(RepeatEffect).rOption);
 		}
 	}
 
@@ -2448,7 +2452,7 @@ public class Char {
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
 		}
-		if (getFieldInstanceType() == FieldInstanceType.CHANNEL) {
+		if (getFieldInstanceType() == CHANNEL) {
 			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
@@ -2680,6 +2684,7 @@ public class Char {
 			addMoney(drop.getMoney());
 			getQuestManager().handleMoneyGain(drop.getMoney());
 			write(WvsContext.dropPickupMessage(drop.getMoney(), (short) 0, (short) 0));
+			dispose();
 			return true;
 		} else {
 			Item item = drop.getItem();
@@ -2921,7 +2926,7 @@ public class Char {
 	}
 
 	public int getTotalChuc() {
-		return getInventoryByType(InvType.EQUIPPED).getItems().stream().mapToInt(i -> ((Equip) i).getChuc()).sum();
+		return getInventoryByType(EQUIPPED).getItems().stream().mapToInt(i -> ((Equip) i).getChuc()).sum();
 	}
 
 	public int getDriverID() {
@@ -3305,7 +3310,7 @@ public class Char {
 	}
 
 	public int calculateBulletIDForAttack() {
-		Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.Weapon);
+		Item weapon = getEquippedInventory().getFirstItemByBodyPart(Weapon);
 		if (weapon == null) {
 			return 0;
 		}
@@ -3750,6 +3755,10 @@ public class Char {
 			int alteredcd = getJobHandler().alterCooldownSkill(skillID);
 			if (alteredcd >= 0) {
 				cdInMillis = alteredcd;
+			}
+			// RuneStone of Skill
+			if (getTemporaryStatManager().hasStatBySkillId(RuneStone.LIBERATE_THE_RUNE_OF_SKILL) && cdInMillis > 5000 && !si.isNotCooltimeReset()) {
+				cdInMillis = 5000;
 			}
 			if (!hasSkillCDBypass() && cdInMillis > 0) {
 				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
@@ -4439,5 +4448,13 @@ public class Char {
 
 	public void setInvincible(boolean invincible) {
 		isInvincible = invincible;
+	}
+
+	public void setQuickslotKeys(List<Integer> quickslotKeys) {
+		this.quickslotKeys = quickslotKeys;
+	}
+
+	public List<Integer> getQuickslotKeys() {
+		return quickslotKeys;
 	}
 }

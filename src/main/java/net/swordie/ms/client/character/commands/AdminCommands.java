@@ -15,6 +15,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
@@ -24,8 +25,11 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
+import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -1122,8 +1126,10 @@ public class AdminCommands {
                     }
                     if (map.size() == 0) {
                         chr.chatMessage(Mob, "No " + queryType + "s found for query " + query);
+                        return;
                     }
-                    for (Map.Entry<Integer, String> entry : map.entrySet()) {
+                    TreeMap<Integer, String> sortedMap = new TreeMap<>(map);
+                    for (Map.Entry<Integer, String> entry : sortedMap.entrySet()) {
                         id = entry.getKey();
                         name = entry.getValue();
                         if (queryType.equalsIgnoreCase("item")) {
@@ -1641,6 +1647,32 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"mobstat"}, requiredType = Tester)
+    public static class MobStatTest extends AdminCommand {
+
+        public static void execute(Char chr, String[] args) {
+            List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
+            if (mobs.size() > 0) {
+                Mob mob = mobs.get(0);
+                MobTemporaryStat mts = mob.getTemporaryStat();
+                Option o = new Option();
+                o.nOption = 1000;
+                o.rOption = 145;
+                o.slv = 1;
+                o.tOption = 1000;
+
+                o.wOption = 1000;
+
+                o.mOption = 1000;
+                o.bOption = 1000;
+                o.nReason = 1000;
+                mts.addMobSkillOptionsAndBroadCast(MobStat.PCounter, o);
+            } else {
+                chr.chatMessage("Could not find a mob.");
+            }
+        }
+    }
+
     @Command(names = {"fp", "findportal"}, requiredType = Tester)
     public static class FP extends AdminCommand { // FindPortal
         public static void execute(Char chr, String[] args) {
@@ -1742,8 +1774,34 @@ public class AdminCommands {
             chr.getField().getReactors().forEach(reactor -> chr.chatMessage(reactor.toString()));
         }
     }
+    
+    @Command(names = {"script"}, requiredType = Tester)
+    public static class StartScriptTest extends AdminCommand {
 
-
+        public static void execute(Char chr, String[] args) {
+            if (args.length < 3) {
+                chr.chatMessage("!script <type> <name>");
+                return;
+            }
+            ScriptType st = null;
+            for (ScriptType type : ScriptType.values()) {
+                if (type.toString().equalsIgnoreCase(args[1])) {
+                    st = type;
+                    break;
+                }
+            }
+            if (st == null) {
+                StringBuilder str = new StringBuilder();
+                for (ScriptType t : ScriptType.values()) {
+                    str.append(t.toString()).append(", ");
+                }
+                String res = str.toString().substring(0, str.length() - 2);
+                chr.chatMessage(String.format("Unknown script type %s, known types: %s", args[1], res));
+                return;
+            }
+            chr.getScriptManager().startScript(0, args[2], st);
+        }
+    }
 
 
 }

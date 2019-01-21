@@ -115,11 +115,11 @@ public class Warrior extends Beginner {
     public static final int SMITE_SHIELD = 1221052; //Lv170
 
 
-    private int[] addedSkills = new int[] {
+    private int[] addedSkills = new int[]{
             MAPLE_RETURN,
     };
 
-    private final int[] buffs = new int[] {
+    private final int[] buffs = new int[]{
             WEAPON_BOOSTER_FIGHTER, // Weapon Booster - Fighter
             COMBO_ATTACK, // Combo Attack
             RAGE, // Rage
@@ -177,7 +177,6 @@ public class Warrior extends Beginner {
     public boolean isHandlerOfJob(short id) {
         return JobConstants.isAdventurerWarrior(id);
     }
-
 
 
     // Buff related methods --------------------------------------------------------------------------------------------
@@ -239,7 +238,7 @@ public class Warrior extends Beginner {
                 o1.tOption = 0;
                 tsm.putCharacterStatValue(EVA, o1); // Check for the main Buff method
 
-                if(parashockGuardTimer != null && !parashockGuardTimer.isDone()) {
+                if (parashockGuardTimer != null && !parashockGuardTimer.isDone()) {
                     parashockGuardTimer.cancel(true);
                 }
                 giveParashockGuardBuff();
@@ -300,8 +299,8 @@ public class Warrior extends Beginner {
                     tsm.putCharacterStatValue(Beholder, o1);
                 }
                 break;
-            case EVIL_EYE_SHOCK :
-                if (tsm.getOption(Beholder).nOption > 0 &&tsm.getOption(Beholder).sOption > 0) //If evil eye and domination is active
+            case EVIL_EYE_SHOCK:
+                if (tsm.getOption(Beholder).nOption > 0 && tsm.getOption(Beholder).sOption > 0) //If evil eye and domination is active
                 {
                     slv = (byte) chr.getSkill(EVIL_EYE).getCurrentLevel();
                     Option o = new Option();
@@ -450,28 +449,20 @@ public class Warrior extends Beginner {
         if (currentCount < 0) {
             return;
         }
-        if (currentCount < getMaxCombo(chr)) {
-            Skill skill = chr.getSkill(ADVANCED_COMBO);
-            byte slv = (byte) skill.getCurrentLevel();
-            SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-            if(chr.hasSkill(ADVANCED_COMBO) && Util.succeedProp(si.getValue(prop, slv)) && currentCount + 1 < getMaxCombo(chr))
-            {
-                Option o = new Option();
-                o.nOption = currentCount + 2;
-                o.rOption = COMBO_ATTACK;
-                tsm.putCharacterStatValue(ComboCounter, o);
-                tsm.sendSetStatPacket();
-            }
-            else
-            {
-                Option o = new Option();
-                o.nOption = currentCount + 1;
-                o.rOption = COMBO_ATTACK;
-                tsm.putCharacterStatValue(ComboCounter, o);
-                tsm.sendSetStatPacket();
-
+        int maxCombo = getMaxCombo(chr);
+        int added = 1;
+        if (chr.hasSkill(ADVANCED_COMBO)) {
+            int slv = chr.getSkillLevel(ADVANCED_COMBO);
+            SkillInfo si = SkillData.getSkillInfoById(ADVANCED_COMBO);
+            if (slv > 0 && Util.succeedProp(si.getValue(prop, slv))) {
+                added = 2;
             }
         }
+        Option o = new Option();
+        o.nOption = Math.min(maxCombo, currentCount + added);
+        o.rOption = COMBO_ATTACK;
+        tsm.putCharacterStatValue(ComboCounter, o);
+        tsm.sendSetStatPacket();
     }
 
     private void removeCombo(Char chr, int count) {
@@ -514,7 +505,7 @@ public class Warrior extends Beginner {
         if (chr.hasSkill(COMBO_ATTACK)) {
             num = 6;
         }
-        if (chr.hasSkill(1120003)) {
+        if (chr.hasSkill(ADVANCED_COMBO)) {
             num = 11;
         }
         return num;
@@ -527,7 +518,7 @@ public class Warrior extends Beginner {
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             byte slv = (byte) skill.getCurrentLevel();
             Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-            if(!chr.isLeft()) {
+            if (!chr.isLeft()) {
                 rect = rect.moveRight();
             }
             Party party = chr.getParty();
@@ -593,7 +584,7 @@ public class Warrior extends Beginner {
 
     public void healByEvilEye() {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(chr.hasSkill(EVIL_EYE) && tsm.hasStatBySkillId(EVIL_EYE)) {
+        if (chr.hasSkill(EVIL_EYE) && tsm.hasStatBySkillId(EVIL_EYE)) {
             Skill skill = chr.getSkill(EVIL_EYE);
             SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
             byte slv = (byte) skill.getCurrentLevel();
@@ -636,7 +627,6 @@ public class Warrior extends Beginner {
             tsm.sendSetStatPacket();
         }
     }
-
 
 
     // Attack related methods ------------------------------------------------------------------------------------------
@@ -708,21 +698,18 @@ public class Warrior extends Beginner {
                 }
                 break;
             case COMBO_FURY_DOWN:
-                    removeCombo(chr, 1);
+                removeCombo(chr, 1);
                 break;
             case PANIC:
-                if(tsm.hasStat(ComboCostInc))
-                {
-                   int amount =  tsm.getOption(ComboCostInc).nOption;
+                if (tsm.hasStat(ComboCostInc)) {
+                    int amount = tsm.getOption(ComboCostInc).nOption;
                     removeCombo(chr, 2 + amount);
                     o3.nOption = amount + 1;
                     o3.rOption = PANIC;
                     o3.tOption = si.getValue(subTime, slv);
                     tsm.putCharacterStatValue(ComboCostInc, o3);
                     tsm.sendSetStatPacket();
-                }
-                else
-                {
+                } else {
                     o3.nOption = 1;
                     o3.rOption = PANIC;
                     o3.tOption = si.getValue(subTime, slv);
@@ -786,7 +773,7 @@ public class Warrior extends Beginner {
                 chr.write(UserLocal.skillCooltimeSetM(SHOUT, 10000));
                 break;
             case PUNCTURE:
-                    removeCombo(chr, si.getValue(y, slv));
+                removeCombo(chr, si.getValue(y, slv));
                 for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
                     Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
                     if (mob == null) {
@@ -809,7 +796,7 @@ public class Warrior extends Beginner {
                         if (mob == null) {
                             continue;
                         }
-                        if(!mob.isBoss()) {
+                        if (!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
                             o1.rOption = skill.getSkillId();
@@ -856,7 +843,7 @@ public class Warrior extends Beginner {
                         if (mob == null) {
                             continue;
                         }
-                        if(!mob.isBoss()) {
+                        if (!mob.isBoss()) {
                             MobTemporaryStat mts = mob.getTemporaryStat();
                             o1.nOption = 1;
                             o1.rOption = skill.getSkillId();
@@ -932,7 +919,7 @@ public class Warrior extends Beginner {
                     if (mob == null) {
                         continue;
                     }
-                    if(!mob.isBoss()) {
+                    if (!mob.isBoss()) {
                         MobTemporaryStat mts = mob.getTemporaryStat();
                         o1.nOption = 1;
                         o1.rOption = skill.getSkillId();
@@ -969,7 +956,7 @@ public class Warrior extends Beginner {
                             if (mob == null) {
                                 continue;
                             }
-                            if(!mob.isBoss()) {
+                            if (!mob.isBoss()) {
                                 MobTemporaryStat mts = mob.getTemporaryStat();
                                 o1.nOption = 1;
                                 o1.rOption = skill.getSkillId();
@@ -980,7 +967,7 @@ public class Warrior extends Beginner {
                         }
                     }
                 }
-                    break;
+                break;
         }
         super.handleAttack(c, attackInfo);
     }
@@ -1060,7 +1047,7 @@ public class Warrior extends Beginner {
     @Override
     public int getFinalAttackSkill() {
         Skill faSkill = getFinalAtkSkill();
-        if(faSkill != null) {
+        if (faSkill != null) {
             SkillInfo si = SkillData.getSkillInfoById(faSkill.getSkillId());
             byte slv = (byte) faSkill.getCurrentLevel();
             int proc = si.getValue(prop, slv);
@@ -1072,8 +1059,7 @@ public class Warrior extends Beginner {
         return 0;
     }
 
-    public boolean isComboIgnoreSkill(int skillID)
-    {
+    public boolean isComboIgnoreSkill(int skillID) {
         return skillID == SHOUT ||
                 skillID == SHOUT_DOWN ||
                 skillID == PANIC ||
@@ -1113,7 +1099,7 @@ public class Warrior extends Beginner {
                     break;
                 case THREATEN:
                     Rect rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                    if(!chr.isLeft()) {
+                    if (!chr.isLeft()) {
                         rect = rect.moveRight();
                     }
                     for (Life life : chr.getField().getLifesInRect(rect)) {
@@ -1146,17 +1132,17 @@ public class Warrior extends Beginner {
                     tsm.sendSetStatPacket();
 
                     Party party = chr.getParty();
-                    if(party != null) {
+                    if (party != null) {
                         Field field = chr.getField();
                         rect = chr.getPosition().getRectAround(si.getRects().get(0));
-                        if(!chr.isLeft()) {
+                        if (!chr.isLeft()) {
                             rect = rect.moveRight();
                         }
                         List<PartyMember> eligblePartyMemberList = field.getPartyMembersInRect(chr, rect).stream().
                                 filter(pml -> pml.getChr().getId() != chr.getId() &&
                                         pml.getChr().getHP() <= 0).
                                 collect(Collectors.toList());
-                                
+
                         if (eligblePartyMemberList.size() > 0) {
                             Char randomPartyChr = Util.getRandomFromCollection(eligblePartyMemberList).getChr();
                             TemporaryStatManager partyTSM = randomPartyChr.getTemporaryStatManager();
@@ -1236,7 +1222,6 @@ public class Warrior extends Beginner {
         }
         return -1;
     }
-
 
 
     // Hit related methods ---------------------------------------------------------------------------------------------
@@ -1382,7 +1367,7 @@ public class Warrior extends Beginner {
 
     public static boolean isFinalPactAvailable(Char chr) {
         Skill skill = chr.getSkill(FINAL_PACT_INFO);
-        if(skill == null) {
+        if (skill == null) {
             return false;
         }
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
@@ -1394,13 +1379,13 @@ public class Warrior extends Beginner {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
         Option o = new Option();
         Skill skill = chr.getSkill(FINAL_PACT_INFO);
-        if(skill == null || !tsm.hasStat(Reincarnation)) {
+        if (skill == null || !tsm.hasStat(Reincarnation)) {
             return;
         }
         int duration = (int) (finishFinalPact - System.currentTimeMillis());
 
         killCount = tsm.getOption(Reincarnation).xOption;
-        if(killCount > 0) {
+        if (killCount > 0) {
             killCount--;
 
             if (duration > 0) {
@@ -1420,13 +1405,13 @@ public class Warrior extends Beginner {
 
     private void killCountFinalPactOnMob(AttackInfo attackInfo) {
         TemporaryStatManager tsm = chr.getTemporaryStatManager();
-        if(!tsm.hasStat(Reincarnation)) {
+        if (!tsm.hasStat(Reincarnation)) {
             return;
         }
-        for(MobAttackInfo mai : attackInfo.mobAttackInfo) {
+        for (MobAttackInfo mai : attackInfo.mobAttackInfo) {
             Mob mob = (Mob) chr.getField().getLifeByObjectID(mai.mobId);
 
-            if(mob != null) {
+            if (mob != null) {
                 if (mob.isBoss()) {
                     lowerFinalPactKillCount();
                 } else {

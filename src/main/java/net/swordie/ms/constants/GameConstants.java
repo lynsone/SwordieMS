@@ -30,6 +30,7 @@ public class GameConstants {
     public static final long DAMAGE_CAP = 50_000_000;
     public static final int BEGINNER_SP_MAX_LV = 7;
     public static final int RESISTANCE_SP_MAX_LV = 10;
+    public static final int QUICKSLOT_LENGTH = 28;
 
     // Field
     public static final int NO_MAP_ID = 999999999;
@@ -155,6 +156,11 @@ public class GameConstants {
     public static final int EASY_HORNTAIL_QUEST = 99996; // Quest where the Spawn state of horntail's heads is stored
     public static final int EASY_HILLA_QUEST = 99995; //Quest where the state of hilla portals is stored
     public static final int ARKARIUM_QUEST = 99994; //Quest wehre difficulty of arkarium is stored
+
+    // Custom Quest QR Values
+    public static final int EVAN_INTRO = 99992; // Used for portal script "evanRoom1" so script doesn't loop
+    public static final int EVAN_INTRO2 = 99993; // Used for portal script "DragonEggNotice" so script doesn't loop
+
     // Trading
     public static final int MAX_TRADE_ITEMS = 9;
 

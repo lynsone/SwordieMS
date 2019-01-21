@@ -192,6 +192,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
+		if (scriptType == ScriptType.Reactor) {
+			scriptEngine.put("reactor", chr.getField().getLifeByObjectID(objID));
+		}
 		if (scriptType == ScriptType.Quest) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
@@ -1056,6 +1059,10 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void setFieldColour(GreyFieldType colorFieldType, short red, short green, short blue, int time) {
 		chr.write(CField.fieldEffect(FieldEffect.setFieldColor(colorFieldType, red, green, blue, time)));
+	}
+
+	public void setFieldGrey(GreyFieldType colorFieldType, boolean show) {
+		chr.write(CField.fieldEffect(FieldEffect.setFieldGrey(colorFieldType, show)));
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-#easy horntail gem
+# Easy horntail gem
 sm.spawnMob(8810102, 95, 260, False)
 sm.spawnMob(8810103, 95, 260, False)
 sm.spawnMob(8810104, 95, 260, False)

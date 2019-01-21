@@ -43,6 +43,8 @@ public class SkillInfo {
     private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
     private boolean psd;
     private Set<Integer> addAttackSkills = new HashSet<>();
+    private Map<Integer, Integer> extraSkillInfo = new HashMap<>();
+    private boolean ignoreCounter;
 
     public int getSkillId() {
         return skillId;
@@ -320,5 +322,21 @@ public class SkillInfo {
 
     public void addAddAttackSkills(int skillId) {
         getAddAttackSkills().add(skillId);
+    }
+
+    public Map<Integer, Integer> getExtraSkillInfo() {
+        return extraSkillInfo;
+    }
+
+    public void setExtraSkillInfo(Map<Integer, Integer> extraSkillInfo) {
+        this.extraSkillInfo = extraSkillInfo;
+    }
+
+    public void addExtraSkillInfo(int skillid, int delay) {
+        getExtraSkillInfo().put(skillid, delay);
+    }
+
+    public boolean isIgnoreCounter() {
+        return getValue(SkillStat.ignoreCounter, 1) != 0;
     }
 }

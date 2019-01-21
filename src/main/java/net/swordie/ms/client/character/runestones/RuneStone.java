@@ -135,10 +135,7 @@ public class RuneStone {
                 runeBuffID = LIBERATE_THE_RUNE_OF_HORDES;
                 break;
             case Skill:
-
-                //TODO Cooldown reduction for cooldowns that are longer than 5sec
-
-                applyRuneSkill(chr);
+                // Handled in Char.java : setSkillCooldown
                 runeBuffID = LIBERATE_THE_RUNE_OF_SKILL;
                 break;
         }
@@ -298,10 +295,6 @@ public class RuneStone {
     }
 
     private void applyRuneRiches(Char chr) {
-        chr.chatMessage(ChatType.BlackOnWhite, "This rune's effect has not yet been implemented.");
-    }
-
-    private void applyRuneSkill(Char chr) {
         chr.chatMessage(ChatType.BlackOnWhite, "This rune's effect has not yet been implemented.");
     }
 }

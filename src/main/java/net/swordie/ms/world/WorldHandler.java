@@ -392,7 +392,7 @@ public class WorldHandler {
         int skillID = attackInfo.skillId;
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
-            (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
             chr.dispose();
             return;
         }
@@ -406,6 +406,9 @@ public class WorldHandler {
             chr.chatMessage(Mob, "SkillID: " + skillID);
             Job sourceJobHandler = chr.getJobHandler();
             SkillInfo si = SkillData.getSkillInfoById(skillID);
+            if (si != null && si.getExtraSkillInfo().size() > 0) {
+                chr.getField().broadcastPacket(CField.registerExtraSkill(chr.getPosition(), skillID, si.getExtraSkillInfo().keySet(), attackInfo.left));
+            }
             if (si != null && si.isMassSpell() && sourceJobHandler.isBuff(skillID) && chr.getParty() != null) {
                 Rect r = si.getFirstRect();
                 if (r != null) {
@@ -452,8 +455,9 @@ public class WorldHandler {
                         totalDamage += dmg;
                     }
                     mob.damage(chr, totalDamage);
+                    mob.handleDamageReflect(chr, skillID, totalDamage);
                     //TODO Horntail sponge damage, should make a separate function
-                    if((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810209)) {
+                    if ((mob.getTemplateId() >= 8810202 && mob.getTemplateId() <= 8810209)) {
                         Life life = field.getLifeByTemplateId(8810214);
                         if (life != null) {
                             Mob mob2 = (Mob) life;
@@ -461,30 +465,30 @@ public class WorldHandler {
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
                         }
                     }
-                    if((mob.getTemplateId() >= 8810002 && mob.getTemplateId() <= 8810009)){
+                    if ((mob.getTemplateId() >= 8810002 && mob.getTemplateId() <= 8810009)) {
                         Life life2 = field.getLifeByTemplateId(8810018);
-                        if(life2 != null) {
+                        if (life2 != null) {
                             Mob mob2 = (Mob) life2;
                             mob2.damage(chr, totalDamage);
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob2)));
                         }
                     }
-                    if((mob.getTemplateId() >= 8810102 && mob.getTemplateId() <= 8810109)){
+                    if ((mob.getTemplateId() >= 8810102 && mob.getTemplateId() <= 8810109)) {
                         Life life3 = field.getLifeByTemplateId(8810118);
-                        if(life3 != null) {
+                        if (life3 != null) {
                             Mob mob3 = (Mob) life3;
                             mob3.damage(chr, totalDamage);
                             field.broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob3)));
-                            }
                         }
                     }
-                    if (mob.getHp() < 0) {
-                        mob.onKilledByChar(chr);
-                        // MultiKill +1,  per killed mob
-                        multiKillMessage++;
-                        mobexp = mob.getForcedMobStat().getExp();
-                    }
                 }
+                if (mob != null && mob.getHp() < 0) {
+                    mob.onKilledByChar(chr);
+                    // MultiKill +1,  per killed mob
+                    multiKillMessage++;
+                    mobexp = mob.getForcedMobStat().getExp();
+                }
+            }
 
 
             // MultiKill Message Popup & Exp
@@ -494,6 +498,7 @@ public class WorldHandler {
                 chr.write(UserLocal.comboCounter((byte) 0, (int) totalBonusExp, multiKillMessage > 10 ? 10 : multiKillMessage));
                 chr.addExpNoMsg(totalBonusExp);
             }
+
         }
     }
 
@@ -983,7 +988,7 @@ public class WorldHandler {
         int skillId = inPacket.decodeInt();
         tsm.removeStatsBySkill(skillId);
 
-        if(SkillConstants.isKeyDownSkill(skillId)) {
+        if (SkillConstants.isKeyDownSkill(skillId)) {
             chr.getField().broadcastPacket(UserRemote.skillCancel(chr.getId(), skillId), chr);
         }
 
@@ -1092,7 +1097,7 @@ public class WorldHandler {
         byte channelId = (byte) (inPacket.decodeByte() + 1);
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
-            channelId < 1 || channelId > c.getWorld().getChannels().size()) {
+                channelId < 1 || channelId > c.getWorld().getChannels().size()) {
             chr.dispose();
             return;
         }
@@ -1159,7 +1164,7 @@ public class WorldHandler {
             PsychicLockBall plb = new PsychicLockBall();
             plb.localKey = inPacket.decodeInt();
             plb.psychicLockKey = inPacket.decodeInt();
-            plb.psychicLockKey = 1;
+            //plb.psychicLockKey = i;
             int mobID = inPacket.decodeInt();
             plb.mob = (Mob) f.getLifeByObjectID(mobID);
             plb.stuffID = inPacket.decodeShort();
@@ -1414,12 +1419,16 @@ public class WorldHandler {
                         int worldID = chr.getClient().getChannelInstance().getWorldId();
                         World world = Server.getInstance().getWorldById(worldID);
                         Char targetChr = world.getCharByName(targetName);
-                        Position targetPosition = targetChr.getPosition();
 
                         // Target doesn't exist
                         if (targetChr == null) {
                             chr.chatMessage(String.format("%s is not online.", targetName));
+                            chr.dispose();
+                            return;
                         }
+
+                        Position targetPosition = targetChr.getPosition();
+
                         Field targetField = targetChr.getField();
                         if (targetField == null || (targetField.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
                             chr.chatMessage("You may not warp to that map.");
@@ -1523,12 +1532,12 @@ public class WorldHandler {
                 case 5750001: // Nebulite Diffuser
                     ePos = inPacket.decodeShort();
                     equip = (Equip) chr.getEquipInventory().getItemBySlot(ePos);
-                    if (equip == null || equip.getSockets()[0] == 0 || equip.getSockets()[0] == ItemConstants.EMPTY_SOCKET_ID) {
+                    if (equip == null || equip.getSocket(0) == 0 || equip.getSocket(0) == ItemConstants.EMPTY_SOCKET_ID) {
                         chr.chatMessage("That item currently does not have an active socket.");
                         chr.dispose();
                         return;
                     }
-                    equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+                    equip.setSocket(0, ItemConstants.EMPTY_SOCKET_ID);
                     equip.updateToChar(chr);
                     break;
                 case 5072000: // Super Megaphone
@@ -2347,6 +2356,7 @@ public class WorldHandler {
             chr.write(UserLocal.questResult(QuestType.QuestRes_Act_Success, questID, npcTemplateID, 0, false));
         }
     }
+
     public static void handleUserCompleteNpcSpeech(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         QuestManager qm = chr.getQuestManager();
@@ -2362,13 +2372,13 @@ public class WorldHandler {
         }
         if (qm.hasQuestInProgress(questID)) {
             QuestInfo qi = QuestData.getQuestInfoById(questID);
-            String scriptName = qi.getSpeech().get(speech-1);
+            String scriptName = qi.getSpeech().get(speech - 1);
             if (scriptName == null || scriptName.equalsIgnoreCase("")) {
                 chr.chatMessage("Could not find that speech - quest id " + questID + ", speech " + speech);
             }
             if (scriptName.contains("NpcSpeech=")) {
                 if (scriptName.endsWith("/")) {
-                    scriptName = scriptName.substring(0, scriptName.length()-1);
+                    scriptName = scriptName.substring(0, scriptName.length() - 1);
                 }
                 Quest quest = chr.getQuestManager().getQuests().get(questID);
                 if (quest != null) {
@@ -2842,6 +2852,26 @@ public class WorldHandler {
                 chr.getSkillCoolTimes().put(skillID, System.currentTimeMillis() + 1000 * si.getValue(SkillStat.cooltime, gs.getLevel()));
                 chr.getJobHandler().handleJoblessBuff(c, inPacket, skillID, (byte) gs.getLevel());
                 break;
+            case Req_Search:
+                byte generalSearch = inPacket.decodeByte();
+                World world = c.getWorld();
+                Collection<Guild> guildCol;
+                if (generalSearch == 1) {
+                    int levMin = inPacket.decodeUByte();
+                    int levMax = inPacket.decodeUByte();
+                    int sizeMin = inPacket.decodeUByte();
+                    int sizeMax = inPacket.decodeUByte();
+                    int avgLevMin = inPacket.decodeUByte();
+                    int avgLevMax = inPacket.decodeUByte();
+                    guildCol = world.getGuildsWithCriteria(levMin, levMax, sizeMin, sizeMax, avgLevMin, avgLevMax);
+                } else {
+                    int searchType = inPacket.decodeShort();
+                    boolean exactWord = inPacket.decodeByte() != 0;
+                    String searchTerm = inPacket.decodeString();
+                    guildCol = world.getGuildsByString(searchType, exactWord, searchTerm);
+                }
+                chr.write(WvsContext.guildSearchResult(guildCol));
+                break;
             default:
                 log.error(String.format("Unhandled guild request %s", grt.toString()));
                 break;
@@ -2974,7 +3004,7 @@ public class WorldHandler {
         Char chr = c.getChr();
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
-            (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
             chr.dispose();
             return;
         }
@@ -3987,9 +4017,9 @@ public class WorldHandler {
             return;
         }
         boolean success = true;
-        if (equip.getSockets()[0] == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
+        if (equip.getSocket(0) == ItemConstants.INACTIVE_SOCKET && ItemConstants.canEquipHavePotential(equip)) {
             chr.consumeItem(item);
-            equip.getSockets()[0] = ItemConstants.EMPTY_SOCKET_ID;
+            equip.setSocket(0, ItemConstants.EMPTY_SOCKET_ID);
         } else {
             success = false;
         }
@@ -4010,7 +4040,7 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-        if (equip.getSockets()[0] != ItemConstants.EMPTY_SOCKET_ID) {
+        if (equip.getSocket(0) != ItemConstants.EMPTY_SOCKET_ID) {
             log.error("Tried to Nebulite an item without an empty socket.");
             chr.chatMessage("You can only insert a Nebulite into empty socket slots.");
             chr.dispose();
@@ -4023,7 +4053,7 @@ public class WorldHandler {
             return;
         }
         chr.consumeItem(item);
-        equip.getSockets()[0] = (short) (nebID % ItemConstants.NEBILITE_BASE_ID);
+        equip.setSocket(0, nebID % ItemConstants.NEBILITE_BASE_ID);
         equip.updateToChar(chr);
     }
 
@@ -4940,6 +4970,7 @@ public class WorldHandler {
         }
         Skill skill = chr.getSkill(skillID, true);
         if (si.getHyper() != 0) { // Passive hyper
+
             ExtendSP esp = chr.getAvatarData().getCharacterStat().getExtendSP();
             SPSet spSet = si.getHyper() == 1 ? esp.getSpSet().get(SkillConstants.PASSIVE_HYPER_JOB_LEVEL - 1) :
                     esp.getSpSet().get(SkillConstants.ACTIVE_HYPER_JOB_LEVEL - 1);
@@ -5176,8 +5207,8 @@ public class WorldHandler {
     public static void handleUserFieldTransferRequest(Char chr, InPacket inPacket) {
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0 ||
-            (field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
-            (field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
+                (field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
+                (field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
             chr.chatMessage("You may not warp to that map.");
             chr.dispose();
             return;
@@ -5841,7 +5872,7 @@ public class WorldHandler {
                 }
             }
             mob.setCurrentDestIndex(collision);
-            if (collision ==  mob.getEscortDest().size()) {
+            if (collision == mob.getEscortDest().size()) {
                 mob.clearEscortDest();// finished escort
             }
         }
@@ -5879,7 +5910,7 @@ public class WorldHandler {
                 break;
         }
 
-        if(!chr.canHold(new ArrayList<>(itemMap.keySet()))) {
+        if (!chr.canHold(new ArrayList<>(itemMap.keySet()))) {
             chr.chatMessage("Please make some space in your inventory.");
             chr.dispose();
             return;
@@ -6042,7 +6073,7 @@ public class WorldHandler {
             int rand = Randomizer.nextInt(100);
             List<MakingSkillRecipe.TargetElem> targets = msr.getTarget();
             while (true) {
-                target = targets.get(Randomizer.rand(0, targets.size()-1));
+                target = targets.get(Randomizer.rand(0, targets.size() - 1));
                 if (target.getProbWeight() >= rand) {
                     break;
                 } else {
@@ -6061,7 +6092,7 @@ public class WorldHandler {
                 crafted.setOwner(chr.getName());
                 crafted.setQuantity(1);// equipment shouldn't be more than one
             }
-            if (msr.getExpiredPeriod() > 0 ) {
+            if (msr.getExpiredPeriod() > 0) {
                 crafted.setDateExpire(FileTime.fromLong(System.currentTimeMillis() + ((long) msr.getExpiredPeriod() * 60 * 1000)));
             }
             if (msr.isNeedOpenItem()) {
@@ -6117,5 +6148,67 @@ public class WorldHandler {
                 }
             }
         }
+    }
+
+    public static void handleUserFollowCharacterRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int driverChrId = inPacket.decodeInt();
+        short unk = inPacket.decodeShort();
+
+        Char driverChr = field.getCharByID(driverChrId);
+        if(driverChr == null ) {
+            return;
+        }
+        driverChr.write(WvsContext.setPassenserRequest(chr.getId()));
+    }
+
+    public static void handleSetPassenserResult(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        int requestorChrId = inPacket.decodeInt();
+        boolean accepted = inPacket.decodeByte() != 0;
+        Char requestorChr = field.getCharByID(requestorChrId);
+
+        if (!accepted) {
+
+            int errorType = inPacket.decodeInt();
+            switch (errorType) {
+
+            }
+
+        } else {
+            requestorChr.write(User.followCharacter(chr.getId(), false, new Position()));
+
+        }
+    }
+
+    public static void handleQuickslotKeyMappedModified(Char chr, InPacket inPacket) {
+        final int length = GameConstants.QUICKSLOT_LENGTH;
+        List<Integer> quickslotKeys = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            quickslotKeys.add(inPacket.decodeInt());
+        }
+        chr.setQuickslotKeys(quickslotKeys);
+    }
+
+    public static void handleTransferFreeMarketRequest(Char chr, InPacket inPacket) {
+        byte toChannelID = (byte) (inPacket.decodeByte() + 1);
+        int fieldID = inPacket.decodeInt();
+
+        Field toField = chr.getClient().getChannelInstance().getField(fieldID);
+
+        if (toField == null) {
+            chr.dispose();
+            return;
+        }
+
+        int currentChannelID = chr.getClient().getChannel();
+
+        if(currentChannelID != toChannelID) {
+            chr.changeChannelAndWarp(toChannelID, fieldID);
+        } else {
+            chr.warp(toField);
+        }
+
+        inPacket.decodeInt(); // tick
     }
 }

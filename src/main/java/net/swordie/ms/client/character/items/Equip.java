@@ -2,6 +2,7 @@ package net.swordie.ms.client.character.items;
 
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.FileTimeConverter;
+import net.swordie.ms.connection.db.InlinedIntArrayConverter;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
@@ -75,9 +76,7 @@ public class Equip extends Item {
     private short rLevel;
     private short rJob;
     private short rPop;
-    @ElementCollection
-    @CollectionTable(name = "options", joinColumns = @JoinColumn(name = "equipID"))
-    @Column(name = "optionID")
+    @Convert(converter = InlinedIntArrayConverter.class)
     private List<Integer> options = new ArrayList<>(); // base + add pot + anvil
     private int specialGrade;
     private boolean fixedPotential;
@@ -98,11 +97,8 @@ public class Equip extends Item {
     private int fixedGrade;
     @Transient
     private Map<EnchantStat, Integer> enchantStats = new HashMap<>();
-    @ElementCollection
-    @CollectionTable(name = "sockets", joinColumns = @JoinColumn(name = "equipID"))
-    @Column(name = "socketID")
-    @OrderColumn(name = "ord")
-    private short[] sockets = new short[3];
+    @Convert(converter = InlinedIntArrayConverter.class)
+    private List<Short> sockets = new ArrayList<>();
     @Transient
     private int dropStreak = 0;
     @Transient
@@ -214,7 +210,7 @@ public class Equip extends Item {
         ret.invType = invType;
         ret.type = type;
         ret.isCash = isCash;
-        System.arraycopy(sockets, 0, ret.sockets, 0, sockets.length);
+        ret.sockets = new ArrayList<>(sockets);
         ret.fSTR = fSTR;
         ret.fDEX = fDEX;
         ret.fINT = fINT;
@@ -1135,8 +1131,8 @@ public class Equip extends Item {
             outPacket.encodeShort(getOptions().get(i)); // 7x, last is fusion anvil
         }
         short socketMask = 0; // 0b0nnn_kkkb: from right to left: boolean active, k empty, n has socket
-        for (int i = 0; i < getSockets().length; i++) {
-            int socket = getSockets()[i];
+        for (int i = 0; i < getSockets().size(); i++) {
+            int socket = getSocket(i);
             // Self made numbers for socket: 3 == empty (since 0 is already taken for STR+1, similar for 1/2)
             if (socket != 0) {
                 socketMask |= 1;
@@ -1148,7 +1144,8 @@ public class Equip extends Item {
         }
         outPacket.encodeShort(socketMask); // socket state, 0 = nothing, 0xFF = see loop
         for (int i = 0; i < 3; i++) {
-            outPacket.encodeShort(getSockets()[i]); // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
+            // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
+            outPacket.encodeShort(getSocket(i));
         }
         outPacket.encodeLong(getId()); // ?
         outPacket.encodeInt(-1); // ?
@@ -1162,8 +1159,6 @@ public class Equip extends Item {
         outPacket.encodeShort(getSoulOptionId()); // soul ID
         outPacket.encodeShort(getSoulSocketId()); // enchanter ID
         outPacket.encodeShort(getSoulOption()); // optionID (same as potentials)
-
-        // TODO: encode flame stats when we're at v190+ or whatever version with flames decoded
     }
 
     public int getTotalStat(EquipBaseStat stat) {
@@ -1217,11 +1212,7 @@ public class Equip extends Item {
             case iPvpDamage:
                 return getiPvpDamage();
             case iReduceReq:
-                byte level = (byte) (getiReduceReq() + getfLevel());
-                if (getLevel() + getiIncReq() - level < 0) {
-                    level = (byte) (getrLevel() + getiIncReq());
-                }
-                return level;
+                return (byte) (getiReduceReq() + getfLevel());
             case specialAttribute:
                 return getSpecialAttribute();
             case durabilityMax:
@@ -1710,11 +1701,11 @@ public class Equip extends Item {
         return getEnchantStats().getOrDefault(es, 0);
     }
 
-    public short[] getSockets() {
+    public List<Short> getSockets() {
         return sockets;
     }
 
-    public void setSockets(short[] sockets) {
+    public void setSockets(List<Short> sockets) {
         this.sockets = sockets;
     }
 
@@ -1950,5 +1941,16 @@ public class Equip extends Item {
             flameApplied[stat] = true;
             statsApplied++;
         }
+    }
+
+    public short getSocket(int num) {
+        return num < getSockets().size() ? getSockets().get(num) : 0;
+    }
+
+    public void setSocket(int num, int value) {
+        while (num >= getSockets().size()) {
+            getSockets().add((short) 0);
+        }
+        getSockets().set(num, (short) value);
     }
 }

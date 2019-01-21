@@ -32,5 +32,6 @@ public class PsychicLockBall {
         outPacket.encodeByte(posRelID);
         outPacket.encodePositionInt(start);
         outPacket.encodePositionInt(rel);
+        outPacket.encodeByte(0);
     }
 }

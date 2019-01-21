@@ -1361,6 +1361,7 @@ public class ItemData {
         res.setQuantity(1);
         res.setType(ITEM);
         res.setInvType(itemInfo.getInvType());
+        res.setCash(itemInfo.isCash());
         return res;
     }
 

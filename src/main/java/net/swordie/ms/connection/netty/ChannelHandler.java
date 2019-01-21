@@ -476,6 +476,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case FOX_MAN_ACTION_SET_USE_REQUEST:
                 WorldHandler.handleFoxManActionSetUseRequest(c, inPacket);
                 break;
+            case QUICKSLOT_KEY_MAPPED_MODIFIED:
+                WorldHandler.handleQuickslotKeyMappedModified(chr, inPacket);
+                break;
             case DIRECTION_NODE_COLLISION:
                 WorldHandler.handleDirectionNodeCollision(c, inPacket);
                 break;
@@ -661,6 +664,15 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
                 break;
             case USER_RECIPE_OPEN_ITEM_USE_REQUEST:
                 WorldHandler.handleUserRecipeOpenItemUseRequest(chr, inPacket);
+                break;
+            case USER_FOLLOW_CHARACTER_REQUEST:
+                WorldHandler.handleUserFollowCharacterRequest(chr, inPacket);
+                break;
+            case SET_PASSENSER_RESULT:
+                WorldHandler.handleSetPassenserResult(chr, inPacket);
+                break;
+            case USER_TRANSFER_FREE_MARKET_REQUEST:
+                WorldHandler.handleTransferFreeMarketRequest(chr, inPacket);
                 break;
             default:
                 handleUnknown(inPacket, op);
