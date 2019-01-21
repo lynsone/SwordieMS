@@ -192,6 +192,9 @@ public class ScriptManagerImpl implements ScriptManager {
 		scriptEngine.put("parentID", parentID);
 		scriptEngine.put("scriptType", scriptType);
 		scriptEngine.put("objectID", objID);
+		if (scriptType == ScriptType.Reactor) {
+			scriptEngine.put("reactor", chr.getField().getLifeByObjectID(objID));
+		}
 		if (scriptType == ScriptType.Quest) {
 			scriptEngine.put("startQuest",
 					scriptName.charAt(scriptName.length() - 1) == QUEST_START_SCRIPT_END_TAG.charAt(0)); // biggest hack eu
