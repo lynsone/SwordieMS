@@ -2,6 +2,7 @@ ARAN = 2159356
 BLACK_MAGE_MINION_1 = 2159360
 BLACK_MAGE_MINION_2 = 2159361
 
+sm.removeSkill(20041226)
 sm.lockInGameUI(True)
 sm.curNodeEventEnd(True)
 sm.removeEscapeButton()
