@@ -67,7 +67,7 @@ else:
     sm.giveSkill(20040221, 1, 1)
     sm.giveSkill(20041222, 1, 1)
     sm.giveSkill(27001201, 1, 20)
-    sm.giveSkill(27000106, 1, 5)
+    sm.giveSkill(27000207, 1, 5)
     sm.setSTR(4)
     sm.setDEX(4)
     sm.setAP(35)
