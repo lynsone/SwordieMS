@@ -4,7 +4,7 @@ SEAL_OF_TIME_3 = 2159365
 SEAL_OF_TIME_4 = 2159366
 SEAL_OF_TIME_5 = 2159367
 
-if not sm.hasQuest(25674):
+if not sm.hasQuest(25674) and sm.hasQuest(25670) and sm.hasQuest(25671) and sm.hasQuest(25672) and sm.hasQuest(25673):
     sm.createQuestWithQRValue(25674, "1", False)
     sm.showFieldEffect("lightning/screenMsg/7")
     sm.removeEscapeButton()
