@@ -2371,8 +2371,9 @@ public class Char {
 		for (AffectedArea aa : tsm.getAffectedAreas()) {
 			tsm.removeStatsBySkill(aa.getSkillID());
 		}
-		if (getField() != null) {
-			getField().removeChar(this);
+		Field currentField = getField();
+		if (currentField != null) {
+			currentField.removeChar(this);
 		}
 		setField(toField);
 		toField.addChar(this);
@@ -2380,7 +2381,7 @@ public class Char {
 		setPosition(new Position(portal.getX(), portal.getY()));
 		getClient().write(Stage.setField(this, toField, getClient().getChannel(), false, 0, characterData, hasBuffProtector(),
 				(byte) (portal != null ? portal.getId() : 0), false, 100, null, true, -1));
-		showProperUI(toField.getId());
+		showProperUI(currentField != null ? currentField.getId() : -1, toField.getId());
 		if (characterData) {
 			initSoulMP();
 			Party party = getParty();
@@ -2457,7 +2458,7 @@ public class Char {
 			mob.addObserver(getScriptManager());
 		}
 		if (getFieldInstanceType() == CHANNEL) {
-			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos()));
+			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos().stream().filter(qmi -> !qmi.isNoInstances() || getField().isChannelField()).collect(Collectors.toList())));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
 			write(UserLocal.setDressChanged(false, true));
@@ -3313,10 +3314,10 @@ public class Char {
 		return getFields().get(id);
 	}
 
-	private void showProperUI(int toField) {
-		if (GameConstants.getMaplerunnerField(toField) > 0) {
+	private void showProperUI(int fromField, int toField) {
+		if (GameConstants.getMaplerunnerField(toField) > 0 && GameConstants.getMaplerunnerField(fromField) <= 0) {
 			write(CField.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
-		} else {
+		} else if (GameConstants.getMaplerunnerField(fromField) > 0 && GameConstants.getMaplerunnerField(toField) <= 0) {
 			write(CField.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
 		}
 	}

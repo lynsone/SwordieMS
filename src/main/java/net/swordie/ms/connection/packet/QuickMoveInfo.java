@@ -16,6 +16,7 @@ public class QuickMoveInfo {
     private String msg;
     private FileTime start;
     private FileTime end;
+    private boolean noInstances;
 
     public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code) {
         this.qmiID = qmiID;
@@ -25,12 +26,13 @@ public class QuickMoveInfo {
         this.start = FileTime.fromType(FileTime.Type.MAX_TIME);
     }
 
-    public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code, int levelMin, String msg, FileTime start, FileTime end) {
+    public QuickMoveInfo(int qmiID, int templateID, QuickMoveType code, int levelMin, String msg, boolean noInstances, FileTime start, FileTime end) {
         this.qmiID = qmiID;
         this.templateID = templateID;
         this.code = code;
         this.levelMin = levelMin;
         this.msg = msg;
+        this.noInstances = noInstances;
         this.start = start;
         this.end = end;
     }
@@ -91,6 +93,14 @@ public class QuickMoveInfo {
 
     public void setLevelMin(int levelMin) {
         this.levelMin = levelMin;
+    }
+
+    public boolean isNoInstances() {
+        return noInstances;
+    }
+
+    public void setNoInstances(boolean noInstances) {
+        this.noInstances = noInstances;
     }
 
     public String getMsg() {

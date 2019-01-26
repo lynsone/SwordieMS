@@ -5363,6 +5363,18 @@ public class WorldHandler {
 
     public static void handleMakeEnterFieldPacketForQuickMove(Char chr, InPacket inPacket) {
         int templateID = inPacket.decodeInt();
+        Field field = chr.getField();
+        QuickMoveInfo qmi = GameConstants.getQuickMoveInfos().stream().filter(info -> info.getTemplateID() == templateID).findFirst().orElseGet(null);
+        if (qmi == null) {
+            chr.dispose();
+            chr.getOffenseManager().addOffense(String.format("Attempted to use non-existing quick move NPC (%d).", templateID));
+            return;
+        }
+        if (qmi.isNoInstances() && field.isChannelField()) {
+            chr.dispose();
+            chr.getOffenseManager().addOffense(String.format("Attempted to use quick move (%s) in illegal map (%d).", qmi.getMsg(), field.getId()));
+            return;
+        }
         Npc npc = NpcData.getNpcDeepCopyById(templateID);
         String script = npc.getScripts().get(0);
         if (script == null) {
