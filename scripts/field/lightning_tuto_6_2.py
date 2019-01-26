@@ -7,21 +7,21 @@ SEAL_OF_TIME_4 = 2159366
 sm.giveSkill(20041222)
 sm.setFuncKeyByScript(True, 20041222, 42)
 
-sm.spawnMob(SEAL_CHECKER, 600, -298, False)
-sm.spawnMob(SEAL_CHECKER, 150, -508, False)
-sm.spawnMob(SEAL_CHECKER, -150, -508, False)
-sm.spawnMob(SEAL_CHECKER, -600, -298, False)
+sm.spawnMob(SEAL_CHECKER, 550, -298, False)
+sm.spawnMob(SEAL_CHECKER, 107, -508, False)
+sm.spawnMob(SEAL_CHECKER, -195, -508, False)
+sm.spawnMob(SEAL_CHECKER, -625, -298, False)
 
-sm.spawnNpc(SEAL_OF_TIME_1, 600, -310)
+sm.spawnNpc(SEAL_OF_TIME_1, 550, -310)
 sm.showNpcSpecialActionByTemplateId(SEAL_OF_TIME_1, "summon", 0)
 
-sm.spawnNpc(SEAL_OF_TIME_2, 150, -520)
+sm.spawnNpc(SEAL_OF_TIME_2, 107, -520)
 sm.showNpcSpecialActionByTemplateId(SEAL_OF_TIME_2, "summon", 0)
 
-sm.spawnNpc(SEAL_OF_TIME_3, -150, -520)
+sm.spawnNpc(SEAL_OF_TIME_3, -195, -520)
 sm.showNpcSpecialActionByTemplateId(SEAL_OF_TIME_3, "summon", 0)
 
-sm.spawnNpc(SEAL_OF_TIME_4, -600, -310)
+sm.spawnNpc(SEAL_OF_TIME_4, -625, -310)
 sm.showNpcSpecialActionByTemplateId(SEAL_OF_TIME_4, "summon", 0)
 sm.showFieldEffect("lightning/screenMsg/4")
 
