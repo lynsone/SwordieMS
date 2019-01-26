@@ -551,7 +551,7 @@ create table offenses (
     msg text,
     type varchar(255),
     issuedate datetime(3),
-    issuerid int,
+    issuercharid int,
     primary key (id),
     foreign key (manager_id) references offense_managers(id) on delete cascade
 );
