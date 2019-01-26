@@ -20,6 +20,7 @@
         </property>
 
         <property name = "hibernate.connection.password">
+            
         </property>
 
         <property name="hibernate.enable_lazy_load_no_trans">

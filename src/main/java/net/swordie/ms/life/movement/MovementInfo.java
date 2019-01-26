@@ -176,6 +176,10 @@ public class MovementInfo implements Encodable {
         return res;
     }
 
+    public byte getKeyPadState() {
+        return keyPadState;
+    }
+
     public List<Movement> getMovements() {
         return movements;
     }

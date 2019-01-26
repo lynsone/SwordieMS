@@ -34,8 +34,6 @@ import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat
  * Created on 12/14/2017.
  */
 public class Aran extends Job {
-
-
     public static final int COMBO_ABILITY = 21000000;
     public static final int COMBAT_STEP = 20001295;
     public static final int REGAINED_MEMORY = 20000194;

@@ -219,6 +219,15 @@ public class WorldHandler {
         movementInfo.applyTo(chr);
         chr.getField().checkCharInAffectedAreas(chr);
         chr.getField().broadcastPacket(UserRemote.move(chr, movementInfo), chr);
+        // client has stopped moving. this might not be the best way
+        if (chr.getMoveAction() == 4 || chr.getMoveAction() == 5) {
+            TemporaryStatManager tsm = c.getChr().getTemporaryStatManager();
+            for (int skill : Job.REMOVE_ON_STOP) {
+                if (tsm.hasStatBySkillId(skill)) {
+                    tsm.removeStatsBySkill(skill);
+                }
+            }
+        }
     }
 
     public static void handleSummonedMove(Char chr, InPacket inPacket) {
@@ -2998,8 +3007,9 @@ public class WorldHandler {
     public static void handleUserSkillUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();
-        if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
-                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+        if (GameConstants.getMaplerunnerField(field.getId()) == -1 &&
+                ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
+                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0)) {
             chr.dispose();
             return;
         }
@@ -5080,6 +5090,7 @@ public class WorldHandler {
 
     public static void handleUserContentsMapRequest(Char chr, InPacket inPacket) {
         inPacket.decodeShort();
+        // TODO: verify levels and that the maps are actually in the contents guide
         int fieldID = inPacket.decodeInt();
         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldID);
         if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
@@ -5088,6 +5099,16 @@ public class WorldHandler {
             return;
         }
         chr.warp(field);
+    }
+
+    public static void handleUserRunScript(Char chr, InPacket inPacket) {
+        SendTypeFromClient type = SendTypeFromClient.getByVal(inPacket.decodeShort());
+        if (type == SendTypeFromClient.PlatformerStageExit) {
+            int fieldID = inPacket.decodeInt();
+            if (chr.getFieldID() == fieldID && GameConstants.getMaplerunnerField(fieldID) > 0) {
+                chr.warp(chr.getOrCreateFieldByCurrentInstanceType(GameConstants.FOREST_OF_TENACITY));
+            }
+        }
     }
 
     public static void handleUserMapTransferRequest(Char chr, InPacket inPacket) {
@@ -5227,8 +5248,8 @@ public class WorldHandler {
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
         if (chr.getClient().getWorld().isReboot()) {
-            log.error(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
-            chr.dispose();
+            chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
+            chr.getOffenseManager().addOffense(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
             return;
         }
 
@@ -5236,26 +5257,34 @@ public class WorldHandler {
 
         inPacket.decodeInt(); // tick
         int iPos = inPacket.decodeInt(); // hammer slot
-        inPacket.decodeInt(); // hammer item id
+        int hammerID = inPacket.decodeInt(); // hammer item id
         inPacket.decodeInt(); // use hammer? useless though
         int ePos = inPacket.decodeInt(); // equip slot
 
         EventManager.addEvent(() -> {
             Equip equip = (Equip) chr.getInventoryByType(EQUIP).getItemBySlot((short) ePos);
             Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short) iPos);
+            short maxHammers = ItemConstants.MAX_HAMMER_SLOTS;
+
+            if (equip != null) {
+                Equip defaultEquip = ItemData.getEquipById(equip.getItemId());
+                if (defaultEquip.isHasIUCMax()) {
+                    maxHammers = defaultEquip.getIUCMax();
+                }
+            }
 
             if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
-                    hammer == null || !ItemConstants.isGoldHammer(hammer)) {
+                    hammer == null || !ItemConstants.isGoldHammer(hammer) || hammerID != hammer.getItemId()) {
+                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
                 chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                         chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
-                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
                 return;
             }
 
             Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
 
             if (vals.size() > 0) {
-                if (equip.getBaseStat(iuc) >= ItemConstants.MAX_HAMMER_SLOTS) {
+                if (equip.getIuc() >= maxHammers) {
                     chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
                             chr.getId(), equip == null ? 0 : equip.getItemId()));
                     chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, 0));
@@ -5268,10 +5297,12 @@ public class WorldHandler {
                     equip.addStat(iuc, 1); // +1 hammer used
                     equip.addStat(tuc, 1); // +1 upgrades available
                     equip.updateToChar(chr);
-                    chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, ItemConstants.MAX_HAMMER_SLOTS - (int) equip.getBaseStat(iuc)));
+                    chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), maxHammers));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 0, 1, equip.getIuc()));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, 0));
                 } else {
-                    chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), ItemConstants.MAX_HAMMER_SLOTS));
+                    chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), maxHammers));
+                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 0, 1, equip.getIuc()));
                     chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, 0));
                 }
 
@@ -5332,6 +5363,18 @@ public class WorldHandler {
 
     public static void handleMakeEnterFieldPacketForQuickMove(Char chr, InPacket inPacket) {
         int templateID = inPacket.decodeInt();
+        Field field = chr.getField();
+        QuickMoveInfo qmi = GameConstants.getQuickMoveInfos().stream().filter(info -> info.getTemplateID() == templateID).findFirst().orElseGet(null);
+        if (qmi == null) {
+            chr.dispose();
+            chr.getOffenseManager().addOffense(String.format("Attempted to use non-existing quick move NPC (%d).", templateID));
+            return;
+        }
+        if (qmi.isNoInstances() && field.isChannelField()) {
+            chr.dispose();
+            chr.getOffenseManager().addOffense(String.format("Attempted to use quick move (%s) in illegal map (%d).", qmi.getMsg(), field.getId()));
+            return;
+        }
         Npc npc = NpcData.getNpcDeepCopyById(templateID);
         String script = npc.getScripts().get(0);
         if (script == null) {

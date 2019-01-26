@@ -103,6 +103,10 @@ public class Equip extends Item {
     private int dropStreak = 0;
     @Transient
     private List<ItemSkill> itemSkills = new ArrayList<>();
+    @Transient
+    private short iucMax = ItemConstants.MAX_HAMMER_SLOTS;
+    @Transient
+    private boolean hasIUCMax = false;
 
     // flame stats
     // TODO: refactor these to be in a different table
@@ -135,6 +139,8 @@ public class Equip extends Item {
         ret.equippedDate = equippedDate.deepCopy();
         ret.prevBonusExpRate = prevBonusExpRate;
         ret.tuc = tuc;
+        ret.iucMax = iucMax;
+        ret.hasIUCMax = hasIUCMax;
         ret.cuc = cuc;
         ret.iStr = iStr;
         ret.iDex = iDex;
@@ -254,6 +260,14 @@ public class Equip extends Item {
     // scroll slots
     public short getTuc() {
         return tuc;
+    }
+
+    public short getIUCMax() {
+        return hasIUCMax ? iucMax : ItemConstants.MAX_HAMMER_SLOTS;
+    }
+
+    public boolean isHasIUCMax() {
+        return hasIUCMax;
     }
 
     public short getCuc() {
@@ -780,6 +794,14 @@ public class Equip extends Item {
 
     public void setTuc(short tuc) {
         this.tuc = tuc;
+    }
+
+    public void setHasIUCMax(boolean hasIUCMax) {
+        this.hasIUCMax = hasIUCMax;
+    }
+
+    public void setIUCMax(short iucMax) {
+        this.iucMax = iucMax;
     }
 
     public void setSpecialGrade(int specialGrade) {
