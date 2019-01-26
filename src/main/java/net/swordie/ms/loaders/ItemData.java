@@ -131,6 +131,10 @@ public class ItemData {
             equip.setBossReward(dataInputStream.readBoolean() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
             equip.setSuperiorEqp(dataInputStream.readBoolean());
             equip.setiReduceReq(dataInputStream.readShort());
+            equip.setHasIUCMax(dataInputStream.readBoolean());
+            if (equip.isHasIUCMax()) {
+                equip.setIUCMax(dataInputStream.readShort());
+            }
             short optionLength = dataInputStream.readShort();
             List<Integer> options = new ArrayList<>(optionLength);
             for (int i = 0; i < optionLength; i++) {
@@ -204,6 +208,10 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
                 dataOutputStream.writeBoolean(equip.isSuperiorEqp());
                 dataOutputStream.writeShort(equip.getiReduceReq());
+                dataOutputStream.writeBoolean(equip.isHasIUCMax());
+                if (equip.isHasIUCMax()) {
+                    dataOutputStream.writeShort(equip.getIUCMax());
+                }
                 dataOutputStream.writeShort(equip.getOptions().size());
                 for (int i : equip.getOptions()) {
                     dataOutputStream.writeInt(i);
@@ -327,6 +335,10 @@ public class ItemData {
                                 case "tuc":
                                     equip.setTuc(Short.parseShort(value));
                                     break;
+                                case "IUCMax":
+                                    equip.setHasIUCMax(true);
+                                    equip.setIUCMax(Short.parseShort(value));
+                                    break;
                                 case "setItemID":
                                     equip.setSetItemID(Integer.parseInt(value));
                                     break;
@@ -379,6 +391,7 @@ public class ItemData {
                                     equip.setCharmEXP(Integer.parseInt(value));
                                     break;
                                 case "level":
+                                    // TODO: proper parsing, actual stats and skills for each level the equip gets
                                     Node levelCase = XMLApi.getFirstChildByNameBF(n, "case");
                                     if (levelCase != null) {
                                         Node case0 = XMLApi.getFirstChildByNameBF(levelCase, "0");

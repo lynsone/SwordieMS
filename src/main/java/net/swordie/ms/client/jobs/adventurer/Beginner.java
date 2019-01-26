@@ -48,19 +48,16 @@ public class Beginner extends Job {
 
     @Override
     public void handleAttack(Client c, AttackInfo attackInfo) {
-
         super.handleAttack(c, attackInfo);
     }
 
     @Override
     public void handleSkill(Client c, int skillID, byte slv, InPacket inPacket) {
         super.handleSkill(c, skillID, slv, inPacket);
-
     }
 
     @Override
     public void handleHit(Client c, InPacket inPacket, HitInfo hitInfo) {
-
         super.handleHit(c, inPacket, hitInfo);
     }
 
@@ -77,7 +74,7 @@ public class Beginner extends Job {
 
     @Override
     public boolean isBuff(int skillID) {
-        return false;
+        return super.isBuff(skillID);
     }
 
     @Override

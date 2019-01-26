@@ -937,10 +937,14 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
 
         outPacket.encodeByte(returnResult);
-        if (returnResult != 1) {
+        if (returnResult == 0) {
+            outPacket.encodeInt(msg);
+            outPacket.encodeInt(upgradesLeft);
+        } else if (returnResult == 1) {
+            // ?
+        } else if (returnResult >= 2) {
             outPacket.encodeInt(msg);
         }
-        outPacket.encodeInt(upgradesLeft);
 
         return outPacket;
     }
@@ -1042,6 +1046,22 @@ public class WvsContext {
         OutPacket outPacket = new OutPacket(OutHeader.SET_PASSENSER_REQUEST);
 
         outPacket.encodeInt(requestorChrId);
+
+        return outPacket;
+    }
+
+    public static OutPacket platformarEnterResult(boolean wrap) {
+        OutPacket outPacket = new OutPacket(OutHeader.PLATFORMAR_ENTER_RESULT);
+
+        outPacket.encodeByte(wrap);
+
+        return outPacket;
+    }
+
+    public static OutPacket platformarOxyzen(int oxyzen) {
+        OutPacket outPacket = new OutPacket(OutHeader.PLATFORMAR_OXYZEN);
+
+        outPacket.encodeInt(oxyzen); // casted to long in client side
 
         return outPacket;
     }

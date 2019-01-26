@@ -14,6 +14,7 @@ import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.container.Triple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,6 +37,7 @@ public class GameConstants {
     public static final int NO_MAP_ID = 999999999;
     public static final int VIDEO_FIELD = 931050990; // Used for Effects and/or Videos
     public static final int ARDENTMILL = 910001000;
+    public static final int FOREST_OF_TENACITY = 993001000;
     public static final int DEFAULT_FIELD_MOB_CAPACITY = 25;
     public static final double DEFAULT_FIELD_MOB_RATE_BY_MOBGEN_COUNT = 1.5;
     public static final int BASE_MOB_RESPAWN_RATE = 5000; // In milliseconds
@@ -190,6 +192,24 @@ public class GameConstants {
     // Skills
     public static final int TIME_LEAP_QR_KEY = 99996; // Quest where personal Time Leap CDs get stored
 
+    // Starforce
+    private static final int STARFORCE_LEVELS[][] = {
+            { Integer.MAX_VALUE, -1 }, // per equip
+            { 137, (ServerConstants.VERSION >= 197 ? 20 : 13) },
+            { 127, (ServerConstants.VERSION >= 197 ? 15 : 12) },
+            { 117, 10 },
+            { 107, 8 },
+            { 95, 5 },
+    };
+
+    private static final int STARFORCE_LEVELS_SUPERIOR[][] = {
+            { Integer.MAX_VALUE, 15 },
+            { 137, 12 },
+            { 127, 10 },
+            { 117, 8 },
+            { 107, 5 },
+            { 95, 3 },
+    };
 
     private static List<QuickMoveInfo> quickMoveInfos;
     public static int[][][] INC_HP_MP = {
@@ -312,21 +332,9 @@ public class GameConstants {
 
     public static int getMaxStars(Equip equip) {
         int level = equip.getrLevel() + equip.getiIncReq();
-        if (equip.isSuperiorEqp()) {
-            return level <= 95 ? 3 :
-                    level <= 107 ? 5 :
-                    level <= 117 ? 8 :
-                    level <= 127 ? 10 :
-                    level <= 137 ? 12 :
-                                   15;
-        } else {
-            return level <= 95 ? 5 :
-                    level <= 107 ? 8 :
-                    level <= 117 ? 10 :
-                    level <= 127 ? (ServerConstants.VERSION >= 197 ? 15 : 12) :
-                    level <= 137 ? (ServerConstants.VERSION >= 197 ? 20 : 13) :
-                                    ItemConstants.getItemStarLimit(equip.getItemId());
-        }
+        int stars = Arrays.stream(equip.isSuperiorEqp() ? STARFORCE_LEVELS_SUPERIOR : STARFORCE_LEVELS)
+                .filter(lv -> level <= lv[0]).findFirst().get()[1];
+        return stars != -1 ? stars : ItemConstants.getItemStarLimit(equip.getItemId());
     }
 
     private static void initEnchantRates() {
@@ -714,7 +722,7 @@ public class GameConstants {
     // N (1-50) for Maplerunner stages
     public static int getMaplerunnerField(int fieldId) {
         // Forest of Tenacity prefix
-        if (fieldId / 10000 != 99300) {
+        if (fieldId / 1000 != 993001) {
             return -1;
         }
         return fieldId % 1000 / 10;

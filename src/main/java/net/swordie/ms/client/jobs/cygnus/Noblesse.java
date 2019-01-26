@@ -71,7 +71,7 @@ public class Noblesse extends Job {
 
     @Override
     public boolean isBuff(int skillID) {
-        return false;
+        return super.isBuff(skillID);
     }
 
     @Override

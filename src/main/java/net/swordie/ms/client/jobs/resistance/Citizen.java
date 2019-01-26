@@ -80,6 +80,6 @@ public class Citizen extends Job {
 
     @Override
     public boolean isBuff(int skillID) {
-        return false;
+        return super.isBuff(skillID);
     }
 }

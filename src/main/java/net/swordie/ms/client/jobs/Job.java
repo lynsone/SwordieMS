@@ -105,10 +105,21 @@ public abstract class Job {
 	public static final int REBOOT = 80000186;
 	public static final int REBOOT2 = 80000187;
 
-	private int[] buffs = new int[]{
+	public static final int MAPLERUNNER_DASH = 80001965;
+
+	public static final int[] REMOVE_ON_STOP = new int[] {
+			MAPLERUNNER_DASH
+	};
+
+	public static final int[] REMOVE_ON_WARP = new int[] {
+			MAPLERUNNER_DASH
+	};
+
+	private int[] buffs = new int[] {
 			BOSS_SLAYERS,
 			UNDETERRED,
-			FOR_THE_GUILD
+			FOR_THE_GUILD,
+			MAPLERUNNER_DASH
 	};
 
 	public Job(Char chr) {
@@ -215,6 +226,7 @@ public abstract class Job {
 					summon.setFlyMob(true);
 					field.spawnSummon(summon);
 				}
+				// TOOD: make sure user owns skill
 				switch (skillID) {
 					case MONOLITH:
 						summon = Summon.getSummonBy(c.getChr(), skillID, slv);
@@ -346,6 +358,15 @@ public abstract class Job {
 				o1.tStart = curTime;
 				o1.tTerm = si.getValue(time, slv);
 				tsm.putCharacterStatValue(IndieDamR, o1);
+				break;
+			case MAPLERUNNER_DASH:
+				o1.nReason = o2.nReason = skillID;
+				o1.tStart = o2.tStart = curTime;
+				o1.tTerm = o2.tTerm = si.getValue(time, slv);
+				o1.nValue = si.getValue(indieForceJump, slv);
+				tsm.putCharacterStatValue(IndieForceJump, o1);
+				o2.nValue = si.getValue(indieForceSpeed, slv);
+				tsm.putCharacterStatValue(IndieForceSpeed, o2);
 				break;
 			default:
 				sendStat = false;

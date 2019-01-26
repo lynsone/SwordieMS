@@ -599,6 +599,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case USER_CONTENTS_MAP_REQUEST:
                 WorldHandler.handleUserContentsMapRequest(chr, inPacket);
                 break;
+            case USER_RUN_SCRIPT:
+                WorldHandler.handleUserRunScript(chr, inPacket);
+                break;
             case USER_MAP_TRANSFER_REQUEST:
                 WorldHandler.handleUserMapTransferRequest(chr, inPacket);
                 break;

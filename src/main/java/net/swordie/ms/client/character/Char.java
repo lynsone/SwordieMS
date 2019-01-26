@@ -1341,14 +1341,13 @@ public class Char {
 			new LikePoint().encode(outPacket);
 		}
 		if (mask.isInMask(DBChar.RunnerGameRecord)) {
-			new RunnerGameRecord().encode(outPacket);
+			new RunnerGameRecord().encode(outPacket); // RunnerGameRecord::Decode
 		}
 		short sizeO = 0;
 		outPacket.encodeShort(sizeO);
 		for (int i = 0; i < sizeO; i++) {
 			outPacket.encodeInt(0);
 			outPacket.encodeString("");
-
 		}
 		if (mask.isInMask(DBChar.MonsterCollection)) {
 			Set<MonsterCollectionExploration> mces = getAccount().getMonsterCollection().getMonsterCollectionExplorations();
@@ -2427,7 +2426,11 @@ public class Char {
 				}
 			}
 		}
-
+		for (int skill : Job.REMOVE_ON_WARP) {
+			if (tsm.hasStatBySkillId(skill)) {
+				tsm.removeStatsBySkill(skill);
+			}
+		}
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();

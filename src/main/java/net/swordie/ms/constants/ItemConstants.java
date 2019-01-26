@@ -48,8 +48,13 @@ public class ItemConstants {
 
     public static final int NEBILITE_BASE_ID = 3060000;
 
-    public static final int HORNTAIL_NECKLACE = 1122000;
-    public static final int CHAOS_HORNTAIL_NECKLACE = 1122076;
+    public static final int HORNTAIL_NECKLACE[] = {
+            1122000, // Horntail Necklace
+            1122076, // Chaos Horntail Necklace
+            1122151, // Chaos Horntail Necklace (+2)
+            1122249, // Dream Horntail Necklace
+            1122278, // Mystic Horntail Necklace
+    };
 
     public static final short MAX_HAMMER_SLOTS = 2;
 
@@ -97,7 +102,11 @@ public class ItemConstants {
     public static final double WEAPON_FLAME_MULTIPLIER_BOSS_WEAPON[] = { 1.0, 1.0, 3.0, 4.4, 6.05, 8.0, 10.25 }; // Boss weapons do not ever roll stat level 1/2.
     public static final short EQUIP_FLAME_LEVEL_DIVIDER = 40;
     public static final short EQUIP_FLAME_LEVEL_DIVIDER_EXTENDED = 20;
-    public static final int SCARLET_SHOULDER = 1152155; // The only exception for flames on shoulders.
+
+    public static final int EXCEPTIONAL_EX_ALLOWED[] = {
+            1152155, // Scarlet Shoulder
+            1113015, // Secret Ring
+    };
 
     // Self-made drops per mob
     public static final Map<Integer, Set<DropInfo>> consumableDropsPerLevel = new HashMap<>();
@@ -156,7 +165,7 @@ public class ItemConstants {
     }
 
     public static int getGenderFromId(int nItemID) {
-        int result; // eax
+        int result;
 
         if (nItemID / 1000000 != 1 && getItemPrefix(nItemID) != 254 || getItemPrefix(nItemID) == 119 || getItemPrefix(nItemID) == 168)
             return 2;
@@ -560,17 +569,17 @@ public class ItemConstants {
                 isBottom(equip.getItemId()) ||
                 isShoe(equip.getItemId()) ||
                 isEarrings(equip.getItemId()) ||
-                equip.getItemId() == SCARLET_SHOULDER ||
+                Arrays.asList(EXCEPTIONAL_EX_ALLOWED).contains(equip.getItemId()) ||
                 isGlove(equip.getItemId()) ||
                 isCape(equip.getItemId()) ||
                 isPocketItem(equip.getItemId()));
     }
 
     public static boolean canEquipGoldHammer(Equip equip) {
-        return !(equip.getItemId() == HORNTAIL_NECKLACE || // Horntail Necklace and the Chaos version are the only exceptions that Golden Hammer has.
-                equip.getItemId() == CHAOS_HORNTAIL_NECKLACE ||
-                equip.getIuc() >= MAX_HAMMER_SLOTS ||
-                ItemData.getEquipById(equip.getItemId()).getTuc() <= 0); // No upgrade slots by default
+        Equip defaultEquip = ItemData.getEquipById(equip.getItemId());
+        return !(Arrays.asList(HORNTAIL_NECKLACE).contains(equip.getItemId()) ||
+                equip.getIuc() >= defaultEquip.getIUCMax() ||
+                defaultEquip.getTuc() <= 0); // No upgrade slots by default
     }
 
     public static boolean isGoldHammer(Item item) {

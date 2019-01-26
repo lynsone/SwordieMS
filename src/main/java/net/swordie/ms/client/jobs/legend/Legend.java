@@ -46,6 +46,6 @@ public class Legend extends Job {
 
     @Override
     public boolean isBuff(int skillID) {
-        return false;
+        return super.isBuff(skillID);
     }
 }

@@ -31,7 +31,6 @@ import static net.swordie.ms.client.jobs.resistance.Blaster.*;
  * Created on 12/18/2017.
  */
 public class SkillConstants {
-
     public static final short PASSIVE_HYPER_MIN_LEVEL = 140;
     public static final List<Short> ACTIVE_HYPER_LEVELS = Arrays.asList((short) 150, (short) 170, (short) 200);
 
@@ -47,7 +46,6 @@ public class SkillConstants {
     public static final int MAKING_SKILL_EXPERT_LEVEL = 10;
     public static final int MAKING_SKILL_MASTER_LEVEL = 11;
     public static final int MAKING_SKILL_MEISTER_LEVEL = 12;
-
 
     public static boolean isSkillNeedMasterLevel(int skillId) {
         if (isIgnoreMasterLevel(skillId)
