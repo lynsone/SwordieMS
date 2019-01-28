@@ -4470,4 +4470,19 @@ public class Char {
 	public List<Integer> getQuickslotKeys() {
 		return quickslotKeys;
 	}
+
+	/**
+	 * Checks if this Char has a skill with at least a given level.
+	 * @param skillID the skill to get
+	 * @param slv the minimum skill level
+	 * @return whether or not this Char has the skill with the given skill level
+	 */
+	public boolean hasSkillWithSlv(int skillID, short slv) {
+		Skill skill = getSkill(skillID);
+		return skill == null && skill.getCurrentLevel() >= slv;
+	}
+
+	public World getWorld() {
+		return getClient().getWorld();
+	}
 }

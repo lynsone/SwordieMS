@@ -13,6 +13,7 @@ import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.WvsContext;
+import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.ServerConstants;
@@ -23,6 +24,7 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.World;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
@@ -138,17 +140,20 @@ public class LoginHandler {
         byte worldId = inPacket.decodeByte();
         byte channel = (byte) (inPacket.decodeByte() + 1);
         byte code = 0; // success code
-
-        c.setWorldId(worldId);
-        c.setChannel(channel);
-//        c.write(Login.sendAccountInfo(c.getAccount()));
-        c.write(Login.selectWorldResult(c.getAccount(), code, Server.getInstance().getWorldById(worldId).isReboot() ? "reboot" : "normal", false));
+        World world = Server.getInstance().getWorldById(worldId);
+        if (world != null && world.getChannelById(channel) != null) {
+            c.setWorldId(worldId);
+            c.setChannel(channel);
+            c.write(Login.selectWorldResult(c.getAccount(), code, Server.getInstance().getWorldById(worldId).isReboot() ? "reboot" : "normal", false));
+        } else {
+            c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
+        }
     }
 
     public static void handleCheckDuplicatedID(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
         CharNameResult code;
-        if (name.toLowerCase().contains("virtual") || name.toLowerCase().contains("kernel")) {
+        if (GameConstants.isValidName(name)) {
             code = CharNameResult.Unavailable_Invalid;
         } else {
             code = Char.getFromDBByName(name) == null ? CharNameResult.Available : CharNameResult.Unavailable_InUse;
@@ -281,6 +286,10 @@ public class LoginHandler {
         c.getAccount().setPic(pic);
         // Update in DB
         DatabaseManager.saveToDB(c.getAccount());
+        if (c.getAccount().getCharById(characterId) == null) {
+            c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
+            return;
+        }
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
@@ -293,9 +302,11 @@ public class LoginHandler {
         byte worldId = c.getWorldId();
         byte channelId = c.getChannel();
         Channel channel = Server.getInstance().getWorldById(worldId).getChannelById(channelId);
-        if (c.isAuthorized()) {
+        if (c.isAuthorized() && c.getAccount().hasCharacter(characterId)) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
+        } else {
+            c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
         }
     }
 

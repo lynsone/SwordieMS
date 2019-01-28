@@ -56,6 +56,7 @@ public class DawnWarrior extends Noblesse {
     public static final int EQUINOX_CYCLE_MOON = 11121011;
     public static final int EQUINOX_CYCLE_SUN = 11121012;
     public static final int IMPALING_RAYS = 11121004; //Special Attack (Incapacitate Debuff)
+    public static final int IMPALING_RAYS_EXPLOSION = 11121013;
     public static final int CALL_OF_CYGNUS_DW = 11121000; //Buff
     public static final int MASTER_OF_THE_SWORD = 11120009;
 
