@@ -4479,7 +4479,7 @@ public class Char {
 	 */
 	public boolean hasSkillWithSlv(int skillID, short slv) {
 		Skill skill = getSkill(skillID);
-		return skill == null && skill.getCurrentLevel() >= slv;
+		return skill != null && skill.getCurrentLevel() >= slv;
 	}
 
 	public World getWorld() {
