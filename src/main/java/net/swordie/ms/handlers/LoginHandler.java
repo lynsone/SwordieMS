@@ -153,7 +153,7 @@ public class LoginHandler {
     public static void handleCheckDuplicatedID(Client c, InPacket inPacket) {
         String name = inPacket.decodeString();
         CharNameResult code;
-        if (GameConstants.isValidName(name)) {
+        if (!GameConstants.isValidName(name)) {
             code = CharNameResult.Unavailable_Invalid;
         } else {
             code = Char.getFromDBByName(name) == null ? CharNameResult.Available : CharNameResult.Unavailable_InUse;
