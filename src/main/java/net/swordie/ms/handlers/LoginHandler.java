@@ -177,6 +177,17 @@ public class LoginHandler {
             items[i] = inPacket.decodeInt();
         }
 
+        CharNameResult code = null;
+        if (!GameConstants.isValidName(name)) {
+            code = CharNameResult.Unavailable_Invalid;
+        } else if (Char.getFromDBByName(name) != null){
+            code = CharNameResult.Unavailable_InUse;
+        }
+        if (code != null) {
+            c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
+            return;
+        }
+
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, items);
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
