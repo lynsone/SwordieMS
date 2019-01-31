@@ -15,6 +15,7 @@ import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
 import net.swordie.ms.handlers.EventManager;
@@ -601,6 +602,15 @@ public class Demon extends Job {
 
         super.handleAttack(c, attackInfo);
     }
+    public void sendHpUpdate() {
+        // Used for client side damage calculation for DAs
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        Option o = new Option();
+        o.nOption = 3; // Hp -> damage conversion
+        o.mOption = chr.getTotalStat(BaseStat.mhp);
+        tsm.putCharacterStatValue(LifeTidal, o);
+        tsm.sendSetStatPacket();
+    }
 
     private void createNetherShieldForceAtom() {
         Field field = chr.getField();
@@ -957,4 +967,6 @@ public class Demon extends Job {
         super.setCharCreationStats(chr);
         chr.getAvatarData().getCharacterStat().setPosMap(927000000);
     }
+
+
 }

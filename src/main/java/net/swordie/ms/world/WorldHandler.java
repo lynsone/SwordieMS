@@ -50,10 +50,7 @@ import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.client.jobs.resistance.BattleMage;
-import net.swordie.ms.client.jobs.resistance.WildHunter;
-import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.client.jobs.resistance.Xenon;
+import net.swordie.ms.client.jobs.resistance.*;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -3971,6 +3968,12 @@ public class WorldHandler {
         if (JobConstants.isAran(chr.getJob())) {
             Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
             aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
+        }
+    }
+
+    public static void handleRequestSetHpBaseDamage(Char chr, InPacket inPacket) {
+        if (JobConstants.isDemonAvenger(chr.getJob())) {
+            ((Demon) chr.getJobHandler()).sendHpUpdate();
         }
     }
 
