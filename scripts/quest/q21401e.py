@@ -2,6 +2,7 @@
 sm.setSpeakerID(1201002)
 sm.sendNext("Thank you, Aran. If it weren't for you, I would have become enraged and who knows what could have happened. Thank you NOT! It's only your duty as my mster...")
 if sm.sendAskYesNo("Anyways, I just noticed how high of a level you've reached. If you were able to control me in my state of rage, I think you're ready to handle more abilities"):
+    sm.giveItem(1142132)
     sm.setJob(2112)
     sm.addSP(5)
     sm.completeQuest(parentID)

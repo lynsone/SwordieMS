@@ -6,6 +6,7 @@ if sm.sendAskYesNo("Here, this is #p1201002#, the Polearm you've asked for. Plea
     #todo show effect
     sm.warpInstanceOut(140030000)
     sm.completeQuest(parentID)
+    sm.consumeItem(4032311, 30)
     sm.dispose()
 else:
     sm.dispose()
