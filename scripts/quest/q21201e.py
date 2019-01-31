@@ -14,6 +14,7 @@ sm.sendNext("Maybe a little bit...")
 sm.setSpeakerID(1201002)
 sm.sendNext("Aran, it is you! *Sniff sniff* Wait, *ahem* I didn't get emotional, it's just allergies. I know the Black Mage has stripped you of your abilities so you probably don't even have the strength to lift me... but at least you remember me! I'm glad that your memory's starting to return.")
 if sm.sendAskYesNo("Evn though you've lost your memory, you're still my master. You endured some very tough training in the past, and I'm sure your body still remembers the skills that got you through those hard times. Alright, I'll restore your abilities!"):
+    sm.giveItem(1142130)
     sm.setJob(2110)
     sm.addSP(5)
     sm.completeQuest(parentID)
