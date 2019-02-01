@@ -408,7 +408,7 @@ public class Demon extends Job {
         if(JobConstants.isDemonAvenger(chr.getJob())) {
 
             //DA HP Cost System
-            hpRCostDASkills(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
+            applyHpCostForDA(SkillConstants.getActualSkillIDfromSkillID(attackInfo.skillId));
 
             if(hasHitMobs) {
                 //Nether Shield Recreation
@@ -878,8 +878,8 @@ public class Demon extends Job {
         }
     }
 
-    private void hpRCostDASkills(int skillID) {
-        if(skillID == NETHER_SHIELD_ATOM || skillID == 0) {
+    private void applyHpCostForDA(int skillID) {
+        if (skillID == NETHER_SHIELD_ATOM || skillID == 0 || !chr.hasSkill(skillID)) {
             return;
         }
         Skill skill = chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID));

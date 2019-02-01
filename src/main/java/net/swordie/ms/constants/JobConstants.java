@@ -102,7 +102,7 @@ public class JobConstants {
     }
 
     public static boolean isDemonAvenger(short job) {
-        return job / 10 == 312;
+        return job / 10 == 312 || job == 3101;
     }
 
     public static boolean isKanna(short id) {
