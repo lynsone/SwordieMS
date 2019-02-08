@@ -1412,12 +1412,13 @@ public class WorldHandler {
             String medalString = (medalInt == 0 ? "" : String.format("<%s> ", StringData.getItemStringById(medalInt)));
 
             switch (itemID) {
-                case 5040004: // Hyper Teleport Rock
+                case ItemConstants.HYPER_TELEPORT_ROCK: // Hyper Teleport Rock
                     short type = inPacket.decodeShort();
                     if (type == 1) {
                         int fieldId = inPacket.decodeInt();
                         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
-                        if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0) {
+                        if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0 ||
+                            !FieldData.getWorldMapFields().contains(fieldId)) {
                             chr.chatMessage("You may not warp to that map.");
                             chr.dispose();
                             return;
