@@ -39,6 +39,8 @@ public class ItemConstants {
     public static final int THIRD_LINE_CHANCE = 50;
     public static final int PRIME_LINE_CHANCE = 15;
 
+    public static final int HYPER_TELEPORT_ROCK = 5040004;
+
     public static final int RED_CUBE = 5062009;
     public static final int BLACK_CUBE = 5062010;
 
