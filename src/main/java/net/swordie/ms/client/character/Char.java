@@ -38,6 +38,7 @@ import net.swordie.ms.client.guild.result.GuildResult;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.JobManager;
 import net.swordie.ms.client.jobs.legend.Evan;
+import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
@@ -1865,6 +1866,9 @@ public class Char {
 				break;
 			case mhp:
 				cs.setMaxHp(amount);
+				if (JobConstants.isDemonAvenger(getJob())) {
+					((Demon) getJobHandler()).sendHpUpdate();
+				}
 				break;
 			case mp:
 				cs.setMp(amount);
@@ -2163,6 +2167,9 @@ public class Char {
             getTemporaryStatManager().removeStatsBySkill(equippedSummonSkill);
             getTemporaryStatManager().removeStatsBySkill(getTemporaryStatManager().getOption(RepeatEffect).rOption);
 		}
+		if (JobConstants.isDemonAvenger(getJob())) {
+			((Demon) getJobHandler()).sendHpUpdate();
+		}
 	}
 
 	/**
@@ -2218,6 +2225,9 @@ public class Char {
 		byte maskValue = AvatarModifiedMask.AvatarLook.getVal();
 		getField().broadcastPacket(UserRemote.avatarModified(this, maskValue, (byte) 0), this);
 		initSoulMP();
+		if (JobConstants.isDemonAvenger(getJob())) {
+			((Demon) getJobHandler()).sendHpUpdate();
+		}
 		return true;
 	}
 
@@ -4469,5 +4479,20 @@ public class Char {
 
 	public List<Integer> getQuickslotKeys() {
 		return quickslotKeys;
+	}
+
+	/**
+	 * Checks if this Char has a skill with at least a given level.
+	 * @param skillID the skill to get
+	 * @param slv the minimum skill level
+	 * @return whether or not this Char has the skill with the given skill level
+	 */
+	public boolean hasSkillWithSlv(int skillID, short slv) {
+		Skill skill = getSkill(skillID);
+		return skill != null && skill.getCurrentLevel() >= slv;
+	}
+
+	public World getWorld() {
+		return getClient().getWorld();
 	}
 }

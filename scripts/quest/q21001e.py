@@ -3,9 +3,9 @@ ATHENA = 1209007
 
 sm.setSpeakerID(ATHENA)
 if sm.sendAskYesNo("You made it back safely! What about the child?! Did you bring the child with you?!"):
-    sm.consumeItem(4001271)
-    sm.consumeItem(4001271)
     sm.completeQuest(parentID)
+    sm.consumeItem(4001271)
+    sm.consumeItem(4001271)
 
     sm.flipSpeaker()
     sm.sendNext("Oh, what a relief. I'm so glad...")

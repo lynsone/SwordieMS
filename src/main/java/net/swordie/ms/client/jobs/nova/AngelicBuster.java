@@ -60,6 +60,7 @@ public class AngelicBuster extends Job {
 
     //2nd job
     public static final int LOVELY_STING = 65101100;
+    public static final int LOVELY_STING_EXPLOSION = 65101006;
     public static final int PINK_PUMMEL = 65101001;
     public static final int POWER_TRANSFER = 65101002; //Buff
 

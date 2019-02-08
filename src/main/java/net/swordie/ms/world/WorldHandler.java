@@ -43,16 +43,14 @@ import net.swordie.ms.client.jobs.adventurer.BeastTamer;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
+import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.legend.Luminous;
 import net.swordie.ms.client.jobs.legend.Shade;
 import net.swordie.ms.client.jobs.nova.AngelicBuster;
 import net.swordie.ms.client.jobs.nova.Kaiser;
-import net.swordie.ms.client.jobs.resistance.BattleMage;
-import net.swordie.ms.client.jobs.resistance.WildHunter;
-import net.swordie.ms.client.jobs.resistance.WildHunterInfo;
-import net.swordie.ms.client.jobs.resistance.Xenon;
+import net.swordie.ms.client.jobs.resistance.*;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -264,8 +262,6 @@ public class WorldHandler {
                 smi.stop(ScriptType.Quest);
                 smi.stop(ScriptType.Item);
 
-            } else if (msg.equalsIgnoreCase("@save")) {
-                DatabaseManager.saveToDB(chr);
             }
         } else if (msg.charAt(0) == AdminCommand.getPrefix()
                 && chr.getAccount().getAccountType().ordinal() > AccountType.Player.ordinal()) {
@@ -601,13 +597,16 @@ public class WorldHandler {
         if (portal != null) {
             portalID = (byte) portal.getId();
             script = "".equals(portal.getScript()) ? portalName : portal.getScript();
+            chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
+        } else {
+            chr.chatMessage("Could not find that portal.");
         }
-        chr.getScriptManager().startScript(portalID, script, ScriptType.Portal);
     }
 
     public static void handleUserPortalScrollUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        if ((chr.getField().getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0 || !field.isChannelField()) {
             chr.chatMessage("You may not use a return scroll in this map.");
             chr.dispose();
             return;
@@ -616,7 +615,6 @@ public class WorldHandler {
         short slot = inPacket.decodeShort();
         int itemID = inPacket.decodeInt();
         ItemInfo ii = ItemData.getItemInfoByID(itemID);
-        Field field = chr.getField();
         Field toField;
 
         if (itemID != 2030000) {
@@ -1104,6 +1102,10 @@ public class WorldHandler {
     public static void handleChangeChannelRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         byte channelId = (byte) (inPacket.decodeByte() + 1);
+        if (c.getWorld().getChannelById(channelId) == null) {
+            chr.chatMessage("Could not find that world.");
+            return;
+        }
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
                 channelId < 1 || channelId > c.getWorld().getChannels().size()) {
@@ -1150,6 +1152,9 @@ public class WorldHandler {
         pa.skeletonLoop = inPacket.decodeShort();
         pa.start = inPacket.decodePositionInt();
         pa.success = true;
+        if (!chr.hasSkillWithSlv(pa.skillID, pa.slv)) {
+            return;
+        }
         chr.write(CField.createPsychicArea(chr.getId(), pa));
         chr.write(UserLocal.doActivePsychicArea(pa));
         chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), null, Collections.singletonList(pa)), chr);
@@ -1158,7 +1163,7 @@ public class WorldHandler {
 
     public static void handleReleasePsychicArea(Char chr, InPacket inPacket) {
         int localPsychicAreaKey = inPacket.decodeInt();
-        chr.write(CField.releasePsychicArea(localPsychicAreaKey));
+        chr.getField().broadcastPacket(CField.releasePsychicArea(localPsychicAreaKey));
     }
 
     public static void handleCreatePsychicLock(Char chr, InPacket inPacket) {
@@ -1175,7 +1180,11 @@ public class WorldHandler {
             plb.psychicLockKey = inPacket.decodeInt();
             //plb.psychicLockKey = i;
             int mobID = inPacket.decodeInt();
-            plb.mob = (Mob) f.getLifeByObjectID(mobID);
+            Life life = f.getLifeByObjectID(mobID);
+            if (life == null) {
+                mobID = 0;
+            }
+            plb.mob = life == null ? null : (Mob) life;
             plb.stuffID = inPacket.decodeShort();
             plb.usableCount = inPacket.decodeShort();
             plb.posRelID = inPacket.decodeByte();
@@ -1184,6 +1193,9 @@ public class WorldHandler {
             plb.rel = inPacket.decodePositionInt();
             pl.psychicLockBalls.add(plb);
         }
+        if (!chr.hasSkillWithSlv(pl.skillID, pl.slv)) {
+            return;
+        }
         chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), pl, null), chr);
         chr.write(User.createPsychicLock(chr.getId(), pl));
     }
@@ -1191,6 +1203,9 @@ public class WorldHandler {
     public static void handleReleasePsychicLock(Char chr, InPacket inPacket) {
         int skillID = inPacket.decodeInt();
         short slv = inPacket.decodeShort();
+        if (!chr.hasSkillWithSlv(skillID, slv)) {
+            return;
+        }
         short count = inPacket.decodeShort();
         int id = inPacket.decodeInt();
         int mobID = inPacket.decodeInt();
@@ -1613,6 +1628,10 @@ public class WorldHandler {
     public static void handleUserFinalAttackRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         int skillID = inPacket.decodeInt();
+        if (!chr.hasSkill(skillID)) {
+            chr.getOffenseManager().addOffense("Tried to request a final attack of an unavailable skill.");
+            return;
+        }
         int pSkill = inPacket.decodeInt();
         int targetID = inPacket.decodeInt();
         int requestTime = inPacket.decodeInt();
@@ -2151,6 +2170,10 @@ public class WorldHandler {
         if (textChair) {
             text = inpacket.decodeString(); // text to display
         }
+        if (text.length() == 0 || text.length() > 10 || !Util.isValidString(text) || !chr.hasItem(itemId)) {
+            chr.chatMessage("Invalid text.");
+            return;
+        }
 
         // Tower Chair  check & id
         inpacket.decodeInt(); // encodes 0
@@ -2405,9 +2428,12 @@ public class WorldHandler {
 
     public static void handleFoxManActionSetUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        if (!chr.hasSkill(Kanna.HAKU) && !chr.hasSkill(Kanna.HAKU_REBORN)) {
+            return;
+        }
         inPacket.decodeInt(); // tick
         byte skillNumber = inPacket.decodeByte(); //bSkill Number
-        //more of the net.swordie.ms.connection.packet, but seems useless
+        // more packet, but seems useless
         switch (skillNumber) {
             case 3:
                 Kanna.hakuFoxFire(chr);
@@ -2447,7 +2473,9 @@ public class WorldHandler {
         int emotion = inPacket.decodeInt();
         int duration = inPacket.decodeInt();
         boolean byItemOption = inPacket.decodeByte() != 0;
-        chr.getField().broadcastPacket(UserRemote.emotion(chr.getId(), emotion, duration, byItemOption), chr);
+        if (GameConstants.isValidEmotion(emotion)) {
+            chr.getField().broadcastPacket(UserRemote.emotion(chr.getId(), emotion, duration, byItemOption), chr);
+        }
     }
 
     public static void handlePartyRequest(Client c, InPacket inPacket) {
@@ -2989,13 +3017,17 @@ public class WorldHandler {
     }
 
     public static void handleUserCreateAuraByGrenade(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
         int objID = inPacket.decodeInt();
-        int skillID = inPacket.decodeInt();
+        int skillID = SkillConstants.getActualSkillIDfromSkillID(inPacket.decodeInt());
+        if (!chr.hasSkill(skillID)) {
+            chr.getOffenseManager().addOffense("Tried creating an aura by grenade with unavailable skill.", 0, skillID);
+            return;
+        }
         Position position = inPacket.decodePosition();
         byte isLeft = inPacket.decodeByte();
-        Char chr = c.getChr();
         SkillInfo fci = SkillData.getSkillInfoById(skillID);
-        byte slv = (byte) chr.getSkill(SkillConstants.getActualSkillIDfromSkillID(skillID)).getCurrentLevel();
+        byte slv = (byte) chr.getSkill(skillID).getCurrentLevel();
         AffectedArea aa = AffectedArea.getPassiveAA(chr, skillID, slv);
         aa.setMobOrigin((byte) 0);
         aa.setPosition(position);
@@ -3539,14 +3571,15 @@ public class WorldHandler {
         int charID = inPacket.decodeInt();
         int skillID = inPacket.decodeInt(); //tick
         Char chr = c.getChr();
-        if (JobConstants.isXenon(chr.getJob())) {
+        if (JobConstants.isXenon(chr.getJob()) && chr.hasSkill(Xenon.TRIANGULATION)) {
             skillID = Xenon.TRIANGULATION;
-        }
-        if (JobConstants.isDawnWarrior(chr.getJob())) {
-            skillID = 11121013;
-        }
-        if (JobConstants.isAngelicBuster(chr.getId())) {
-            skillID = 65101006; //Lovely Sting Explosion
+        } else if (JobConstants.isDawnWarrior(chr.getJob()) && chr.hasSkill(DawnWarrior.IMPALING_RAYS)) {
+            skillID = DawnWarrior.IMPALING_RAYS_EXPLOSION;
+        } else if (JobConstants.isAngelicBuster(chr.getId()) && chr.hasSkill(AngelicBuster.LOVELY_STING)) {
+            skillID = AngelicBuster.LOVELY_STING_EXPLOSION;
+        } else {
+            chr.chatMessage("Unhandled mob explosion for your job.");
+            return;
         }
         Mob mob = (Mob) c.getChr().getField().getLifeByObjectID(mobID);
         if (mob != null) {
@@ -3562,7 +3595,10 @@ public class WorldHandler {
 
     public static void handleUserActivateEffectItem(Client c, InPacket inPacket) {
         Char chr = c.getChr();
-        chr.setActiveEffectItemID(inPacket.decodeInt());
+        int itemId = inPacket.decodeInt();
+        if (chr.hasItem(itemId)) {
+            chr.setActiveEffectItemID(itemId);
+        }
     }
 
     public static void handleUserActivatePetRequest(Client c, InPacket inPacket) {
@@ -3883,6 +3919,10 @@ public class WorldHandler {
         Char chr = c.getChr();
 
         ItemInfo ii = ItemData.getItemInfoByID(itemID);
+        if (ii == null || !chr.hasItem(itemID)) {
+            chr.chatMessage("Could not find that item.");
+            return;
+        }
         int masterLevel = ii.getMasterLv();
         int reqSkillLv = ii.getReqSkillLv();
         int skillid = 0;
@@ -3909,6 +3949,7 @@ public class WorldHandler {
 
         if (skill.getCurrentLevel() > reqSkillLv && skill.getMasterLevel() < masterLevel) {
             chr.chatMessage(Mob, "Success Chance: " + chance + "%.");
+            chr.consumeItem(itemID, 1);
             if (Util.succeedProp(chance)) {
                 skill.setMasterLevel(masterLevel);
                 List<Skill> list = new ArrayList<>();
@@ -3919,7 +3960,6 @@ public class WorldHandler {
             } else {
                 chr.chatMessage(Notice2, "[Mastery Book] Item id: " + itemID + " was used, however it was unsuccessful.");
             }
-            chr.consumeItem(itemID, 1);
         }
         chr.dispose();
     }
@@ -3929,6 +3969,12 @@ public class WorldHandler {
         if (JobConstants.isAran(chr.getJob())) {
             Aran aranJobHandler = ((Aran) c.getChr().getJobHandler());
             aranJobHandler.setCombo(aranJobHandler.getCombo() - 10);
+        }
+    }
+
+    public static void handleRequestSetHpBaseDamage(Char chr, InPacket inPacket) {
+        if (JobConstants.isDemonAvenger(chr.getJob())) {
+            ((Demon) chr.getJobHandler()).sendHpUpdate();
         }
     }
 
@@ -4542,7 +4588,7 @@ public class WorldHandler {
         inPacket.decodeInt(); // tick
         MemorialCubeInfo mci = chr.getMemorialCubeInfo();
         boolean chooseBefore = inPacket.decodeByte() == 7;
-        if (chooseBefore) {
+        if (mci != null && chooseBefore) {
             Inventory equipInv = chr.getEquipInventory();
             Equip equip = mci.getOldEquip();
             Equip invEquip = (Equip) equipInv.getItemBySlot((short) equip.getBagIndex());
@@ -4969,7 +5015,7 @@ public class WorldHandler {
             chr.dispose();
             return;
         }
-        if (si.getHyper() == 0 && si.getHyperStat() == 0) {
+        if (si.getHyper() == 0 && si.getHyperStat() == 0 || !SkillConstants.isMatching(si.getRootId(), chr.getJob())) {
             log.error(String.format("Character %d attempted assigning hyper SP to a wrong skill (skill id %d, player job %d)", chr.getId(), skillID, chr.getJob()));
             chr.dispose();
             return;
@@ -5214,6 +5260,9 @@ public class WorldHandler {
         byte idk2 = inPacket.decodeByte();
         int idk3 = inPacket.decodeInt(); // party id?
         String msg = inPacket.decodeString();
+        if (msg.length() > 1000 || !Util.isValidString(msg)) {
+            return;
+        }
         if (type == 1 && chr.getParty() != null) {
             chr.getParty().broadcast(CField.groupMessage(GroupMessageType.Party, chr.getName(), msg), chr);
         } else if (type == 3 && chr.getGuild() != null && chr.getGuild().getAlliance() != null) {
@@ -5225,7 +5274,8 @@ public class WorldHandler {
         Field field = chr.getField();
         if ((field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0 ||
                 (field.getFieldLimit() & FieldOption.MigrateLimit.getVal()) > 0 ||
-                (field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0) {
+                (field.getFieldLimit() & FieldOption.PortalScrollLimit.getVal()) > 0 ||
+                !field.isChannelField()) {
             chr.chatMessage("You may not warp to that map.");
             chr.dispose();
             return;
@@ -6232,20 +6282,19 @@ public class WorldHandler {
     public static void handleTransferFreeMarketRequest(Char chr, InPacket inPacket) {
         byte toChannelID = (byte) (inPacket.decodeByte() + 1);
         int fieldID = inPacket.decodeInt();
-
-        Field toField = chr.getClient().getChannelInstance().getField(fieldID);
-
-        if (toField == null) {
-            chr.dispose();
-            return;
-        }
-
-        int currentChannelID = chr.getClient().getChannel();
-
-        if(currentChannelID != toChannelID) {
-            chr.changeChannelAndWarp(toChannelID, fieldID);
-        } else {
-            chr.warp(toField);
+        if (chr.getWorld().getChannelById(toChannelID) != null  && GameConstants.isFreeMarketField(fieldID)
+                && GameConstants.isFreeMarketField(chr.getField().getId())) {
+            Field toField = chr.getClient().getChannelInstance().getField(fieldID);
+            if (toField == null) {
+                chr.dispose();
+                return;
+            }
+            int currentChannelID = chr.getClient().getChannel();
+            if (currentChannelID != toChannelID) {
+                chr.changeChannelAndWarp(toChannelID, fieldID);
+            } else {
+                chr.warp(toField);
+            }
         }
 
         inPacket.decodeInt(); // tick

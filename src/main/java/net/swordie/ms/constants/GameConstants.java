@@ -11,6 +11,7 @@ import net.swordie.ms.enums.QuickMoveType;
 import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Rect;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
 
 import java.util.ArrayList;
@@ -778,5 +779,18 @@ public class GameConstants {
             return INC_HP_MP[jobCategory];
         }
         return null;// something wrong.
+    }
+
+    public static boolean isValidName(String name) {
+        return name.length() >= 4 && name.length() <= 13 && Util.isDigitLetterString(name);
+    }
+
+    public static boolean isValidEmotion(int emotion) {
+        return emotion >= 0 && emotion <= 10;
+    }
+
+    public static boolean isFreeMarketField(int id) {
+        // room 1~22
+        return id > 910000000 && id < 910001000;
     }
 }

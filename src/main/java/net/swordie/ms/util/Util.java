@@ -384,4 +384,12 @@ public class Util {
         }
         return set;
     }
+
+    public static boolean isDigitLetterString(String name) {
+        return name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
+    }
+
+    public static boolean isValidString(String name) {
+        return name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+    }
 }

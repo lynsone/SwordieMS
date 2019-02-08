@@ -9,12 +9,14 @@ import net.swordie.ms.client.character.skills.PartyBooster;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
+import net.swordie.ms.client.jobs.resistance.Demon;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
+import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.LeaveType;
 import net.swordie.ms.enums.TSIndex;
@@ -163,6 +165,9 @@ public class TemporaryStatManager {
                 getIndieSchedules().put(tuple, sf);
             }
         }
+        if (cts != LifeTidal && JobConstants.isDemonAvenger(chr.getJob())) {
+            ((Demon) chr.getJobHandler()).sendHpUpdate();
+        }
     }
 
     public Option getOptByCTSAndSkill(CharacterTemporaryStat cts, int skillID) {
@@ -196,6 +201,9 @@ public class TemporaryStatManager {
             getSchedules().get(cts).cancel(false);
         } else {
             getSchedules().remove(cts);
+        }
+        if (JobConstants.isDemonAvenger(chr.getJob())) {
+            ((Demon) chr.getJobHandler()).sendHpUpdate();
         }
     }
 
