@@ -69,6 +69,7 @@ public class Server extends Properties {
 			e.printStackTrace();
 		}
 		StringData.load();
+		FieldData.loadWorldMap();
 
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
