@@ -3625,7 +3625,7 @@ public class WorldHandler {
             Pet pet = petItem.createPet(chr);
             petItem.setActiveState((byte) (pet.getIdx() + 1));
             chr.addPet(pet);
-            c.write(UserLocal.petActivateChange(pet, true, (byte) 0));
+            chr.getField().broadcastPacket(UserLocal.petActivateChange(pet, true, (byte) 0));
         } else {
             Pet pet = chr.getPets()
                     .stream()
@@ -3633,7 +3633,7 @@ public class WorldHandler {
                     .findFirst().orElse(null);
             petItem.setActiveState((byte) 0);
             chr.removePet(pet);
-            c.write(UserLocal.petActivateChange(pet, false, (byte) 0));
+            chr.getField().broadcastPacket(UserLocal.petActivateChange(pet, false, (byte) 0));
         }
 
         c.write(WvsContext.inventoryOperation(true, false,
@@ -6297,5 +6297,14 @@ public class WorldHandler {
         }
 
         inPacket.decodeInt(); // tick
+    }
+
+    public static void handleAndroidMove(Char chr, InPacket inPacket) {
+        Android android = chr.getAndroid();
+        if (android == null) {
+            return;
+        }
+        MovementInfo mi = new MovementInfo(inPacket);
+        chr.getField().broadcastPacket(AndroidPacket.move(android, mi), chr);
     }
 }

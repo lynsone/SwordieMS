@@ -599,6 +599,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case PET_DROP_PICK_UP_REQUEST:
                 WorldHandler.handlePetDropPickUpRequest(chr, inPacket);
                 break;
+            case ANDROID_MOVE:
+                WorldHandler.handleAndroidMove(chr, inPacket);
+                break;
             case USER_CONTENTS_MAP_REQUEST:
                 WorldHandler.handleUserContentsMapRequest(chr, inPacket);
                 break;

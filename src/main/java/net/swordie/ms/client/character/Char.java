@@ -57,6 +57,7 @@ import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Android;
 import net.swordie.ms.life.Familiar;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.drop.Drop;
@@ -397,6 +398,8 @@ public class Char {
 	private boolean isInvincible = false;
 	@Convert(converter = InlinedIntArrayConverter.class)
 	private List<Integer> quickslotKeys;
+	@Transient
+	private Android android;
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
@@ -4495,4 +4498,12 @@ public class Char {
 	public World getWorld() {
 		return getClient().getWorld();
 	}
+
+    public Android getAndroid() {
+        return android;
+    }
+
+    public void setAndroid(Android android) {
+        this.android = android;
+    }
 }

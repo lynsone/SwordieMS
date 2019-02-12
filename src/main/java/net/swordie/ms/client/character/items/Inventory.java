@@ -124,11 +124,11 @@ public class Inventory {
         this.type = type;
     }
 
-    public Item getItemBySlot(short bagIndex) {
-        return getItemBySlot(bagIndex < 0 ? -bagIndex : bagIndex);
+    public Item getItemBySlot(int bagIndex) {
+        return getItemBySlotS(bagIndex < 0 ? -bagIndex : bagIndex);
     }
 
-    private Item getItemBySlot(int bagIndex) {
+    private Item getItemBySlotS(int bagIndex) {
         return getItems().stream().filter(item -> item.getBagIndex() == bagIndex).findAny().orElse(null);
     }
 

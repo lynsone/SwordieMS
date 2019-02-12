@@ -1151,6 +1151,7 @@ public enum OutHeader {
             CREATE_OBTACLE,
             DROP_ENTER_FIELD,
             MOB_LEAVE_FIELD,
+            ANDROID_MOVE,
             MESSAGE
     );
 
