@@ -1003,7 +1003,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	public void killMobs() {
 		List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
 		for (Mob mob : mobs) {
-			mob.die();
+			mob.die(false);
 		}
 	}
 

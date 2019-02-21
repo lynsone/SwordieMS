@@ -597,7 +597,7 @@ public class WildHunter extends Citizen {
                                     quest.getQRKey(), quest.getQRValue(), (byte) 0));
                             chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 0)));
                             WildHunterInfo whi = chr.getWildHunterInfo();
-                            mob.die();
+                            mob.die(true);
                         } else {
                             chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 2)));
                         }

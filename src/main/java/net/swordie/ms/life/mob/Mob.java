@@ -1234,9 +1234,9 @@ public class Mob extends Life {
             // Boss sponges
             // TODO horntail kills
             if (getTemplateId() == 8810214 || getTemplateId() == 8810018 || getTemplateId() == 8810118) {
-                getField().getMobs().forEach(Mob::die);
+                getField().getMobs().forEach(m -> m.die(true));
             }
-            die();
+            die(true);
             if (damageDealer.hasQuestInProgress(38022) && getTemplateId() == 9300811) {
                 damageDealer.getScriptManager().setQRValue(38022, "clear", false);
             }
@@ -1250,7 +1250,7 @@ public class Mob extends Life {
         }
     }
 
-    public void die() {
+    public void die(boolean drops) {
         Field field = getField();
         getField().broadcastPacket(MobPool.leaveField(getObjectId(), DeathType.ANIMATION_DEATH));
         getField().removeLife(getObjectId());
@@ -1258,7 +1258,9 @@ public class Mob extends Life {
             return;
         }
         distributeExp();
-        dropDrops(); // xd
+        if (drops) {
+            dropDrops(); // xd
+        }
         for (Char chr : getDamageDone().keySet()) {
             chr.getQuestManager().handleMobKill(this);
             chr.getTemporaryStatManager().addSoulMPFromMobDeath();
