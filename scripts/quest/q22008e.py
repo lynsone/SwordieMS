@@ -1,19 +1,19 @@
 # 22008 |   Chasing away the foxes (Evan intro)
 sm.setSpeakerID(1013101)
 sm.sendNext("Did you defeat the Treacherous Foxes?")
-sm.setPlayerAsSpeaker
+sm.setPlayerAsSpeaker()
 sm.sendNext("#bWhat happened to slaying the Foxes left behind?")
 sm.setSpeakerID(1013101)
 sm.sendNext("Oh that? Haha, I did chase them, sort of, But I wanted to make sure they did not catch up to you. I wouldn't want you eaten by a Treacherous Fox or anything. So I just let them be.")
-sm.setPlayerAsSpeaker
+sm.setPlayerAsSpeaker()
 sm.sendNext("#bAre you sure you weren't just hiding because you were scared of the Foxes?")
 sm.setSpeakerID(1013101)
 sm.sendNext("What? No way! Sheeesh, I fear nothing!")
-sm.setPlayerAsSpeaker
+sm.setPlayerAsSpeaker()
 sm.sendNext("#bWatch out! There's a Treacherous Fox right behind you!")
 sm.setSpeakerID(1013101)
 sm.sendNext("Eeeek! Mommy!")
-sm.setPlayerAsSpeaker
+sm.setPlayerAsSpeaker()
 sm.sendNext("....")
 sm.setSpeakerID(1013101)
 sm.sendNext("....")
