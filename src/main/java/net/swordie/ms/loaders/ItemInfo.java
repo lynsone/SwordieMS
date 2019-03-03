@@ -42,6 +42,8 @@ public class ItemInfo {
     private int moveTo;
     private Set<ItemRewardInfo> itemRewardInfos = new HashSet<>();
     private int skillId;
+    private int grade;
+    private int android;
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
@@ -317,4 +319,19 @@ public class ItemInfo {
         return null;
     }
 
+    public void setGrade(int grade) {
+        this.grade = grade;
+    }
+
+    public int getGrade() {
+        return grade;
+    }
+
+    public void setAndroid(int android) {
+        this.android = android;
+    }
+
+    public int getAndroid() {
+        return android;
+    }
 }

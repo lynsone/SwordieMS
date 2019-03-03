@@ -178,6 +178,11 @@ public class LoginHandler {
         }
 
         CharNameResult code = null;
+        if (!ItemData.isStartingItems(items)) {
+            c.getAccount().getOffenseManager().addOffense("Tried to add items unavailable on char creation.");
+            code = CharNameResult.Unavailable_CashItem;
+        }
+
         if (!GameConstants.isValidName(name)) {
             code = CharNameResult.Unavailable_Invalid;
         } else if (Char.getFromDBByName(name) != null){

@@ -19,6 +19,7 @@ public class Offense {
     private Type type;
     @Convert(converter = FileTimeConverter.class)
     private FileTime issueDate;
+    @Column(name = "issuer_char_id")
     private int issuerCharID;
 
     public Offense() {

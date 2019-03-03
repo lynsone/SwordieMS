@@ -25,6 +25,7 @@ public class ItemData {
     public static Map<Integer, PetInfo> pets = new HashMap<>();
     public static Map<Integer, ItemOption> itemOptions = new HashMap<>();
     public static Map<Integer, Integer> skillIdByItemId = new HashMap<>();
+    private static Set<Integer> startingItems = new HashSet<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
 
@@ -851,15 +852,19 @@ public class ItemData {
                         for (Node info : XMLApi.getAllChildren(infoNode)) {
                             String name = XMLApi.getNamedAttribute(info, "name");
                             String value = XMLApi.getNamedAttribute(info, "value");
+                            int intValue = 0;
+                            if (Util.isNumber(value)) {
+                                intValue = Integer.parseInt(value);
+                            }
                             switch (name) {
                                 case "cash":
-                                    item.setCash(Integer.parseInt(value) != 0);
+                                    item.setCash(intValue != 0);
                                     break;
                                 case "price":
-                                    item.setPrice(Integer.parseInt(value));
+                                    item.setPrice(intValue);
                                     break;
                                 case "slotMax":
-                                    item.setSlotMax(Integer.parseInt(value));
+                                    item.setSlotMax(intValue);
                                     break;
                                 // info not currently interesting. May be interesting in the future.
                                 case "icon":
@@ -908,10 +913,10 @@ public class ItemData {
                                     }
                                     break;
                                 case "reqSkillLevel":
-                                    item.setReqSkillLv(Integer.parseInt(value));
+                                    item.setReqSkillLv(intValue);
                                     break;
                                 case "masterLevel":
-                                    item.setMasterLv(Integer.parseInt(value));
+                                    item.setMasterLv(intValue);
                                     break;
 
                                 case "stateChangeItem":
@@ -972,7 +977,6 @@ public class ItemData {
                                 case "useDelay":
                                 case "name":
                                 case "uiData":
-                                case "grade":
                                 case "UI":
                                 case "recoveryRate":
                                 case "itemMsg":
@@ -1116,151 +1120,157 @@ public class ItemData {
                                 case "willEXP":
                                     break;
                                 case "tradeBlock":
-                                    item.setTradeBlock(Integer.parseInt(value) != 0);
+                                    item.setTradeBlock(intValue != 0);
                                     break;
                                 case "notSale":
-                                    item.setNotSale(Integer.parseInt(value) != 0);
+                                    item.setNotSale(intValue != 0);
                                     break;
                                 case "path":
                                     item.setPath(value);
                                     break;
                                 case "noCursed":
-                                    item.setNoCursed(Integer.parseInt(value) != 0);
+                                    item.setNoCursed(intValue != 0);
                                     break;
                                 case "noNegative":
-                                    item.putScrollStat(noNegative, Integer.parseInt(value));
+                                    item.putScrollStat(noNegative, intValue);
                                     break;
                                 case "incRandVol":
-                                    item.putScrollStat(incRandVol, Integer.parseInt(value));
+                                    item.putScrollStat(incRandVol, intValue);
                                     break;
                                 case "success":
-                                    item.putScrollStat(success, Integer.parseInt(value));
+                                    item.putScrollStat(success, intValue);
                                     break;
                                 case "incSTR":
-                                    item.putScrollStat(incSTR, Integer.parseInt(value));
+                                    item.putScrollStat(incSTR, intValue);
                                     break;
                                 case "incDEX":
-                                    item.putScrollStat(incDEX, Integer.parseInt(value));
+                                    item.putScrollStat(incDEX, intValue);
                                     break;
                                 case "incINT":
-                                    item.putScrollStat(incINT, Integer.parseInt(value));
+                                    item.putScrollStat(incINT, intValue);
                                     break;
                                 case "incLUK":
-                                    item.putScrollStat(incLUK, Integer.parseInt(value));
+                                    item.putScrollStat(incLUK, intValue);
                                     break;
                                 case "incPAD":
-                                    item.putScrollStat(incPAD, Integer.parseInt(value));
+                                    item.putScrollStat(incPAD, intValue);
                                     break;
                                 case "incMAD":
-                                    item.putScrollStat(incMAD, Integer.parseInt(value));
+                                    item.putScrollStat(incMAD, intValue);
                                     break;
                                 case "incPDD":
-                                    item.putScrollStat(incPDD, Integer.parseInt(value));
+                                    item.putScrollStat(incPDD, intValue);
                                     break;
                                 case "incMDD":
-                                    item.putScrollStat(incMDD, Integer.parseInt(value));
+                                    item.putScrollStat(incMDD, intValue);
                                     break;
                                 case "incEVA":
-                                    item.putScrollStat(incEVA, Integer.parseInt(value));
+                                    item.putScrollStat(incEVA, intValue);
                                     break;
                                 case "incACC":
-                                    item.putScrollStat(incACC, Integer.parseInt(value));
+                                    item.putScrollStat(incACC, intValue);
                                     break;
                                 case "incPERIOD":
-                                    item.putScrollStat(incPERIOD, Integer.parseInt(value));
+                                    item.putScrollStat(incPERIOD, intValue);
                                     break;
                                 case "incMHP":
                                 case "incMaxHP":
-                                    item.putScrollStat(incMHP, Integer.parseInt(value));
+                                    item.putScrollStat(incMHP, intValue);
                                     break;
                                 case "incMMP":
                                 case "incMaxMP":
-                                    item.putScrollStat(incMMP, Integer.parseInt(value));
+                                    item.putScrollStat(incMMP, intValue);
                                     break;
                                 case "incSpeed":
-                                    item.putScrollStat(incSpeed, Integer.parseInt(value));
+                                    item.putScrollStat(incSpeed, intValue);
                                     break;
                                 case "incJump":
-                                    item.putScrollStat(incJump, Integer.parseInt(value));
+                                    item.putScrollStat(incJump, intValue);
                                     break;
                                 case "incReqLevel":
-                                    item.putScrollStat(incReqLevel, Integer.parseInt(value));
+                                    item.putScrollStat(incReqLevel, intValue);
                                     break;
                                 case "randOption":
-                                    item.putScrollStat(randOption, Integer.parseInt(value));
+                                    item.putScrollStat(randOption, intValue);
                                     break;
                                 case "randstat":
                                 case "randStat":
-                                    item.putScrollStat(randStat, Integer.parseInt(value));
+                                    item.putScrollStat(randStat, intValue);
                                     break;
                                 case "tuc":
-                                    item.putScrollStat(tuc, Integer.parseInt(value));
+                                    item.putScrollStat(tuc, intValue);
                                     break;
                                 case "incIUC":
-                                    item.putScrollStat(incIUC, Integer.parseInt(value));
+                                    item.putScrollStat(incIUC, intValue);
                                     break;
                                 case "speed":
-                                    item.putScrollStat(speed, Integer.parseInt(value));
+                                    item.putScrollStat(speed, intValue);
                                     break;
                                 case "forceUpgrade":
-                                    item.putScrollStat(forceUpgrade, Integer.parseInt(value));
+                                    item.putScrollStat(forceUpgrade, intValue);
                                     break;
                                 case "cursed":
-                                    item.putScrollStat(cursed, Integer.parseInt(value));
+                                    item.putScrollStat(cursed, intValue);
                                     break;
                                 case "maxSuperiorEqp":
-                                    item.putScrollStat(maxSuperiorEqp, Integer.parseInt(value));
+                                    item.putScrollStat(maxSuperiorEqp, intValue);
                                     break;
                                 case "reqRUC":
-                                    item.putScrollStat(reqRUC, Integer.parseInt(value));
+                                    item.putScrollStat(reqRUC, intValue);
                                     break;
                                 case "bagType":
-                                    item.setBagType(Integer.parseInt(value));
+                                    item.setBagType(intValue);
                                     break;
                                 case "charmEXP":
                                 case "charismaEXP":
-                                    item.setCharmEXP(Integer.parseInt(value));
+                                    item.setCharmEXP(intValue);
                                     break;
                                 case "senseEXP":
-                                    item.setSenseEXP(Integer.parseInt(value));
+                                    item.setSenseEXP(intValue);
                                     break;
                                 case "quest":
-                                    item.setQuest(Integer.parseInt(value) != 0);
+                                    item.setQuest(intValue != 0);
                                     break;
                                 case "reqQuestOnProgress":
-                                    item.setReqQuestOnProgress(Integer.parseInt(value));
+                                    item.setReqQuestOnProgress(intValue);
                                     break;
                                 case "qid":
                                 case "questId":
                                     if (value.contains(".") && value.split("[.]").length > 0) {
                                         item.addQuest(Integer.parseInt(value.split("[.]")[0]));
                                     } else {
-                                        item.addQuest(Integer.parseInt(value));
+                                        item.addQuest(intValue);
                                     }
                                     break;
                                 case "notConsume":
-                                    item.setNotConsume(Integer.parseInt(value) != 0);
+                                    item.setNotConsume(intValue != 0);
                                     break;
                                 case "monsterBook":
-                                    item.setMonsterBook(Integer.parseInt(value) != 0);
+                                    item.setMonsterBook(intValue != 0);
                                     break;
                                 case "mob":
-                                    item.setMobID(Integer.parseInt(value));
+                                    item.setMobID(intValue);
                                     break;
                                 case "npc":
-                                    item.setNpcID(Integer.parseInt(value));
+                                    item.setNpcID(intValue);
                                     break;
                                 case "linkedID":
-                                    item.setLinkedID(Integer.parseInt(value));
+                                    item.setLinkedID(intValue);
                                     break;
                                 case "reqEquipLevelMax":
-                                    item.putScrollStat(reqEquipLevelMax, Integer.parseInt(value));
+                                    item.putScrollStat(reqEquipLevelMax, intValue);
                                     break;
                                 case "createType":
-                                    item.putScrollStat(createType, Integer.parseInt(value));
+                                    item.putScrollStat(createType, intValue);
                                     break;
                                 case "optionType":
-                                    item.putScrollStat(optionType, Integer.parseInt(value));
+                                    item.putScrollStat(optionType, intValue);
+                                    break;
+                                case "grade":
+                                    item.setGrade(intValue);
+                                    break;
+                                case "android":
+                                    item.setAndroid(intValue);
                                     break;
                                 case "spec":
                                     break;
@@ -1729,6 +1739,57 @@ public class ItemData {
         }
     }
 
+    private static void saveStartingItems(String dir) {
+        File file = new File(String.format("%s/startingItems.dat", dir));
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+            dos.writeInt(startingItems.size());
+            for (int i : startingItems) {
+                dos.writeInt(i);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void loadStartingItemsFromWZ() {
+        String wzDir = ServerConstants.WZ_DIR + "/Etc.wz";
+        String itemOptionDir = String.format("%s/MakeCharInfo.img.xml", wzDir);
+        File file = new File(itemOptionDir);
+        startingItems.addAll(searchForStartingItems(XMLApi.getRoot(file)));
+        System.out.println(startingItems);
+    }
+
+    private static Set<Integer> searchForStartingItems(Node n) {
+        List<Node> subNodes = XMLApi.getAllChildren(n);
+        for (Node node : subNodes) {
+            String name = XMLApi.getNamedAttribute(node, "name");
+            String value = XMLApi.getNamedAttribute(node, "value");
+            if (Util.isNumber(name) && value != null && Util.isNumber(value)) {
+                startingItems.add(Integer.parseInt(value));
+            }
+            startingItems.addAll(searchForStartingItems(node));
+        }
+        return startingItems;
+    }
+
+
+    @Loader(varName = "startingItems")
+    public static void loadStartingItems(File file, boolean exists) {
+        if (!exists) {
+            loadStartingItemsFromWZ();
+            saveStartingItems(ServerConstants.DAT_DIR);
+        } else {
+            try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+                int size = dis.readInt();
+                for (int i = 0; i < size; i++) {
+                    startingItems.add(dis.readInt());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @SuppressWarnings("unused") // Reflection
     public static void generateDatFiles() {
         log.info("Started generating item data.");
@@ -1770,5 +1831,18 @@ public class ItemData {
         getEquips().clear();
         getItems().clear();
         getItemOptions().clear();
+    }
+
+    public static boolean isStartingItems(int[] items) {
+        for (int item : items) {
+            if (!isStartingItem(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isStartingItem(int item) {
+        return startingItems.contains(item);
     }
 }
