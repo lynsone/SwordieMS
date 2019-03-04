@@ -1,8 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.util.container.Tuple;
+import net.swordie.ms.loaders.containerclasses.SkillStringInfo;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

@@ -1,4 +1,4 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 import net.swordie.ms.client.character.quest.progress.QuestProgressRequirement;
 import net.swordie.ms.client.character.quest.reward.QuestReward;

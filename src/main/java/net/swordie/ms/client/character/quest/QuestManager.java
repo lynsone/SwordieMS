@@ -13,9 +13,8 @@ import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.QuestData;
-import net.swordie.ms.loaders.QuestInfo;
+import net.swordie.ms.loaders.containerclasses.QuestInfo;
 import net.swordie.ms.util.FileTime;
-import net.swordie.ms.world.field.Field;
 
 import javax.persistence.*;
 import java.util.Collection;

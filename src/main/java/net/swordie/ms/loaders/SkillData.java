@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
+import net.swordie.ms.loaders.containerclasses.MobSkillInfo;
 import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
 import org.apache.log4j.LogManager;
@@ -23,6 +24,7 @@ public class SkillData {
     private static Map<Short, Map<Short, MobSkillInfo>> mobSkillInfos = new HashMap<>();
     private static Map<Integer, MakingSkillRecipe> makingSkillRecipes = new HashMap<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+    private static final boolean LOG_UNKS = false;
 
     public static void saveSkills(String dir) {
         Util.makeDirIfAbsent(dir);
@@ -268,7 +270,9 @@ public class SkillData {
                                             if (skillStat != null) {
                                                 skill.addSkillStatInfo(skillStat, commonAttr.get("value"));
                                             } else if (!unkVals.contains(nodeName)) {
-                                                log.warn("Unknown SkillStat " + nodeName);
+                                                if (LOG_UNKS) {
+                                                    log.warn("Unknown SkillStat " + nodeName);
+                                                }
                                                 unkVals.add(nodeName);
                                             }
                                         }
@@ -760,7 +764,9 @@ public class SkillData {
                             break;
                         default:
                             if (!unks.contains(name)) {
-                                log.warn(String.format("Unkown MobSkillStat %s with value %s (skill %d level %d)", name, value, skillID, level));
+                                if (LOG_UNKS) {
+                                    log.warn(String.format("Unkown MobSkillStat %s with value %s (skill %d level %d)", name, value, skillID, level));
+                                }
                                 unks.add(name);
                             }
                             break;
@@ -941,7 +947,9 @@ public class SkillData {
                                             tar.setProbWeight(targetValue);
                                             break;
                                         default:
-                                            log.warn("Unknown target value " + targetName);
+                                            if (LOG_UNKS) {
+                                                log.warn("Unknown target value " + targetName);
+                                            }
                                             break;
                                     }
                                 }
@@ -1010,7 +1018,9 @@ public class SkillData {
                                             count = ingredientValue;
                                             break;
                                         default:
-                                            log.warn("Unknown ingredient value " + ingredientName);
+                                            if (LOG_UNKS) {
+                                                log.warn("Unknown ingredient value " + ingredientName);
+                                            }
                                             break;
                                     }
                                 }
@@ -1020,7 +1030,9 @@ public class SkillData {
                             }
                             break;
                         default:
-                            log.warn("Unknown recipe value " + name);
+                            if (LOG_UNKS) {
+                                log.warn("Unknown recipe value " + name);
+                            }
                             break;
                     }
                 }

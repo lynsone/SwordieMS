@@ -5,7 +5,6 @@ import net.swordie.ms.client.Account;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
@@ -15,7 +14,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
@@ -23,12 +21,14 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.Android;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.SkillStringInfo;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
@@ -41,7 +41,6 @@ import org.apache.log4j.LogManager;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -59,7 +58,8 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-
+            Android andr = new Android(Integer.parseInt(args[1]), chr, (short) 0, (short) 1000, (short) 1000, "Sword");
+            chr.write(AndroidPacket.created(andr));
         }
     }
 

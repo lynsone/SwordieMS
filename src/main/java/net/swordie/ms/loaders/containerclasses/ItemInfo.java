@@ -1,9 +1,10 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.ScrollStat;
 import net.swordie.ms.enums.SpecStat;
+import net.swordie.ms.loaders.ItemData;
 
 import java.util.*;
 

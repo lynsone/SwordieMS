@@ -1,4 +1,4 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 /**
  * Created on 1/11/2018.

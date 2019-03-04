@@ -8,7 +8,7 @@ import net.swordie.ms.enums.DropMotionType;
 import net.swordie.ms.enums.DropType;
 import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.life.Life;
 

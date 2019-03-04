@@ -23,7 +23,7 @@ import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.scripts.ScriptManager;
@@ -44,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.SkillStat.mesoR;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**

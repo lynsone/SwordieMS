@@ -1,9 +1,6 @@
 package net.swordie.ms.life.drop;
 
 import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
 import net.swordie.ms.util.Util;
 
 import javax.persistence.*;

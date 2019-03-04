@@ -7,7 +7,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.loaders.containerclasses.EquipDrop;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.Util;

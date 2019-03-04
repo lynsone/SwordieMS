@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.life.Reactor;
+import net.swordie.ms.loaders.containerclasses.ReactorInfo;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Rect;
@@ -16,7 +17,8 @@ import java.util.HashMap;
  */
 public class ReactorData {
 
-    private final static Logger log = Logger.getLogger(ReactorData.class);
+    private static final boolean LOG_UNKS = false;
+    private static final Logger log = Logger.getLogger(ReactorData.class);
     private static HashMap<Integer, ReactorInfo> reactorInfo = new HashMap<>();
 
     private static void loadReactorsFromWZ() {
@@ -100,7 +102,9 @@ public class ReactorData {
                     case "rb":
                         break;
                     default:
-                        log.warn(String.format("[Reactor] Unhandled info node id %d, %s, value %s", ri.getId(), name, value));
+                        if (LOG_UNKS) {
+                            log.warn(String.format("[Reactor] Unhandled info node id %d, %s, value %s", ri.getId(), name, value));
+                        }
                 }
             }
             addReactorInfo(ri);

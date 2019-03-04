@@ -10,6 +10,8 @@ import net.swordie.ms.ServerConstants;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.enums.Stat;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.QuestInfo;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Util;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class QuestData {
     private static Set<QuestInfo> baseQuests = new HashSet<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+    private static final boolean LOG_UNKS = false;
 
     public static void loadQuestsFromWZ() {
         String wzDir = String.format("%s/Quest.wz/", ServerConstants.WZ_DIR);
@@ -222,7 +225,9 @@ public class QuestData {
                                             qcr.setQuestStatus(Byte.parseByte(questValue));
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk quest name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk quest name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -244,7 +249,9 @@ public class QuestData {
                                         case "order":
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk pet name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk pet name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -287,7 +294,9 @@ public class QuestData {
                                         case "order":
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk mob name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -322,7 +331,9 @@ public class QuestData {
                                         case "secret":
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk item name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk item name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -348,7 +359,9 @@ public class QuestData {
                                         case "levelCondition":
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk skill name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -376,7 +389,9 @@ public class QuestData {
                                             order = Integer.parseInt(questValue);
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk npc speech name %s with value %s", questID, questName, questValue));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk npc speech name %s with value %s", questID, questName, questValue));
+                                            }
                                             break;
                                     }
                                 }
@@ -387,7 +402,9 @@ public class QuestData {
                             }
                             break;
                         default:
-                            log.warn(String.format("(%d) Unk name %s with value %s", questID, name, value));
+                            if (LOG_UNKS) {
+                                log.warn(String.format("(%d) Unk name %s with value %s", questID, name, value));
+                            }
                             break;
                     }
                 }
@@ -450,7 +467,9 @@ public class QuestData {
                                             qir.setGender(Integer.parseInt(itemValue));
                                             break;
                                         default:
-                                            log.warn(String.format("(%d) Unk item name %s with value %s status %d", id, itemName, itemValue, status));
+                                            if (LOG_UNKS) {
+                                                log.warn(String.format("(%d) Unk item name %s with value %s status %d", id, itemName, itemValue, status));
+                                            }
                                             break;
                                     }
                                 }
@@ -458,7 +477,9 @@ public class QuestData {
                             }
                             break;
                         default:
-                            log.warn(String.format("(%d) Unk name %s with value %s status %d", id, name, value, status));
+                            if (LOG_UNKS) {
+                                log.warn(String.format("(%d) Unk name %s with value %s status %d", id, name, value, status));
+                            }
                             break;
                     }
                 }

@@ -3,11 +3,10 @@ package net.swordie.ms.client.character.items;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

@@ -44,6 +44,7 @@ import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;

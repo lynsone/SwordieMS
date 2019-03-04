@@ -1,4 +1,4 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 /**
  * @author Sjonnie

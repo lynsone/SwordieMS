@@ -5,6 +5,9 @@ import net.swordie.ms.client.character.items.*;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemRewardInfo;
+import net.swordie.ms.loaders.containerclasses.PetInfo;
 import net.swordie.ms.util.*;
 import org.apache.log4j.LogManager;
 import org.w3c.dom.Document;
@@ -27,6 +30,7 @@ public class ItemData {
     public static Map<Integer, Integer> skillIdByItemId = new HashMap<>();
     private static Set<Integer> startingItems = new HashSet<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+    private static final boolean LOG_UNKS = false;
 
 
     /**
@@ -1275,7 +1279,9 @@ public class ItemData {
                                 case "spec":
                                     break;
                                 default:
-                                    log.warn(String.format("Unknown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
+                                    if (LOG_UNKS) {
+                                        log.warn(String.format("Unknown node: %s, value = %s, itemID = %s", name, value, item.getItemId()));
+                                    }
                             }
                         }
                     }

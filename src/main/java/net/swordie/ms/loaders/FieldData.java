@@ -30,6 +30,7 @@ public class FieldData {
     private static List<Field> fields = new ArrayList<>();
     private static List<Integer> worldMapFields = new ArrayList<>();
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
+    private static final boolean LOG_UNKS = false;
 
     public static void main(String[] args) {
         generateDatFiles();
@@ -429,7 +430,9 @@ public class FieldData {
                                     life.setMobAliveReq(Integer.parseInt(value));
                                     break;
                                 default:
-                                    //log.warn("unknown life property " + name + " with value " + value);
+                                    if (LOG_UNKS) {
+                                        log.warn("unknown life property " + name + " with value " + value);
+                                    }
                                     break;
                             }
                         }
@@ -480,7 +483,9 @@ public class FieldData {
                                     reactor.setPhantomForest(iVal != 0);
                                     break;
                                 default:
-                                    log.warn(String.format("Unknown reactor property %s with value %s", name, value));
+                                    if (LOG_UNKS) {
+                                        log.warn(String.format("Unknown reactor property %s with value %s", name, value));
+                                    }
                             }
                         }
                         field.addLife(reactor);

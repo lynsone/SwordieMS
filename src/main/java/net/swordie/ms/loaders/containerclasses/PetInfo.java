@@ -1,8 +1,9 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.life.pet.PetSkill;
+import net.swordie.ms.loaders.StringData;
 
 /**
  * Created on 4/14/2018.

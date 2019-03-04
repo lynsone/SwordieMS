@@ -20,6 +20,7 @@ import java.util.*;
  */
 public class NpcData {
 	private static final Logger log = Logger.getLogger(NpcData.class);
+	private static final boolean LOG_UNKS = false;
 
 	private static Set<Npc> npcs = new HashSet<>();
 	private static Map<Integer, NpcShopDlg> shops = new HashMap<>();
