@@ -204,7 +204,6 @@ public class DatabaseManager {
             // String.format for query, just to fill in the class
             // Can't set the FROM clause with a parameter it seems
             javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
-            System.out.println(((Query) query).getQueryString());
             query.setParameter("val", value);
             List l = ((org.hibernate.query.Query) query).list();
             if (l != null && l.size() > 0) {

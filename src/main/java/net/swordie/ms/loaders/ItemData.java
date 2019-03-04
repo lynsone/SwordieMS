@@ -1762,7 +1762,6 @@ public class ItemData {
         String itemOptionDir = String.format("%s/MakeCharInfo.img.xml", wzDir);
         File file = new File(itemOptionDir);
         startingItems.addAll(searchForStartingItems(XMLApi.getRoot(file)));
-        System.out.println(startingItems);
     }
 
     private static Set<Integer> searchForStartingItems(Node n) {

@@ -202,7 +202,7 @@ public class Util {
      * @return Whether or not the String is a number
      */
     public static boolean isNumber(String string) {
-        return string.matches("-?\\d+(\\.\\d+)?");
+        return string != null && string.matches("-?\\d+(\\.\\d+)?");
     }
 
     /**
