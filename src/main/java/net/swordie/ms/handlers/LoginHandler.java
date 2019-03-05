@@ -176,9 +176,12 @@ public class LoginHandler {
         for (int i = 0; i < itemLength; i++) {
             items[i] = inPacket.decodeInt();
         }
-
+        int face = items[0];
+        int hair = items[1];
         CharNameResult code = null;
-        if (!ItemData.isStartingItems(items)) {
+        if (!ItemData.isStartingItems(items) || skin > ItemConstants.MAX_SKIN || skin < 0
+                || face < ItemConstants.MIN_FACE || hair > ItemConstants.MAX_FACE
+                || hair < ItemConstants.MIN_HAIR || hair > ItemConstants.MAX_HAIR) {
             c.getAccount().getOffenseManager().addOffense("Tried to add items unavailable on char creation.");
             code = CharNameResult.Unavailable_CashItem;
         }
@@ -194,7 +197,7 @@ public class LoginHandler {
         }
 
         Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
-                curSelectedSubJob, gender, skin, items);
+                curSelectedSubJob, gender, skin, face, hair, items);
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());

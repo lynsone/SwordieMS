@@ -34,6 +34,12 @@ public class ItemConstants {
     public static final int RAND_CHAOS_MAX = 5;
     public static final int INC_RAND_CHAOS_MAX = 10;
 
+    public static final byte MAX_SKIN = 13;
+    public static final int MIN_HAIR = 30000;
+    public static final int MAX_HAIR = 49999;
+    public static final int MIN_FACE = 20000;
+    public static final int MAX_FACE = 29999;
+
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     public static final int THIRD_LINE_CHANCE = 50;
