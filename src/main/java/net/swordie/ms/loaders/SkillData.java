@@ -5,6 +5,7 @@ import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.SkillStat;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.life.mob.skill.MobSkillStat;
+import net.swordie.ms.loaders.containerclasses.MakingSkillRecipe;
 import net.swordie.ms.loaders.containerclasses.MobSkillInfo;
 import net.swordie.ms.util.*;
 import net.swordie.ms.util.container.Tuple;
@@ -187,7 +188,9 @@ public class SkillData {
                             skillId = Integer.parseInt(skillIdStr);
                             skill.setSkillId(skillId);
                         } else {
-                            log.error(skillIdStr + " is not a number.");
+                            if (LOG_UNKS) {
+                                log.warn(skillIdStr + " is not a number.");
+                            }
                             continue;
                         }
                         for (Node mainLevelNode : XMLApi.getAllChildren(skillNode)) {
@@ -312,7 +315,9 @@ public class SkillData {
                                                     extraSkillId = Integer.parseInt(extraSkillValue);
                                                     break;
                                                 default:
-                                                    log.error(String.format("Unknown Extra Skill Info Name: %s", extraSkillName));
+                                                    if (LOG_UNKS) {
+                                                        log.warn(String.format("Unknown Extra Skill Info Name: %s", extraSkillName));
+                                                    }
                                                     break;
                                             }
                                         }

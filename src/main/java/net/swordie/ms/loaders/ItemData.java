@@ -819,7 +819,9 @@ public class ItemData {
                         pi.setRunScript(value);
                         break;
                     default:
-                        log.error(String.format("Unhandled pet node, name = %s, value = %s.", name, value));
+                        if (LOG_UNKS) {
+                            log.warn(String.format("Unhandled pet node, name = %s, value = %s.", name, value));
+                        }
                         break;
                 }
             }
@@ -844,7 +846,9 @@ public class ItemData {
                 for (Node mainNode : XMLApi.getAllChildren(nodes.get(0))) {
                     String nodeName = XMLApi.getNamedAttribute(mainNode, "name");
                     if (!Util.isNumber(nodeName)) {
-                        log.error(String.format("%s is not a number.", nodeName));
+                        if (LOG_UNKS) {
+                            log.error(String.format("%s is not a number.", nodeName));
+                        }
                         continue;
                     }
                     int id = Integer.parseInt(nodeName);
@@ -1316,8 +1320,8 @@ public class ItemData {
                                     SpecStat ss = SpecStat.getSpecStatByName(name);
                                     if (ss != null && value != null) {
                                         item.putSpecStat(ss, Integer.parseInt(value));
-                                    } else {
-                                        log.error(String.format("Unhandled spec for id %d, name %s, value %s", id, name, value));
+                                    } else if (LOG_UNKS){
+                                        log.warn(String.format("Unhandled spec for id %d, name %s, value %s", id, name, value));
                                     }
                             }
                         }

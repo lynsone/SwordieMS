@@ -180,7 +180,7 @@ public class LoginHandler {
         int hair = items[1];
         CharNameResult code = null;
         if (!ItemData.isStartingItems(items) || skin > ItemConstants.MAX_SKIN || skin < 0
-                || face < ItemConstants.MIN_FACE || hair > ItemConstants.MAX_FACE
+                || face < ItemConstants.MIN_FACE || face > ItemConstants.MAX_FACE
                 || hair < ItemConstants.MIN_HAIR || hair > ItemConstants.MAX_HAIR) {
             c.getAccount().getOffenseManager().addOffense("Tried to add items unavailable on char creation.");
             code = CharNameResult.Unavailable_CashItem;

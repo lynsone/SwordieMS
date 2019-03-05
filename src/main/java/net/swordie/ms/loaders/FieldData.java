@@ -681,7 +681,6 @@ public class FieldData {
     }
 
     private static void saveWorldMap(String dir) {
-        log.info(dir);
         File file = new File(dir);
         try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file))) {
             dataOutputStream.writeInt(worldMapFields.size());
