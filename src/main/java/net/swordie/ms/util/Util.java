@@ -393,7 +393,11 @@ public class Util {
         return name != null && name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
     }
 
-    public static boolean isDigit(String val) {
-        return val != null && val.matches("[0-9]+");
+    public static boolean isInteger(String val) {
+        if (val != null && val.matches("[0-9]+") && val.length() <= 10) {
+            long longVal = Long.parseLong(val);
+            return longVal >= Integer.MIN_VALUE && longVal <= Integer.MAX_VALUE;
+        }
+        return false;
     }
 }
