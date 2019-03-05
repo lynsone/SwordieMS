@@ -394,7 +394,7 @@ public class Util {
     }
 
     public static boolean isInteger(String val) {
-        if (val != null && val.matches("[0-9]+") && val.length() <= 10) {
+        if (val != null && val.matches("^-?[0-9]+") && val.length() <= 10) {
             long longVal = Long.parseLong(val);
             return longVal >= Integer.MIN_VALUE && longVal <= Integer.MAX_VALUE;
         }
