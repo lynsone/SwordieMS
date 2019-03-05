@@ -857,7 +857,7 @@ public class ItemData {
                             String name = XMLApi.getNamedAttribute(info, "name");
                             String value = XMLApi.getNamedAttribute(info, "value");
                             int intValue = 0;
-                            if (Util.isNumber(value)) {
+                            if (Util.isDigit(value)) {
                                 intValue = Integer.parseInt(value);
                             }
                             switch (name) {

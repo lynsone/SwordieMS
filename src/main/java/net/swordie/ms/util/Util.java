@@ -386,10 +386,14 @@ public class Util {
     }
 
     public static boolean isDigitLetterString(String name) {
-        return name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
+        return name != null && name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
     }
 
     public static boolean isValidString(String name) {
-        return name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+        return name != null && name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+    }
+
+    public static boolean isDigit(String val) {
+        return val != null && val.matches("[0-9]+");
     }
 }
