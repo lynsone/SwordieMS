@@ -189,8 +189,8 @@ public class ScriptManagerImpl implements ScriptManager {
 			bindings = scriptEngine.createBindings();
 			bindings.put("sm", this);
 			bindings.put("chr", chr);
-			bindings.put("field", chr == null ? field : chr.getField());
 		}
+		bindings.put("field", chr == null ? field : chr.getField());
 		bindings.put("parentID", parentID);
 		bindings.put("scriptType", scriptType);
 		bindings.put("objectID", objID);
