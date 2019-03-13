@@ -1,15 +1,10 @@
 package net.swordie.ms.life.mob;
 
-import net.swordie.ms.client.Account;
-import net.swordie.ms.client.Client;
-import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -40,7 +35,6 @@ import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
-import org.python.modules.math;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1868,7 +1862,7 @@ public class Mob extends Life {
         if (getExp() == 0) {
             return 0;
         }
-        double amount = ((math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
+        double amount = ((Math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
         return (int) (amount + 1);
 
 
