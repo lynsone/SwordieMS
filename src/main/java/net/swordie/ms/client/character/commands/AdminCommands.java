@@ -1670,7 +1670,7 @@ public class AdminCommands {
         public static void execute(Char chr, String[] args) {
             List<Mob> mobs = new ArrayList<>(chr.getField().getMobs());
             for (Mob mob : mobs) {
-                mob.die();
+                mob.die(false);
             }
         }
     }

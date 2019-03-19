@@ -3,6 +3,7 @@ JUN_ID = 2159000
 ULRIKA_ID = 2159001
 VON_ID = 2159002
 
+sm.removeEscapeButton()
 sm.setSpeakerID(ULRIKA_ID)
 sm.sendNext("There you are, #h #! You're late. Get over here.")
 
