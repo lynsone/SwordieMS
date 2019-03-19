@@ -16,9 +16,9 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.MoveAbility;
@@ -810,7 +810,7 @@ public class BeastTamer extends Job {
                             randomPartyChr.heal(randomPartyChr.getMaxHP());
                             partyTSM.putCharacterStatValue(NotDamaged, o1);
                             partyTSM.sendSetStatPacket();
-                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.write(UserPacket.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
                             randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
                         }
                     }
@@ -826,7 +826,7 @@ public class BeastTamer extends Job {
                 Char pmChr = pm.getChr();
                 if (pmChr.getId() != chr.getId() && pmChr.getClient().getChannel() == chr.getClient().getChannel() && pmChr.getLevel() > 9) {
                     pmChr.warp(chr.getField());
-                    pmChr.write(CField.teleport(chr.getPosition(), pmChr));
+                    pmChr.write(FieldPacket.teleport(chr.getPosition(), pmChr));
                 }
                 pmChr.dispose();
             }
@@ -848,7 +848,7 @@ public class BeastTamer extends Job {
         tsm.removeStatsBySkill(BEAR_REBORN);
         tsm.sendResetStatPacket();
         chr.chatMessage("You have been revived by Bear Reborn.");
-        chr.write(User.effect(Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
+        chr.write(UserPacket.effect(Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(BEAR_REBORN, (byte) 1, 0)));
     }
 

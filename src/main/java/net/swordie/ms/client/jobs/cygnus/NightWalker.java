@@ -11,7 +11,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Summoned;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
@@ -444,7 +444,7 @@ public class NightWalker extends Noblesse {
                 ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 0, (int) System.currentTimeMillis(), 1, 0,
                 new Position());
 
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                 true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
                 mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
     }
@@ -482,7 +482,7 @@ public class NightWalker extends Noblesse {
                     ((chr.getPosition().getX() > mob.getPosition().getX()) ? 90 : 270), 0, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
 
-            chr.getField().broadcastPacket(CField.createForceAtom(true, mobId, 0, type,
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, mobId, 0, type,
                     true, mobId, SHADOW_BAT_ATOM, forceAtomInfo, new Rect(), ((chr.getPosition().getX() < mob.getPosition().getX()) ? 90 : 270), 30,
                     mob.getPosition(), SHADOW_BAT_ATOM, mob.getPosition()));
         }

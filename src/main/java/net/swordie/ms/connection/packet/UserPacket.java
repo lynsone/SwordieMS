@@ -10,7 +10,7 @@ import net.swordie.ms.util.Position;
 /**
  * Created on 2/3/2018.
  */
-public class User {
+public class UserPacket {
 
     public static OutPacket chat(int charID, ChatUserType type, String msg, boolean onlyBalloon, int idk, int worldID) {
         OutPacket outPacket = new OutPacket(OutHeader.CHAT);

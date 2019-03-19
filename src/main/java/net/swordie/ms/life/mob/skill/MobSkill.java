@@ -11,7 +11,7 @@ import net.swordie.ms.enums.TSIndex;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
-import net.swordie.ms.loaders.MobSkillInfo;
+import net.swordie.ms.loaders.containerclasses.MobSkillInfo;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.world.field.Field;
 import org.apache.log4j.LogManager;

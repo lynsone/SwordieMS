@@ -23,7 +23,7 @@ import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.scripts.ScriptManager;
@@ -44,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.skills.SkillStat.mesoR;
 import static net.swordie.ms.client.character.skills.SkillStat.time;
 
 /**
@@ -573,7 +572,7 @@ public class Field {
             spawnLife(life, chr);
         }
         if (getRuneStone() != null && getMobs().size() > 0 && getBossMobID() == 0 && isChannelField() && !isTown()) {
-            chr.write(CField.runeStoneAppear(getRuneStone()));
+            chr.write(FieldPacket.runeStoneAppear(getRuneStone()));
         }
         if (getOpenGates() != null && getOpenGates().size() > 0) {
             for (OpenGate openGate : getOpenGates()) {
@@ -627,7 +626,7 @@ public class Field {
                 addLifeSchedule(aa, sf);
             }
         }
-        broadcastPacket(CField.affectedAreaCreated(aa));
+        broadcastPacket(FieldPacket.affectedAreaCreated(aa));
         getChars().forEach(chr -> aa.getField().checkCharInAffectedAreas(chr));
         getMobs().forEach(mob -> aa.getField().checkMobInAffectedAreas(mob));
     }
@@ -1104,14 +1103,14 @@ public class Field {
         if(getRuneStone() == null) {
             RuneStone runeStone = new RuneStone().getRandomRuneStone(this);
             setRuneStone(runeStone);
-            broadcastPacket(CField.runeStoneAppear(runeStone));
+            broadcastPacket(FieldPacket.runeStoneAppear(runeStone));
         }
     }
 
     public void useRuneStone(Client c, RuneStone runeStone) {
-        broadcastPacket(CField.completeRune(c.getChr()));
-        broadcastPacket(CField.runeStoneDisappear());
-        c.write(CField.runeStoneSkillAck(runeStone.getRuneType()));
+        broadcastPacket(FieldPacket.completeRune(c.getChr()));
+        broadcastPacket(FieldPacket.runeStoneDisappear());
+        c.write(FieldPacket.runeStoneSkillAck(runeStone.getRuneType()));
 
         setRuneStone(null);
 
@@ -1138,7 +1137,7 @@ public class Field {
         }
         Effect effect = Effect.createFieldTextEffect(string, 50, 2000, 4,
                 new Position(0, -200), 1, 4 , TextEffectType.BurningField, 0, 0);
-        broadcastPacket(User.effect(effect));
+        broadcastPacket(UserPacket.effect(effect));
     }
 
     public void increaseBurningLevel() {

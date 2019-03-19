@@ -23,7 +23,7 @@ import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
-import net.swordie.ms.loaders.MakingSkillRecipe;
+import net.swordie.ms.loaders.containerclasses.MakingSkillRecipe;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class CField {
+public class FieldPacket {
 
     public static OutPacket funcKeyMappedManInit(FuncKeyMap funcKeyMap) {
         OutPacket outPacket = new OutPacket(OutHeader.FUNC_KEY_MAPPED_MAN_INIT);

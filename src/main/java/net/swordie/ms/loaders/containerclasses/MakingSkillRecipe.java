@@ -1,9 +1,6 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.connection.packet.User;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.Stat;

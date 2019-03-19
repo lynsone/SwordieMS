@@ -1,7 +1,7 @@
 package net.swordie.ms.world.field;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.enums.ClockType;
 import net.swordie.ms.handlers.EventManager;
 
@@ -34,10 +34,10 @@ public class Clock {
         }
         switch (getClockType()) {
             case SecondsClock:
-                field.broadcastPacket(CField.clock(ClockPacket.secondsClock(seconds)));
+                field.broadcastPacket(FieldPacket.clock(ClockPacket.secondsClock(seconds)));
                 break;
             case StopWatch:
-                field.broadcastPacket(CField.clock(ClockPacket.stopWatch(seconds)));
+                field.broadcastPacket(FieldPacket.clock(ClockPacket.stopWatch(seconds)));
                 break;
         }
         field.setClock(this);
@@ -48,10 +48,10 @@ public class Clock {
         if(field.getClock() != null) {
             switch (field.getClock().getClockType()) {
                 case SecondsClock:
-                    chr.write(CField.clock(ClockPacket.secondsClock((int) getRemainingTime())));
+                    chr.write(FieldPacket.clock(ClockPacket.secondsClock((int) getRemainingTime())));
                     break;
                 case StopWatch:
-                    chr.write(CField.clock(ClockPacket.stopWatch((int) getRemainingTime())));
+                    chr.write(FieldPacket.clock(ClockPacket.stopWatch((int) getRemainingTime())));
                     break;
             }
         }
@@ -63,7 +63,7 @@ public class Clock {
 
     public void removeClock() {
         if(field.getClock() != null) {
-            field.broadcastPacket(CField.clock(ClockPacket.removeClock()));
+            field.broadcastPacket(FieldPacket.clock(ClockPacket.removeClock()));
             clockRemovalTimer.cancel(true);
             field.setClock(null);
         }

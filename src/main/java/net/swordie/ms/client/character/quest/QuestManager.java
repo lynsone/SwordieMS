@@ -7,15 +7,14 @@ import net.swordie.ms.client.character.quest.reward.QuestBuffItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestItemReward;
 import net.swordie.ms.client.character.quest.reward.QuestReward;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.enums.QuestStatus;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.loaders.QuestData;
-import net.swordie.ms.loaders.QuestInfo;
+import net.swordie.ms.loaders.containerclasses.QuestInfo;
 import net.swordie.ms.util.FileTime;
-import net.swordie.ms.world.field.Field;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -193,7 +192,7 @@ public class QuestManager {
         quest.setCompletedTime(FileTime.currentTime());
         chr.chatMessage(Mob, "[Info] Completed quest " + quest.getQRKey());
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.questCompleteEffect()));
-        chr.write(User.effect(Effect.questCompleteEffect()));
+        chr.write(UserPacket.effect(Effect.questCompleteEffect()));
         chr.write(WvsContext.questRecordMessage(quest));
         if (questInfo != null) {
             for (QuestReward qr : questInfo.getQuestRewards()) {

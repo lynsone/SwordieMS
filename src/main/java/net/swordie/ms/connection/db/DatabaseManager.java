@@ -2,6 +2,7 @@ package net.swordie.ms.connection.db;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.LinkSkill;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.anticheat.Offense;
 import net.swordie.ms.client.anticheat.OffenseManager;
@@ -69,6 +70,7 @@ public class DatabaseManager {
         Configuration configuration = new Configuration().configure();
         configuration.setProperty("autoReconnect", "true");
         Class[] dbClasses = new Class[] {
+                User.class,
                 FileTime.class,
                 SystemTime.class,
                 NonCombatStatDayLimit.class,
@@ -204,7 +206,6 @@ public class DatabaseManager {
             // String.format for query, just to fill in the class
             // Can't set the FROM clause with a parameter it seems
             javax.persistence.Query query = session.createQuery(String.format("FROM %s WHERE %s = :val", clazz.getName(), columnName));
-            System.out.println(((Query) query).getQueryString());
             query.setParameter("val", value);
             List l = ((org.hibernate.query.Query) query).list();
             if (l != null && l.size() > 0) {

@@ -18,7 +18,6 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -254,7 +253,7 @@ public class Phantom extends Job {
                 xOpt = 1;
                 break;
         }
-        chr.write(User.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
+        chr.write(UserPacket.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
         chr.write(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
 
         o.nOption = randomInt;
@@ -335,7 +334,7 @@ public class Phantom extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                     } else if (chr.hasSkill(CARTE_BLANCHE)) {
@@ -345,7 +344,7 @@ public class Phantom extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                     }
@@ -380,7 +379,7 @@ public class Phantom extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
                             350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                 } else if (chr.hasSkill(CARTE_BLANCHE)) {
@@ -390,7 +389,7 @@ public class Phantom extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                 }
@@ -604,7 +603,7 @@ public class Phantom extends Job {
         tsm.removeStatsBySkill(skill.getSkillId());
         tsm.sendResetStatPacket();
         chr.chatMessage("You have been revived by Final Feint.");
-        chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+        chr.write(UserPacket.effect(Effect.skillSpecial(skill.getSkillId())));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
 
         o.nOption = 1;

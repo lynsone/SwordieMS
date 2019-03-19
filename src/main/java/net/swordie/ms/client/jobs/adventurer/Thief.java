@@ -782,7 +782,7 @@ public class Thief extends Beginner {
         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 2, 3,
                 0, 0, (int) System.currentTimeMillis(), 1, 0,
                 new Position());
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                 true, mobId, MESO_EXPLOSION_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 mob.getPosition(), MESO_EXPLOSION_ATOM, mob.getPosition()));
     }
@@ -824,7 +824,7 @@ public class Thief extends Beginner {
             }
 
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
-            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
+            chr.write(UserPacket.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
         }
     }
 
@@ -882,7 +882,7 @@ public class Thief extends Beginner {
                             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 45, 4,
                                     randomInt+anglez, 170, (int) System.currentTimeMillis(), 1, 0,
                                     new Position());
-                            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), life.getObjectId(), type,
+                            chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), life.getObjectId(), type,
                                     true, life.getObjectId(), atom, forceAtomInfo, rect, 0, 300,
                                     life.getPosition(), chr.getBulletIDForAttack(), life.getPosition()));
                         }

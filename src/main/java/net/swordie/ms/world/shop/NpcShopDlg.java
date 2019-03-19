@@ -3,7 +3,7 @@ package net.swordie.ms.world.shop;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 
 import java.util.ArrayList;
 import java.util.List;

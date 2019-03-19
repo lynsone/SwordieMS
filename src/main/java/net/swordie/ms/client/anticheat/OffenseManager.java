@@ -6,6 +6,7 @@ import net.swordie.ms.util.FileTime;
 import org.apache.log4j.Logger;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -97,7 +98,14 @@ public class OffenseManager {
     }
 
     private Offense getDefaultOffsense() {
-        return new Offense(chr.getId(), chr.getAccount().getId(), "", Offense.Type.Manual, FileTime.currentTime(), 0);
+        int charId = 0;
+        int accId = 0;
+        if (chr != null) {
+            charId = chr.getId();
+            accId = chr.getAccId();
+        }
+
+        return new Offense(charId, accId, "", Offense.Type.Manual, FileTime.currentTime(), 0);
     }
 
     private void addOffense(Offense offense) {
@@ -108,6 +116,9 @@ public class OffenseManager {
     }
 
     public Set<Offense> getOffenses() {
+        if (offenses == null) {
+            offenses = new HashSet<>();
+        }
         return offenses;
     }
 

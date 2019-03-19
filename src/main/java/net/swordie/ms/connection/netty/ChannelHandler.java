@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
@@ -38,14 +39,14 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
-        Account acc = c.getAccount();
+        User user = c.getUser();
         Char chr = c.getChr();
-        if(c != null && chr != null && !chr.isChangingChannel()) {
+        if (c != null && chr != null && !chr.isChangingChannel()) {
             chr.logout();
         } else if (c != null && chr != null && chr.isChangingChannel()) {
             chr.setChangingChannel(false);
-        } else if (acc != null) {
-            acc.unstuck();
+        } else if (user != null) {
+            user.unstuck();
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }
@@ -61,14 +62,14 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
         Char chr = c.getChr();
         short op = inPacket.decodeShort();
         InHeader opHeader = InHeader.getInHeaderByOp(op);
-        if(opHeader == null) {
+        if (opHeader == null) {
             handleUnknown(inPacket, op);
             return;
         }
-        if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(op))) {
+        if (!InHeader.isSpamHeader(InHeader.getInHeaderByOp(op))) {
             log.debug(String.format("[In]\t| %s, %d/0x%s\t| %s", InHeader.getInHeaderByOp(op), op, Integer.toHexString(op).toUpperCase(), inPacket));
         }
-        switch(opHeader) {
+        switch (opHeader) {
             case CONNECT_CHAT:
                 ChatHandler.handleConnect(c, inPacket);
                 break;
@@ -690,7 +691,7 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
     }
 
     private void handleUnknown(InPacket inPacket, short opCode) {
-        if(!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
+        if (!InHeader.isSpamHeader(InHeader.getInHeaderByOp(opCode))) {
             log.warn(String.format("Unhandled opcode %s/0x%s, packet %s", opCode, Integer.toHexString(opCode).toUpperCase(), inPacket));
         }
     }

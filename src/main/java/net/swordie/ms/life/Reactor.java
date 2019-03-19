@@ -2,7 +2,7 @@ package net.swordie.ms.life;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.loaders.ReactorInfo;
+import net.swordie.ms.loaders.containerclasses.ReactorInfo;
 import net.swordie.ms.loaders.ReactorData;
 import net.swordie.ms.connection.packet.ReactorPool;
 import net.swordie.ms.world.field.Field;

@@ -13,7 +13,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
@@ -582,7 +582,7 @@ public class WildHunter extends Citizen {
                     if (life instanceof Mob) {
                         Mob mob = (Mob) life;
                         if (mob.getMaxHp() * 0.90 <= mob.getHp()) {
-                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 1)));
+                            chr.write(UserPacket.effect(Effect.showCaptureEffect(skillID, slv, 0, 1)));
                             return;
                         }
                         Quest quest = chr.getQuestManager().getQuestById(QuestConstants.WILD_HUNTER_JAGUAR_STORAGE_ID);
@@ -595,11 +595,11 @@ public class WildHunter extends Citizen {
                             quest.setProperty(key, "1");
                             chr.write(WvsContext.message(MessageType.QUEST_RECORD_EX_MESSAGE,
                                     quest.getQRKey(), quest.getQRValue(), (byte) 0));
-                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 0)));
+                            chr.write(UserPacket.effect(Effect.showCaptureEffect(skillID, slv, 0, 0)));
                             WildHunterInfo whi = chr.getWildHunterInfo();
                             mob.die(true);
                         } else {
-                            chr.write(User.effect(Effect.showCaptureEffect(skillID, slv, 0, 2)));
+                            chr.write(UserPacket.effect(Effect.showCaptureEffect(skillID, slv, 0, 2)));
                         }
                     }
                     break;

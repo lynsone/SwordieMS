@@ -19,6 +19,7 @@ public class Client extends NettyClient {
 	private Char chr;
 	private Lock lock;
 	private Account account;
+	private User user;
 	private byte channel;
 	private byte worldId;
 	private boolean authorized;
@@ -114,4 +115,12 @@ public class Client extends NettyClient {
     public byte getOldChannel() {
         return oldChannel;
     }
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 }

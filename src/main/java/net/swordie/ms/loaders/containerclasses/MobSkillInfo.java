@@ -1,4 +1,4 @@
-package net.swordie.ms.loaders;
+package net.swordie.ms.loaders.containerclasses;
 
 import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.util.Position;

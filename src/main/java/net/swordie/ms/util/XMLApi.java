@@ -33,6 +33,7 @@ public class XMLApi {
 
     /**
      * Returns a list of Nodes containing all children of a given Node. Filters out all text elements.
+     *
      * @param node The Node of which the children are requested.
      * @return The list of children nodes of <code>node</code>. An empty list if there are none.
      */
@@ -40,8 +41,8 @@ public class XMLApi {
         List<Node> result = new ArrayList<>();
 
         Node childNode = node.getFirstChild();
-        while(childNode != null) {
-            if(!childNode.getNodeName().contains("#text")) {
+        while (childNode != null) {
+            if (!childNode.getNodeName().contains("#text")) {
                 result.add(childNode);
             }
             childNode = childNode.getNextSibling();
@@ -52,13 +53,14 @@ public class XMLApi {
 
     /**
      * Gets all attributes in a String, String map.
+     *
      * @param node The Node the attributes are requested for.
      * @return The attributes corresponding to <code>node</code>.
      */
     public static Map<String, String> getAttributes(Node node) {
         Map<String, String> result = new HashMap<>();
         NamedNodeMap namedNodeMap = node.getAttributes();
-        for(int i = 0; i < namedNodeMap.getLength(); i++) {
+        for (int i = 0; i < namedNodeMap.getLength(); i++) {
             Node n = namedNodeMap.item(i);
             result.put(n.getNodeName(), n.getNodeValue());
         }
@@ -67,6 +69,7 @@ public class XMLApi {
 
     /**
      * Generates a parsed Document, given an XML file.
+     *
      * @param file The file to parse.
      * @return The parsed Document.
      */
@@ -90,22 +93,23 @@ public class XMLApi {
 
     /**
      * Breadth first search for a child node of a given Node.
+     *
      * @param node The node to search in.
      * @param name The name of the child.
      * @return The first occurrence of the name in the children of node, or null if there is none.
      */
     public static Node getFirstChildByNameBF(Node node, String name) {
         List<Node> nodes = getAllChildren(node);
-        for(Node n : nodes) {
+        for (Node n : nodes) {
             Map<String, String> attrs = getAttributes(n);
             String nodeName = attrs.get("name");
-            if(name.equals(nodeName)) {
+            if (name.equals(nodeName)) {
                 return n;
             }
         }
-        for(Node n : nodes) {
+        for (Node n : nodes) {
             Node child = getFirstChildByNameBF(n, name);
-            if(child != null) {
+            if (child != null) {
                 return child;
             }
         }
@@ -114,21 +118,22 @@ public class XMLApi {
 
     /**
      * Depth first search for a child node of a given Node.
+     *
      * @param node The node to search in.
      * @param name The name of the child.
      * @return The first occurrence of the name in the children of node, or null if there is none.
      */
     public static Node getFirstChildByNameDF(Node node, String name) {
         List<Node> nodes = getAllChildren(node);
-        for(Node n : nodes) {
+        for (Node n : nodes) {
             Map<String, String> attrs = getAttributes(n);
             String nodeName = attrs.get("name");
-            if(name.equals(nodeName)) {
+            if (name.equals(nodeName)) {
                 return n;
             }
-            for(Node n2 : getAllChildren(n)) {
+            for (Node n2 : getAllChildren(n)) {
                 Node child = getFirstChildByNameDF(n2, name);
-                if(child != null) {
+                if (child != null) {
                     return child;
                 }
             }
@@ -138,12 +143,13 @@ public class XMLApi {
 
     /**
      * Grabs the Node from a specified path.
-     * @param xmlPath The path to the xml file.
+     *
+     * @param xmlPath  The path to the xml file.
      * @param nodeName The name of the node to be returned.
      * @return The first occurrence of the given nodeName in the given xmlPath, or null if there is none.
      */
     public static Node getNodeByPath(String xmlPath, String nodeName) {
-        File file = new File(ServerConstants.WZ_DIR+"/"+ xmlPath +".xml");
+        File file = new File(ServerConstants.WZ_DIR + "/" + xmlPath + ".xml");
         Document doc = getRoot(file);
         Node node = getAllChildren(doc).get(0);
 

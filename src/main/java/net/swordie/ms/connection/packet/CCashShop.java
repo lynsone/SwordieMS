@@ -1,6 +1,7 @@
 package net.swordie.ms.connection.packet;
 
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.trunk.Trunk;
@@ -23,14 +24,15 @@ import java.util.List;
  */
 public class CCashShop {
     public static OutPacket queryCashResult(Char chr) {
+        User user = chr.getUser();
         Account account = chr.getAccount();
 
         OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_QUERY_CASH_RESULT);
 
         outPacket.encodeInt(account.getNxCredit());
-        outPacket.encodeInt(account.getMaplePoints());
+        outPacket.encodeInt(user.getMaplePoints());
         outPacket.encodeInt(chr.getRewardPoints());
-        outPacket.encodeInt(account.getNxPrepaid());
+        outPacket.encodeInt(user.getNxPrepaid());
 
         return outPacket;
     }
@@ -249,7 +251,7 @@ public class CCashShop {
             outPacket.encodeInt(0); // bonus items' sn size
         });
         outPacket.encodeShort(GameConstants.MAX_LOCKER_SIZE);
-        outPacket.encodeShort(account.getCharacterSlots());
+        outPacket.encodeShort(account.getUser().getCharacterSlots());
         outPacket.encodeShort(0);
         outPacket.encodeShort(account.getCharacters().size());
 

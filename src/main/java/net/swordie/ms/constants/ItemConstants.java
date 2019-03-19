@@ -7,7 +7,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.pet.PetSkill;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.ItemInfo;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.loaders.containerclasses.EquipDrop;
 import org.apache.log4j.LogManager;
 import net.swordie.ms.util.Util;
@@ -33,6 +33,12 @@ public class ItemConstants {
     public static final int SPELL_TRACE_ID = 4001832;
     public static final int RAND_CHAOS_MAX = 5;
     public static final int INC_RAND_CHAOS_MAX = 10;
+
+    public static final byte MAX_SKIN = 13;
+    public static final int MIN_HAIR = 30000;
+    public static final int MAX_HAIR = 49999;
+    public static final int MIN_FACE = 20000;
+    public static final int MAX_FACE = 29999;
 
     static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 

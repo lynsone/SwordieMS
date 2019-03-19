@@ -12,9 +12,9 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
@@ -399,7 +399,7 @@ public class Archer extends Beginner {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 13, 12,
                                 num, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), 0, mob.getPosition()));
                     }
@@ -692,7 +692,7 @@ public class Archer extends Beginner {
                 } else {
                     tsm.removeStatsBySkill(ARMOR_BREAK);
                     lastArmorBreak = System.currentTimeMillis();
-                    chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
+                    chr.write(UserPacket.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
                     chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
                 }
             }
@@ -786,7 +786,7 @@ public class Archer extends Beginner {
         tsm.putCharacterStatValue(BowMasterConcentration, o2);
         tsm.sendSetStatPacket();
         if(amount < 20) {
-            chr.write(User.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
+            chr.write(UserPacket.effect(Effect.skillUse(skill.getSkillId(), slv, 0)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(skill.getSkillId(), slv, 0)));
         }
     }
@@ -883,7 +883,7 @@ public class Archer extends Beginner {
         if (chr.hasSkill(FOCUSED_FURY) && tsm.hasStat(BowMasterConcentration)) {
             tsm.removeStatsBySkill(FOCUSED_FURY);
             tsm.sendResetStatPacket();
-            chr.write(User.effect(Effect.skillSpecial(FOCUSED_FURY)));
+            chr.write(UserPacket.effect(Effect.skillSpecial(FOCUSED_FURY)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(FOCUSED_FURY)));
             tsm.removeAllDebuffs();
         }

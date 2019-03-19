@@ -403,7 +403,7 @@ public class Magician extends Beginner {
                         Char partyChr = partyMember.getChr();
                         partyChr.heal(partyChr.getMaxHP());
                         partyChr.healMP(partyChr.getMaxMP());
-                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                        partyChr.write(UserPacket.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
                         partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
                     }
                 }
@@ -876,7 +876,7 @@ public class Magician extends Beginner {
                         partyTSM.sendSetStatPacket();
                         if(partyChr != chr) {
                           chr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, slv, 0)), partyChr);
-                          partyChr.write(User.effect(Effect.skillAffected(skillID, slv, 0)));
+                          partyChr.write(UserPacket.effect(Effect.skillAffected(skillID, slv, 0)));
                         }
                     }
                 } else {
@@ -941,7 +941,7 @@ public class Magician extends Beginner {
         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                 0, 500, (int) System.currentTimeMillis(), 1, 0,
                 new Position(0, -100));
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                 true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
     }
@@ -963,7 +963,7 @@ public class Magician extends Beginner {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 5,
                         anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), MEGIDDO_FLAME_ATOM, mob.getPosition()));
             }

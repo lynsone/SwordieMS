@@ -13,9 +13,9 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
@@ -405,7 +405,7 @@ public class AngelicBuster extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                             new Position(5, 0)); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
                 }
@@ -436,7 +436,7 @@ public class AngelicBuster extends Job {
         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                 anglenum, 250, (int) System.currentTimeMillis(), 1, 0,
                 new Position(0, -100));
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                 true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 life.getPosition(), SOUL_SEEKER_ATOM, life.getPosition()));
     }
@@ -460,7 +460,7 @@ public class AngelicBuster extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstimpact, 2,
                         anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, SOUL_SEEKER_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), SOUL_SEEKER_ATOM, mob.getPosition()));
             }
@@ -552,7 +552,7 @@ public class AngelicBuster extends Job {
 
     private void rechargeABSkills() {
         Effect effect = Effect.createABRechargeEffect();
-        chr.write(User.effect(effect));
+        chr.write(UserPacket.effect(effect));
         chr.write(UserLocal.resetStateForOffSkill());
     }
 

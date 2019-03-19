@@ -12,7 +12,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.DropPool;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
@@ -156,7 +156,7 @@ public class Kanna extends Job {
     }
 
     public void spawnHaku() {
-        c.write(CField.enterFieldFoxMan(chr));
+        c.write(FieldPacket.enterFieldFoxMan(chr));
     }
 
     public static void hakuFoxFire(Char chr) {

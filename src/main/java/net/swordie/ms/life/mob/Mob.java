@@ -1,15 +1,10 @@
 package net.swordie.ms.life.mob;
 
-import net.swordie.ms.client.Account;
-import net.swordie.ms.client.Client;
-import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.client.character.CharacterStat;
 import net.swordie.ms.client.character.info.ExpIncreaseInfo;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
-import net.swordie.ms.client.character.skills.info.AttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
@@ -40,7 +35,6 @@ import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Foothold;
 import net.swordie.ms.world.field.fieldeffect.FieldEffect;
-import org.python.modules.math;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1241,10 +1235,10 @@ public class Mob extends Life {
                 damageDealer.getScriptManager().setQRValue(38022, "clear", false);
             }
             if (isBoss() && getHpTagColor() != 0) {
-                getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
+                getField().broadcastPacket(FieldPacket.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
             }
         } else if (isBoss() && getHpTagColor() != 0) {
-            getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
+            getField().broadcastPacket(FieldPacket.fieldEffect(FieldEffect.mobHPTagFieldEffect(this)));
         } else {
             getField().broadcastPacket(MobPool.hpIndicator(getObjectId(), (byte) (percDamage * 100)));
         }
@@ -1289,7 +1283,7 @@ public class Mob extends Life {
                 mob.setHomePosition(getPosition().deepCopy());
                 field.spawnLife(mob, null);
                 field.setEliteState(EliteState.EliteBoss);
-                field.broadcastPacket(CField.eliteState(EliteState.EliteBoss, false, GameConstants.ELITE_BOSS_BGM,
+                field.broadcastPacket(FieldPacket.eliteState(EliteState.EliteBoss, false, GameConstants.ELITE_BOSS_BGM,
                         null, null));
             } else if (field.getKilledElites() >= GameConstants.ELITE_MOB_DARK_NOTIFICATION) {
                 msg = "You feel something in the dark energy...";
@@ -1298,7 +1292,7 @@ public class Mob extends Life {
             }
             getField().broadcastPacket(WvsContext.weatherEffectNotice(WeatherEffNoticeType.EliteBoss, msg, 8000)); // 8 seconds
         } else if (getEliteType() == 3) {
-            field.broadcastPacket(CField.eliteState(EliteState.None, true, null, null, null));
+            field.broadcastPacket(FieldPacket.eliteState(EliteState.None, true, null, null, null));
             field.setEliteState(EliteState.None);
         }
         setChanged();
@@ -1870,7 +1864,7 @@ public class Mob extends Life {
         if (getExp() == 0) {
             return 0;
         }
-        double amount = ((math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
+        double amount = ((Math.sqrt(getMaxHp() / 100D)) * ((double) getMaxHp() / (getExp() * getLevel())));
         return (int) (amount + 1);
 
 
@@ -1901,7 +1895,7 @@ public class Mob extends Life {
             if (prop >= 100 || Util.succeedProp(prop)) {
                 int hpDamage = (chr.getMaxHP() * damagePerc) / 100;
                 chr.damage(hpDamage);
-                getField().broadcastPacket(User.userHitByCounter(chr.getId(), hpDamage));
+                getField().broadcastPacket(UserPacket.userHitByCounter(chr.getId(), hpDamage));
             }
         }
     }

@@ -2,6 +2,7 @@ package net.swordie.ms;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.User;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
@@ -24,8 +25,6 @@ import net.swordie.ms.util.container.Tuple;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,7 +40,7 @@ public class Server extends Properties {
 	private static final Server server = new Server();
 
 	private List<World> worldList = new ArrayList<>();
-	private Set<Integer> accounts = new HashSet<>(); // just save the ids, no need to save the references
+	private Set<Integer> users = new HashSet<>(); // just save the ids, no need to save the references
 	private CashShop cashShop;
 
 	public static Server getInstance() {
@@ -194,15 +193,15 @@ public class Server extends Properties {
 		return this.cashShop;
 	}
 
-	public void addAccount(Account account) {
-		accounts.add(account.getId());
+	public void addUser(User user) {
+		users.add(user.getId());
 	}
 
-	public void removeAccount(Account account) {
-		accounts.remove(account.getId());
+	public void removeUser(User user) {
+		users.remove(user.getId());
 	}
 
-	public boolean isAccountLoggedIn(Account account) {
-		return accounts.contains(account.getId());
+	public boolean isUserLoggedIn(User user) {
+		return users.contains(user.getId());
 	}
 }

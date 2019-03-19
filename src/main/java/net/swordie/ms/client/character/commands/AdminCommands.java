@@ -1,11 +1,10 @@
 package net.swordie.ms.client.character.commands;
 
 import net.swordie.ms.Server;
-import net.swordie.ms.client.Account;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
@@ -15,7 +14,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.adventurer.Thief;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.packet.*;
@@ -23,12 +21,14 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
+import net.swordie.ms.life.Android;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
 import net.swordie.ms.life.mob.MobTemporaryStat;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.SkillStringInfo;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
@@ -41,7 +41,6 @@ import org.apache.log4j.LogManager;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
@@ -59,7 +58,8 @@ public class AdminCommands {
     public static class Test extends AdminCommand {
 
         public static void execute(Char chr, String[] args) {
-
+            Android andr = new Android(Integer.parseInt(args[1]), chr, (short) 0, (short) 1000, (short) 1000, "Sword");
+            chr.write(AndroidPacket.created(andr));
         }
     }
 
@@ -939,7 +939,7 @@ public class AdminCommands {
                 return;
             }
             Position position = new Position(portal.getX(), portal.getY());
-            chr.write(CField.teleport(position, chr));
+            chr.write(FieldPacket.teleport(position, chr));
         }
     }
 
@@ -959,7 +959,7 @@ public class AdminCommands {
             List<Integer> mobs = new ArrayList<>();
             int mobID = mob.getObjectId();
             mobs.add(mobID);
-            chr.getField().broadcastPacket(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
                     true, mobs, 142110011, fais, null, 0, 0, null, 142110011, mob.getPosition()));
 
         }
@@ -1156,6 +1156,33 @@ public class AdminCommands {
             chr.addMoney(mesos);
         }
     }
+
+    @Command(names = {"nx", "setnx"}, requiredType = Tester)
+    public static class NxCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int nx = Integer.parseInt(args[1]);
+            chr.addNx(nx);
+        }
+    }
+
+    @Command(names = {"dp", "setdp"}, requiredType = Tester)
+    public static class DpCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int dp = Integer.parseInt(args[1]);
+            User user = chr.getUser();
+            user.setDonationPoints(dp);
+        }
+    }
+
+    @Command(names = {"vp", "setvp"}, requiredType = Tester)
+    public static class VpCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int vp = Integer.parseInt(args[1]);
+            User user = chr.getUser();
+            user.setVotePoints(vp);
+        }
+    }
+
 
     @Command(names = {"goto"}, requiredType = Tester)
     public static class GoTo extends AdminCommand {
@@ -1600,7 +1627,7 @@ public class AdminCommands {
                     return;
                 }
             }
-            Account banAccount = banChr.getAccount();
+            User banUser = banChr.getUser();
             LocalDateTime banDate = LocalDateTime.now();
             switch (amountType) {
                 case "m":
@@ -1627,9 +1654,9 @@ public class AdminCommands {
                     chr.chatMessage(SpeakerChannel, String.format("Unknown date type %s", amountType));
                     break;
             }
-            banAccount.setBanExpireDate(FileTime.fromDate(banDate));
-            banAccount.setBanReason(reason);
-            banAccount.getOffenseManager().addOffense(reason, chr.getId());
+            banUser.setBanExpireDate(FileTime.fromDate(banDate));
+            banUser.setBanReason(reason);
+            banUser.getOffenseManager().addOffense(reason, chr.getId());
             chr.chatMessage(SpeakerChannel, String.format("Character %s has been banned. Expire date: %s", name, banDate));
             if (online) {
                 banChr.write(WvsContext.returnToTitle());

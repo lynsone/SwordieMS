@@ -44,6 +44,7 @@ import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.npc.NpcMessageType;
 import net.swordie.ms.life.npc.NpcScriptInfo;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
@@ -188,8 +189,8 @@ public class ScriptManagerImpl implements ScriptManager {
 			bindings = scriptEngine.createBindings();
 			bindings.put("sm", this);
 			bindings.put("chr", chr);
-			bindings.put("field", chr == null ? field : chr.getField());
 		}
+		bindings.put("field", chr == null ? field : chr.getField());
 		bindings.put("parentID", parentID);
 		bindings.put("scriptType", scriptType);
 		bindings.put("objectID", objID);
@@ -818,7 +819,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void curNodeEventEnd(boolean enable) {
 		setCurNodeEventEnd(enable);
-		chr.write(CField.curNodeEventEnd(enable));
+		chr.write(FieldPacket.curNodeEventEnd(enable));
 	}
 
 	public void setCurNodeEventEnd(boolean curNodeEventEnd) {
@@ -826,7 +827,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void progressMessageFont(int fontNameType, int fontSize, int fontColorType, int fadeOutDelay, String message) {
-		chr.write(User.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
+		chr.write(UserPacket.progressMessageFont(fontNameType, fontSize, fontColorType, fadeOutDelay, message));
 	}
 
 	public void localEmotion(int emotion, int duration, boolean byItemOption) {
@@ -1022,7 +1023,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showEffectToField(String dir, int delay) {
 		Field field = chr.getField();
-		field.broadcastPacket(User.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
+		field.broadcastPacket(UserPacket.effect(Effect.effectFromWZ(dir, false, delay, 4, 0)));
 	}
 
 	public void showFieldEffect(String dir) {
@@ -1031,7 +1032,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void showFieldEffect(String dir, int delay) {
-		chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
 	}
 
 	public void showFieldEffectToField(String dir) {
@@ -1040,7 +1041,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showFieldEffectToField(String dir, int delay) {
 		Field field = chr.getField();
-		field.broadcastPacket(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
+		field.broadcastPacket(FieldPacket.fieldEffect(FieldEffect.getFieldEffectFromWz(dir, delay)));
 	}
 
 	public void showFieldBackgroundEffect(String dir) {
@@ -1049,23 +1050,23 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	public void showFieldBackgroundEffect(String dir, int delay) {
 		Field field = chr.getField();
-		chr.write(CField.fieldEffect(FieldEffect.getFieldBackgroundEffectFromWz(dir, delay)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.getFieldBackgroundEffectFromWz(dir, delay)));
 	}
 
 	public void showFadeTransition(int duration, int fadeInTime, int fadeOutTime) {
-		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient2(fadeInTime, duration, fadeOutTime, true)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.takeSnapShotOfClient2(fadeInTime, duration, fadeOutTime, true)));
 	}
 
 	public void showFade(int duration) {
-		chr.write(CField.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.takeSnapShotOfClient(duration)));
 	}
 
 	public void setFieldColour(GreyFieldType colorFieldType, short red, short green, short blue, int time) {
-		chr.write(CField.fieldEffect(FieldEffect.setFieldColor(colorFieldType, red, green, blue, time)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.setFieldColor(colorFieldType, red, green, blue, time)));
 	}
 
 	public void setFieldGrey(GreyFieldType colorFieldType, boolean show) {
-		chr.write(CField.fieldEffect(FieldEffect.setFieldGrey(colorFieldType, show)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.setFieldGrey(colorFieldType, show)));
 	}
 
 	@Override
@@ -1080,7 +1081,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void teleportInField(Position position) {
-		chr.write(CField.teleport(position, chr));
+		chr.write(FieldPacket.teleport(position, chr));
 	}
 
 	@Override
@@ -1093,7 +1094,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		Portal portal = chr.getField().getPortalByID(portalId);
 		if (portal != null) {
 			Position position = new Position(portal.getX(), portal.getY());
-			chr.write(CField.teleport(position, chr));
+			chr.write(FieldPacket.teleport(position, chr));
 		}
 	}
 
@@ -1175,7 +1176,7 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void openTrunk(int npcTemplateID) {
-		chr.write(CField.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
+		chr.write(FieldPacket.trunkDlg(new TrunkOpen(npcTemplateID, chr.getAccount().getTrunk())));
 	}
 
 	@Override
@@ -1383,7 +1384,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getTemplateId() == templateID)
 				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+				.ifPresent(mob -> chr.getField().broadcastPacket(FieldPacket.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
 	}
 
 	@Override
@@ -1391,7 +1392,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		chr.getField().getMobs().stream()
 				.filter(m -> m.getHp() > 0)
 				.findFirst()
-				.ifPresent(mob -> chr.getField().broadcastPacket(CField.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
+				.ifPresent(mob -> chr.getField().broadcastPacket(FieldPacket.fieldEffect(FieldEffect.mobHPTagFieldEffect(mob))));
 	}
 
 
@@ -1930,7 +1931,7 @@ public class ScriptManagerImpl implements ScriptManager {
 			}
 		}
 
-		field.broadcastPacket(CField.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
+		field.broadcastPacket(FieldPacket.createObtacle(ObtacleAtomCreateType.NORMAL, obtacleInRowInfo, obtacleRadianInfo, obtacleAtomInfosSet));
 	}
 
 	public void stopEvents() {
@@ -1943,7 +1944,7 @@ public class ScriptManagerImpl implements ScriptManager {
 		} else {
 			field = this.field;
 		}
-		field.broadcastPacket(CField.clock(ClockPacket.removeClock()));
+		field.broadcastPacket(FieldPacket.clock(ClockPacket.removeClock()));
 	}
 
 	private Set<ScheduledFuture> getEvents() {
@@ -2161,7 +2162,7 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	public void createClock(int hours, int minutes, int seconds) {
-		chr.write(CField.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
+		chr.write(FieldPacket.clock(ClockPacket.hmsClock((byte) hours, (byte) minutes, (byte) seconds)));
 		addEvent(EventManager.addEvent(this::removeClock, seconds + minutes * 60 + hours * 3600, TimeUnit.SECONDS));
 	}
 
@@ -2173,7 +2174,7 @@ public class ScriptManagerImpl implements ScriptManager {
     }
 
 	public void removeClock() {
-		chr.write(CField.clock(ClockPacket.removeClock()));
+		chr.write(FieldPacket.clock(ClockPacket.removeClock()));
 	}
 
 
@@ -2213,32 +2214,32 @@ public class ScriptManagerImpl implements ScriptManager {
 	@Override
 	public void openUI(UIType uiID){
 		int uiIDValue = uiID.getVal();
-		chr.write(CField.openUI(uiIDValue));
+		chr.write(FieldPacket.openUI(uiIDValue));
 	}
 
 	@Override
 	public void showClearStageExpWindow(long expGiven) {
-		chr.write(CField.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.showClearStageExpWindow((int) expGiven)));
 		giveExpNoMsg(expGiven);
 	}
 
 	public void removeBlowWeather() {
-	    chr.write(CField.removeBlowWeather());
+	    chr.write(FieldPacket.removeBlowWeather());
     }
 
 	public void blowWeather(int itemID, String message) {
         removeBlowWeather();// removing old one if exists.
-	    chr.write(CField.blowWeather(itemID, message));
+	    chr.write(FieldPacket.blowWeather(itemID, message));
     }
 
     public void playSound(String sound) { playSound(sound, 100); }// default
 	public void playSound(String sound, int vol) {
-		chr.write(CField.fieldEffect(FieldEffect.playSound(sound, vol)));
+		chr.write(FieldPacket.fieldEffect(FieldEffect.playSound(sound, vol)));
 	}
 
 	public void blind(int enable, int x, int color, int time) { blind(enable, x, color, 0, 0, time); }
 
-	public void blind(int enable, int x, int color, int unk1, int unk2, int time) { chr.write(CField.fieldEffect(FieldEffect.blind(enable, x, color, unk1, unk2, time))); }
+	public void blind(int enable, int x, int color, int unk1, int unk2, int time) { chr.write(FieldPacket.fieldEffect(FieldEffect.blind(enable, x, color, unk1, unk2, time))); }
 	@Override
 	public int getRandomIntBelow(int upBound) {
 		return new Random().nextInt(upBound);
@@ -2259,15 +2260,15 @@ public class ScriptManagerImpl implements ScriptManager {
 
 	@Override
 	public void showEffect(String dir, int placement, int delay) {
-		chr.write(User.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
+		chr.write(UserPacket.effect(Effect.effectFromWZ(dir, false, delay, placement, 0)));
 	}
 
 	public void avatarOriented(String effectPath) {
-		chr.write(User.effect(Effect.avatarOriented(effectPath)));
+		chr.write(UserPacket.effect(Effect.avatarOriented(effectPath)));
 	}
 
 	public void reservedEffect(String effectPath) {
-		chr.write(User.effect(Effect.reservedEffect(effectPath)));
+		chr.write(UserPacket.effect(Effect.reservedEffect(effectPath)));
 
 		String[] splitted = effectPath.split("/");
 		String sceneName = splitted[splitted.length - 2];
@@ -2280,16 +2281,16 @@ public class ScriptManagerImpl implements ScriptManager {
 		}
 	}
 
-	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(User.effect(Effect.reservedEffectRepeat(effectPath, start))); }
+	public void reservedEffectRepeat(String effectPath, boolean start) { chr.write(UserPacket.effect(Effect.reservedEffectRepeat(effectPath, start))); }
 
 	public void reservedEffectRepeat(String effectPath) { reservedEffectRepeat(effectPath, true); }
 
-	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(User.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
+	public void playExclSoundWithDownBGM(String soundPath, int volume) { chr.write(UserPacket.effect(Effect.playExclSoundWithDownBGM(soundPath, volume))); }
 
-	public void blindEffect(boolean blind) { chr.write(User.effect(Effect.blindEffect(blind))); }
+	public void blindEffect(boolean blind) { chr.write(UserPacket.effect(Effect.blindEffect(blind))); }
 
 	public void fadeInOut(int fadeIn, int delay, int fadeOut, int alpha) {
-		chr.write(User.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
+		chr.write(UserPacket.effect(Effect.fadeInOut(fadeIn, delay, fadeOut, alpha)));
 	}
 
 	public String formatNumber(String number) {

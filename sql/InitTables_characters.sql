@@ -1,5 +1,6 @@
 set FOREIGN_KEY_CHECKS = 0;
 drop table if exists damageskinsavedatas,
+users,
 friends,
 linkskills,
 accounts,
@@ -551,7 +552,7 @@ create table offenses (
     msg text,
     type varchar(255),
     issuedate datetime(3),
-    issuercharid int,
+    issuer_char_id int,
     primary key (id),
     foreign key (manager_id) references offense_managers(id) on delete cascade
 );
@@ -776,8 +777,15 @@ create table monster_collection_rewards (
     primary key (region, session, groupid)
 );
 
-create table accounts (
+create table users (
 	id int not null auto_increment,
+    banExpireDate datetime(3),
+    banReason varchar(255),
+    offensemanager int,
+    votepoints int default 0,
+    donationpoints int default 0,
+    maplePoints int default 0,
+    nxPrepaid int default 0,
 	name varchar(255),
 	password varchar(255),
 	pic varchar(255),
@@ -796,18 +804,22 @@ create table accounts (
 	censorednxloginid varchar(255),
 	characterslots int default 4,
 	creationdate datetime(3),
+    primary key (id),
+    foreign key (offensemanager) references offense_managers(id)
+    
+);
+
+create table accounts (
+	id int not null auto_increment,
+    worldid int,
+    userid int,
     trunkid int,
     nxCredit int default 0,
-    maplePoints int default 0,
-    nxPrepaid int default 0,
     monstercollectionid int,
-    banExpireDate datetime(3),
-    banReason varchar(255),
-    offensemanager int,
 	primary key (id),
+    foreign key (userid) references users(id),
     foreign key (trunkid) references trunks(id),
-    foreign key (monstercollectionid) references monster_collections(id),
-    foreign key (offensemanager) references offense_managers(id)
+    foreign key (monstercollectionid) references monster_collections(id)
 );
 
 
@@ -848,7 +860,7 @@ create table friends (
 );
 
 
-insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin', 'admin', '4', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`, `nxcredit`) values ('admin1', 'admin', '4', '0', '111111', '40', '500000');
-insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '4', '0', '111111', '40');
-insert into `accounts` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '4', '0', '111111', '40');
+insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('admin', 'admin', '4', '0', '111111', '40');
+insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('admin1', 'admin', '4', '0', '111111', '40');
+insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '4', '0', '111111', '40');
+insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('maigal', 'admin', '4', '0', '111111', '40');

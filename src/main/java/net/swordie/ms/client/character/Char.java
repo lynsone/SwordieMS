@@ -4,6 +4,7 @@ import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.LinkSkill;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.anticheat.OffenseManager;
@@ -26,7 +27,6 @@ import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.runestones.RuneStone;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
-import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.friend.FriendFlag;
@@ -64,6 +64,7 @@ import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.*;
@@ -339,6 +340,8 @@ public class Char {
 	@Transient
 	private NpcShopDlg shop;
 	@Transient // yes
+	private User user;
+	@Transient // yes
 	private Account account;
 	@Transient
 	private Client chatClient;
@@ -402,19 +405,19 @@ public class Char {
 	private Android android;
 
 	public Char() {
-		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, new int[]{});
+		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, 0, 0, new int[]{});
 	}
 
 	public Char(int accId, String name, int keySettingType, int eventNewCharSaleJob, int job, short curSelectedSubJob,
-				byte gender, byte skin, int[] items) {
+				byte gender, byte skin, int face, int hair, int[] items) {
 		this.accId = accId;
 		avatarData = new AvatarData();
 		avatarData.setAvatarLook(new AvatarLook());
 		AvatarLook avatarLook = avatarData.getAvatarLook();
 		avatarLook.setGender(gender);
 		avatarLook.setSkin(skin);
-		avatarLook.setFace(items.length > 0 ? items[0] : 0);
-		avatarLook.setHair(items.length > 1 ? items[1] : 0);
+		avatarLook.setFace(face);
+		avatarLook.setHair(hair);
 		List<Integer> hairEquips = new ArrayList<>();
 		for (int itemId : items) {
 			Equip equip = ItemData.getEquipDeepCopyFromID(itemId, false);
@@ -492,6 +495,23 @@ public class Char {
 		Transaction transaction = session.beginTransaction();
 		Query query = session.createQuery("FROM Char chr WHERE chr.avatarData.characterStat.name = :name");
 		query.setParameter("name", name);
+		List l = ((org.hibernate.query.Query) query).list();
+		Char chr = null;
+		if (l != null && l.size() > 0) {
+			chr = (Char) l.get(0);
+		}
+		transaction.commit();
+		session.close();
+		return chr;
+	}
+
+	public static Char getFromDBByNameAndWorld(String name, int worldId) {
+		Session session = DatabaseManager.getSession();
+		Transaction transaction = session.beginTransaction();
+		Query query = session.createQuery("FROM Char chr " +
+				"WHERE chr.avatarData.characterStat.name = :name AND chr.avatarData.characterStat.worldIdForLog = :world");
+		query.setParameter("name", name);
+		query.setParameter("world", worldId);
 		List l = ((org.hibernate.query.Query) query).list();
 		Char chr = null;
 		if (l != null && l.size() > 0) {
@@ -2112,7 +2132,7 @@ public class Char {
 	 * @param msg The message to display.
 	 */
 	public void chatScriptMessage(String msg) {
-		write(User.scriptProgressMessage(msg));
+		write(UserPacket.scriptProgressMessage(msg));
 	}
 
 	/**
@@ -2462,7 +2482,7 @@ public class Char {
 			write(UserLocal.deathCountInfo(getDeathCount()));
 		}
 		if (field.getEliteState() == EliteState.EliteBoss) {
-			write(CField.eliteState(EliteState.EliteBoss, true, GameConstants.ELITE_BOSS_BGM, null, null));
+			write(FieldPacket.eliteState(EliteState.EliteBoss, true, GameConstants.ELITE_BOSS_BGM, null, null));
 		}
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
@@ -2471,7 +2491,7 @@ public class Char {
 			mob.addObserver(getScriptManager());
 		}
 		if (getFieldInstanceType() == CHANNEL) {
-			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos().stream().filter(qmi -> !qmi.isNoInstances() || getField().isChannelField()).collect(Collectors.toList())));
+			write(FieldPacket.setQuickMoveInfo(GameConstants.getQuickMoveInfos().stream().filter(qmi -> !qmi.isNoInstances() || getField().isChannelField()).collect(Collectors.toList())));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
 			write(UserLocal.setDressChanged(false, true));
@@ -2713,7 +2733,7 @@ public class Char {
 					itemID == GameConstants.RED_EXP_ORB_ID) {
 				long expGain = (long) (drop.getMobExp() * GameConstants.getExpOrbExpModifierById(itemID));
 
-				write(User.effect(Effect.fieldItemConsumed((int) (expGain > Integer.MAX_VALUE ? Integer.MAX_VALUE : expGain))));
+				write(UserPacket.effect(Effect.fieldItemConsumed((int) (expGain > Integer.MAX_VALUE ? Integer.MAX_VALUE : expGain))));
 				addExpNoMsg(expGain);
 
 				// Exp Orb Buff On Pickup
@@ -3288,10 +3308,10 @@ public class Char {
 		setOnline(false);
 		getJobHandler().handleCancelTimer(this);
 		getField().removeChar(this);
-		getAccount().setCurrentChr(null);
+		getUser().setCurrentChr(null);
 		if (!isChangingChannel()) {
 			getClient().getChannelInstance().removeChar(this);
-			Server.getInstance().removeAccount(getAccount()); // don't unstuck, as that would save the account (twice)
+			Server.getInstance().removeUser(getUser()); // don't unstuck, as that would save the account (twice)
 		} else {
 			getClient().setChr(null);
 		}
@@ -3329,9 +3349,9 @@ public class Char {
 
 	private void showProperUI(int fromField, int toField) {
 		if (GameConstants.getMaplerunnerField(toField) > 0 && GameConstants.getMaplerunnerField(fromField) <= 0) {
-			write(CField.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+			write(FieldPacket.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
 		} else if (GameConstants.getMaplerunnerField(fromField) > 0 && GameConstants.getMaplerunnerField(toField) <= 0) {
-			write(CField.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+			write(FieldPacket.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
 		}
 	}
 
@@ -3457,6 +3477,14 @@ public class Char {
 
 	public Friend getFriendByCharID(int charID) {
 		return getFriends().stream().filter(f -> f.getFriendID() == charID).findAny().orElse(null);
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public Account getAccount() {
@@ -4270,7 +4298,7 @@ public class Char {
 	}
 
     public OffenseManager getOffenseManager() {
-        return getAccount().getOffenseManager();
+        return getUser().getOffenseManager();
     }
 
 	/**
@@ -4411,7 +4439,7 @@ public class Char {
 					break;
 			}
 			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
-			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+			write(FieldPacket.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
 		}
 	}
 
@@ -4506,4 +4534,5 @@ public class Char {
     public void setAndroid(Android android) {
         this.android = android;
     }
+
 }

@@ -202,7 +202,7 @@ public class Util {
      * @return Whether or not the String is a number
      */
     public static boolean isNumber(String string) {
-        return string.matches("-?\\d+(\\.\\d+)?");
+        return string != null && string.matches("-?\\d+(\\.\\d+)?");
     }
 
     /**
@@ -386,10 +386,18 @@ public class Util {
     }
 
     public static boolean isDigitLetterString(String name) {
-        return name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
+        return name != null && name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
     }
 
     public static boolean isValidString(String name) {
-        return name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+        return name != null && name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+    }
+
+    public static boolean isInteger(String val) {
+        if (val != null && val.matches("^-?[0-9]+") && val.length() <= 10) {
+            long longVal = Long.parseLong(val);
+            return longVal >= Integer.MIN_VALUE && longVal <= Integer.MAX_VALUE;
+        }
+        return false;
     }
 }

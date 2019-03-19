@@ -24,6 +24,7 @@ import static net.swordie.ms.life.mob.MobStat.*;
  * Created on 12/30/2017.
  */
 public class MobData {
+    private static final boolean LOG_UNKS = false;
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
 
     private static Map<Integer, Mob> mobs = new HashMap<>();
@@ -727,7 +728,9 @@ public class MobData {
                                                     banPortal = banMapValue;
                                                     break;
                                                 default:
-                                                    log.warn(String.format("Unknown ban map node %s with value %s", banMapName, banMapValue));
+                                                    if (LOG_UNKS) {
+                                                        log.warn(String.format("Unknown ban map node %s with value %s", banMapName, banMapValue));
+                                                    }
                                                     break;
                                             }
                                             if (banFieldID != 0) {
@@ -832,7 +835,9 @@ public class MobData {
                                         mobSkill.setSpeak(skillNodeValue);
                                         break;
                                     default:
-                                        log.warn(String.format("Unknown skill node %s with value %s", skillNodeName, skillNodeValue));
+                                        if (LOG_UNKS) {
+                                            log.warn(String.format("Unknown skill node %s with value %s", skillNodeName, skillNodeValue));
+                                        }
                                 }
                             }
                             if (attack) {
@@ -970,7 +975,9 @@ public class MobData {
                     case "forward_direction":
                         break;
                     default:
-                        log.warn(String.format("Unkown property %s with value %s.", name, value));
+                        if (LOG_UNKS) {
+                            log.warn(String.format("Unkown property %s with value %s.", name, value));
+                        }
                 }
                 getMobs().put(mob.getTemplateId(), mob);
             }
