@@ -824,7 +824,7 @@ public class Thief extends Beginner {
             }
 
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skill.getSkillId(), slv, 0)));
-            chr.write(User.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
+            chr.write(UserPacket.effect(Effect.skillAffected(skill.getSkillId(), slv, 0)));
         }
     }
 

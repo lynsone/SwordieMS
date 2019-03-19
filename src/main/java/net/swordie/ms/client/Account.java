@@ -9,7 +9,6 @@ import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.AccountType;
 import net.swordie.ms.enums.PicStatus;
@@ -24,6 +23,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Class representing an Account, which is a world-specific "User" class.
+ *
  * Created by Tim on 4/30/2017.
  */
 @Entity
@@ -35,25 +36,7 @@ public class Account {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String name;
-    private String password;
-    @Enumerated(EnumType.ORDINAL)
-    private AccountType accountType;
-    private int age;
-    private int vipGrade;
-    private int nBlockReason;
-    private byte gender;
-    private byte msg2;
-    private byte purchaseExp;
-    private byte pBlockReason;
-    private byte gradeCode;
-    private long chatUnblockDate;
-    private boolean hasCensoredNxLoginID;
-    private String censoredNxLoginID;
-    private String pic;
-    private int characterSlots;
-    @Convert(converter = FileTimeConverter.class)
-    private FileTime creationDate = FileTime.currentTime();
+    private int worldId;
     @JoinColumn(name = "trunkID")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Trunk trunk;
@@ -71,146 +54,36 @@ public class Account {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "accID")
     private Set<Char> characters = new HashSet<>();
-    @Transient
-    private Char currentChr;
+    // nxCredit is from mobs, so is account (world) specific.
     private int nxCredit;
-    private int maplePoints;
-    private int nxPrepaid;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "accID")
     private Set<LinkSkill> linkSkills = new HashSet<>();
-    @Convert(converter = FileTimeConverter.class)
-    private FileTime banExpireDate = FileTime.fromType(FileTime.Type.ZERO_TIME);
-    private String banReason;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "offensemanager")
-    private OffenseManager offenseManager;
+    @Transient
+    private User user;
+    @Transient
+    private Char currentChr;
 
-    public Account(String name, String password, int accountId, String pic, AccountType accountType, int age, int vipGrade, int nBlockReason, byte gender, byte msg2,
-                   byte purchaseExp, byte pBlockReason, long chatUnblockDate, boolean hasCensoredNxLoginID,
-                   byte gradeCode, String censoredNxLoginID, int characterSlots, FileTime creationDate) {
-        this.name = name;
-        this.password = password;
-        this.id = accountId;
-        this.pic = pic;
-        this.accountType = accountType;
-        this.age = age;
-        this.vipGrade = vipGrade;
-        this.gender = gender;
-        this.msg2 = msg2;
-        this.purchaseExp = purchaseExp;
-        this.nBlockReason = nBlockReason;
-        this.pBlockReason = pBlockReason;
-        this.chatUnblockDate = chatUnblockDate;
-        this.hasCensoredNxLoginID = hasCensoredNxLoginID;
-        this.gradeCode = gradeCode;
-        this.censoredNxLoginID = censoredNxLoginID;
-        this.characterSlots = characterSlots;
-        this.creationDate = creationDate;
+    public Account(User user, int worldId) {
+        this.user = user;
+        this.worldId = worldId;
+        this.trunk = new Trunk();
         this.monsterCollection = new MonsterCollection();
         this.friends = new HashSet<>();
-        this.trunk = new Trunk((byte) 20);
-    }
-
-    public Account(String id, int accountId) {
-        this(id, null, accountId, null, AccountType.Player, 0, 0, 0,
-                (byte) 0, (byte) 0, (byte) 0, (byte) 3, 0, false, (byte) 0,
-                "", 16, FileTime.currentTime());
+        this.damageSkins = new HashSet<>();
+        this.characters = new HashSet<>();
+        this.linkSkills = new HashSet<>();
     }
 
     public Account(){
     }
 
-    public static Account getFromDBByName(String name) {
-        return (Account) DatabaseManager.getObjFromDB(Account.class, name);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPassword() {
-        return password;
+    public static Account getFromDBById(int accountID) {
+        return (Account) DatabaseManager.getObjFromDB(Account.class, accountID);
     }
 
     public int getId() {
         return id;
-    }
-
-    public AccountType getAccountType() {
-        return accountType;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public int getVipGrade() {
-        return vipGrade;
-    }
-
-    public byte getGender() {
-        return gender;
-    }
-
-    public byte getMsg2() {
-        return msg2;
-    }
-
-    public byte getPurchaseExp() {
-        return purchaseExp;
-    }
-
-    public byte getpBlockReason() {
-        return pBlockReason;
-    }
-
-    public long getChatUnblockDate() {
-        return chatUnblockDate;
-    }
-
-    public boolean hasCensoredNxLoginID() {
-        return hasCensoredNxLoginID;
-    }
-
-    public byte getGradeCode() {
-        return gradeCode;
-    }
-
-    public String getCensoredNxLoginID() {
-        return censoredNxLoginID;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getnBlockReason() {
-        return nBlockReason;
-    }
-
-    public void setAccountType(AccountType accountType) {
-        this.accountType = accountType;
-    }
-
-    public int getCharacterSlots() {
-        return characterSlots;
-    }
-
-    public FileTime getCreationDate() {
-        return creationDate;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public static Account getFromDBById(int accountId) {
-        return (Account) DatabaseManager.getObjFromDB(Account.class, accountId);
     }
 
     public Set<Char> getCharacters() {
@@ -221,77 +94,6 @@ public class Account {
        getCharacters().add(character);
     }
 
-    public String getPic() {
-        // security is overrated
-        return pic;
-    }
-
-    public void setPic(String pic) {
-        this.pic = pic;
-    }
-
-    public PicStatus getPicStatus() {
-        PicStatus picStatus;
-        String pic = getPic();
-        if(pic == null || pic.length() == 0) {
-            picStatus = PicStatus.CREATE_PIC;
-        } else {
-            picStatus = PicStatus.ENTER_PIC;
-        }
-        return picStatus;
-    }
-
-    public void setVipGrade(int vipGrade) {
-        this.vipGrade = vipGrade;
-    }
-
-    public void setGender(byte gender) {
-        this.gender = gender;
-    }
-
-    public void setMsg2(byte msg2) {
-        this.msg2 = msg2;
-    }
-
-    public void setnBlockReason(int nBlockReason) {
-        this.nBlockReason = nBlockReason;
-    }
-
-    public void setPurchaseExp(byte purchaseExp) {
-        this.purchaseExp = purchaseExp;
-    }
-
-    public void setpBlockReason(byte pBlockReason) {
-        this.pBlockReason = pBlockReason;
-    }
-
-    public void setGradeCode(byte gradeCode) {
-        this.gradeCode = gradeCode;
-    }
-
-    public void setChatUnblockDate(long chatUnblockDate) {
-        this.chatUnblockDate = chatUnblockDate;
-    }
-
-    public void setHasCensoredNxLoginID(boolean hasCensoredNxLoginID) {
-        this.hasCensoredNxLoginID = hasCensoredNxLoginID;
-    }
-
-    public void setCensoredNxLoginID(String censoredNxLoginID) {
-        this.censoredNxLoginID = censoredNxLoginID;
-    }
-
-    public void setCharacterSlots(int characterSlots) {
-        this.characterSlots = characterSlots;
-    }
-
-    public void setCreationDate(FileTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public boolean isHasCensoredNxLoginID() {
-        return hasCensoredNxLoginID;
-    }
 
     public void setId(int id) {
         this.id = id;
@@ -323,14 +125,6 @@ public class Account {
         if(f != null) {
             getFriends().remove(f);
         }
-    }
-
-    public Char getCurrentChr() {
-        return currentChr;
-    }
-
-    public void setCurrentChr(Char currentChr) {
-        this.currentChr = currentChr;
     }
 
     public Set<DamageSkinSaveData> getDamageSkins() {
@@ -385,22 +179,6 @@ public class Account {
         this.nxCredit = nxCredit;
     }
 
-    public int getMaplePoints() {
-        return maplePoints;
-    }
-
-    public void setMaplePoints(int maplePoints) {
-        this.maplePoints = maplePoints;
-    }
-
-    public int getNxPrepaid() {
-        return nxPrepaid;
-    }
-
-    public void setNxPrepaid(int nxPrepaid) {
-        this.nxPrepaid = nxPrepaid;
-    }
-
     public void addLinkSkill(LinkSkill linkSkill) {
         removeLinkSkillByOwnerID(linkSkill.getOwnerID());
         getLinkSkills().add(linkSkill);
@@ -436,28 +214,6 @@ public class Account {
         addNXCredit(-credit);
     }
 
-    public void addMaplePoints(int points) {
-        int newPoints = getMaplePoints() + points;
-        if (newPoints >= 0) {
-            setMaplePoints(newPoints);
-        }
-    }
-
-    public void deductMaplePoints(int points) {
-        addMaplePoints(-points);
-    }
-
-    public void addNXPrepaid(int prepaid) {
-        int newPrepaid = getNxPrepaid() + prepaid;
-        if (newPrepaid >= 0) {
-            addNXPrepaid(newPrepaid);
-        }
-    }
-
-    public void deductNXPrepaid(int prepaid) {
-        addNXPrepaid(-prepaid);
-    }
-
     public MonsterCollection getMonsterCollection() {
         if (monsterCollection == null) {
             monsterCollection = new MonsterCollection();
@@ -467,22 +223,6 @@ public class Account {
 
     public void setMonsterCollection(MonsterCollection monsterCollection) {
         this.monsterCollection = monsterCollection;
-    }
-
-    public FileTime getBanExpireDate() {
-        return banExpireDate;
-    }
-
-    public void setBanExpireDate(FileTime banExpireDate) {
-        this.banExpireDate = banExpireDate;
-    }
-
-    public String getBanReason() {
-        return banReason;
-    }
-
-    public void setBanReason(String banReason) {
-        this.banReason = banReason;
     }
 
     public boolean hasCharacter(int charID) {
@@ -498,19 +238,27 @@ public class Account {
         return Util.findWithPred(getCharacters(), chr -> chr.getName().equals(name));
     }
 
-    public void unstuck() {
-        Server.getInstance().removeAccount(this);
-        DatabaseManager.saveToDB(this);
+    public User getUser() {
+        return user;
     }
 
-    public OffenseManager getOffenseManager() {
-        if (offenseManager == null) {
-            setOffenseManager(new OffenseManager());
-        }
-        return offenseManager;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public void setOffenseManager(OffenseManager offenseManager) {
-        this.offenseManager = offenseManager;
+    public int getWorldId() {
+        return worldId;
+    }
+
+    public void setWorldId(int worldId) {
+        this.worldId = worldId;
+    }
+
+    public Char getCurrentChr() {
+        return currentChr;
+    }
+
+    public void setCurrentChr(Char currentChr) {
+        this.currentChr = currentChr;
     }
 }

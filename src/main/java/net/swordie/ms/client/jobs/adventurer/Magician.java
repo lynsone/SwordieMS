@@ -403,7 +403,7 @@ public class Magician extends Beginner {
                         Char partyChr = partyMember.getChr();
                         partyChr.heal(partyChr.getMaxHP());
                         partyChr.healMP(partyChr.getMaxMP());
-                        partyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                        partyChr.write(UserPacket.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
                         partyChr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
                     }
                 }
@@ -876,7 +876,7 @@ public class Magician extends Beginner {
                         partyTSM.sendSetStatPacket();
                         if(partyChr != chr) {
                           chr.getField().broadcastPacket(UserRemote.effect(partyChr.getId(), Effect.skillAffected(skillID, slv, 0)), partyChr);
-                          partyChr.write(User.effect(Effect.skillAffected(skillID, slv, 0)));
+                          partyChr.write(UserPacket.effect(Effect.skillAffected(skillID, slv, 0)));
                         }
                     }
                 } else {

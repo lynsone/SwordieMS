@@ -61,7 +61,7 @@ public class ChannelAcceptor implements Runnable {
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(channel.getPort()).sync();
-            log.info(String.format("Channel %d listening on port %d", channel.getChannelId(), channel.getPort()));
+            log.info(String.format("Channel %d-%d listening on port %d", channel.getWorldId(), channel.getChannelId(), channel.getPort()));
             // Wait until the server socket is closed.
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.

@@ -46,7 +46,7 @@ public class Channel {
         this.worldId = worldId;
         this.channelId = channelId;
         this.adultChannel = false;
-        this.port = ServerConstants.LOGIN_PORT + 100 + channelId;
+        this.port = ServerConstants.LOGIN_PORT + (100 * worldId) + channelId;
         this.fields = new CopyOnWriteArrayList<>();
         this.transfers = new HashMap<>();
     }

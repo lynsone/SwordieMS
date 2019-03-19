@@ -3,7 +3,7 @@ package net.swordie.ms.handlers;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.ChatSocket;
 import net.swordie.ms.Server;
 import net.swordie.ms.enums.GroupMessageType;
@@ -65,7 +65,7 @@ public class ChatHandler {
         int guildID = inPacket.decodeInt();
         String msg = inPacket.decodeString();
         if (chr.getGuild() != null) {
-            chr.getGuild().broadcast(CField.groupMessage(GroupMessageType.Guild, chr.getName(), msg));
+            chr.getGuild().broadcast(FieldPacket.groupMessage(GroupMessageType.Guild, chr.getName(), msg));
         }
     }
 }

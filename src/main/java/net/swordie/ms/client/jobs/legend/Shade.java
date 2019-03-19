@@ -16,7 +16,6 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -510,10 +509,10 @@ public class Shade extends Job {
         tsm.removeStatsBySkill(SUMMON_OTHER_SPIRIT);
         tsm.sendResetStatPacket();
         chr.chatMessage("You have been revived by Summon Other Spirit.");
-        chr.write(User.effect(Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
+        chr.write(UserPacket.effect(Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(SUMMON_OTHER_SPIRIT)));
 
-        chr.write(User.effect(Effect.skillUse(25111211, (byte) 1, 0)));
+        chr.write(UserPacket.effect(Effect.skillUse(25111211, (byte) 1, 0)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillUse(25111211, (byte) 1, 0)));
     }
 

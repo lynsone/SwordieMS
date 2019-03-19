@@ -1,7 +1,7 @@
 package net.swordie.ms.client.character;
 
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.constants.MonsterCollectionGroup;
 import net.swordie.ms.constants.MonsterCollectionRegion;
 import net.swordie.ms.constants.MonsterCollectionSession;
@@ -103,7 +103,7 @@ public class MonsterCollection {
         }
         collection.get(mcmi.getRegion()).getMonsterCollectionSessions().get(mcmi.getSession()).sendCompletionInfo(chr,
                 100000 + mcmi.getRegion() * 100 + mcmi.getSession());
-        chr.write(User.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", false, 0, 4, 0)));
+        chr.write(UserPacket.effect(Effect.effectFromWZ("Effect/BasicEff.img/monsterCollectionGet", false, 0, 4, 0)));
     }
 
     public int getId() {

@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.handlers.ChatHandler;
@@ -38,14 +39,14 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("[ChannelHandler] | Channel inactive.");
         Client c = (Client) ctx.channel().attr(CLIENT_KEY).get();
-        Account acc = c.getAccount();
+        User user = c.getUser();
         Char chr = c.getChr();
         if(c != null && chr != null && !chr.isChangingChannel()) {
             chr.logout();
         } else if (c != null && chr != null && chr.isChangingChannel()) {
             chr.setChangingChannel(false);
-        } else if (acc != null) {
-            acc.unstuck();
+        } else if (user != null) {
+            user.unstuck();
         } else {
             log.warn("[ChannelHandler] | Was not able to save character, data inconsistency may have occurred.");
         }

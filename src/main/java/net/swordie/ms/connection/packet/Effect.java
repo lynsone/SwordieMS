@@ -408,8 +408,8 @@ public class Effect {
 
     public static void showFameGradeUp(Char chr) {
         Field field = chr.getField();
-        chr.write(User.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/front")));
-        chr.write(User.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/back")));
+        chr.write(UserPacket.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/front")));
+        chr.write(UserPacket.effect(Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/back")));
         field.broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/front")));
         field.broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Effect/BasicEff.img/FameGradeUp/back")));
     }

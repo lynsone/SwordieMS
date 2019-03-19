@@ -3,7 +3,6 @@ package net.swordie.ms.client.jobs.legend;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
-import net.swordie.ms.client.character.SPSet;
 import net.swordie.ms.client.character.info.HitInfo;
 import net.swordie.ms.client.character.skills.*;
 import net.swordie.ms.client.character.skills.info.AttackInfo;
@@ -12,6 +11,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.Summon;
 import net.swordie.ms.life.mob.MobStat;
@@ -22,7 +22,6 @@ import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.loaders.SkillData;
-import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
@@ -122,7 +121,7 @@ public class Evan extends Job {
     }
 
     public void spawnMir() {
-        c.write(CField.createDragon(chr));
+        c.write(FieldPacket.createDragon(chr));
     }
 
     public int getEvanSkill(int skillID) {
@@ -259,7 +258,7 @@ public class Evan extends Job {
     public void handleAttack(Client c, AttackInfo attackInfo) {
         if(chr.getField() != oldField) {
             debrisCount = 0;
-            c.write(CField.delWreckage(chr));
+            c.write(FieldPacket.delWreckage(chr));
         }
         oldField = chr.getField();
         Char chr = c.getChr();
@@ -291,7 +290,7 @@ public class Evan extends Job {
                         if(debrisCount < getMaxDebris()) {
                             debrisPos.put(debrisCount, mob.getPosition());
                             debrisCount++;
-                            c.write(CField.addWreckage(chr, mob, getDebrisSkill(), debrisCount));
+                            c.write(FieldPacket.addWreckage(chr, mob, getDebrisSkill(), debrisCount));
                         }
                     }
                 }
@@ -339,7 +338,7 @@ public class Evan extends Job {
             return;
         }
         for(int i = 0; i<debrisCount; i++) {
-            c.write(CField.delWreckage(chr));
+            c.write(FieldPacket.delWreckage(chr));
             Life life = Util.getRandomFromCollection(lifes);
             int mobID = (life).getObjectId(); //
             int inc = ForceAtomEnum.WRECKAGE.getInc();
@@ -351,7 +350,7 @@ public class Evan extends Job {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 10,
                     0, 200, (int) System.currentTimeMillis(), 1, 0,
                     debrisPos.get(i));
-            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, getDebrisSkill(), forceAtomInfo, new Rect(), 0, 300,
                     life.getPosition(), getDebrisSkill(), life.getPosition()));
         }
@@ -420,7 +419,7 @@ public class Evan extends Job {
         super.handleSkill(c, skillID, slv, inPacket);
         if(chr.getField() != oldField) {
             debrisCount = 0;
-            c.write(CField.delWreckage(chr));
+            c.write(FieldPacket.delWreckage(chr));
         }
         oldField = chr.getField();
         TemporaryStatManager tsm = chr.getTemporaryStatManager();

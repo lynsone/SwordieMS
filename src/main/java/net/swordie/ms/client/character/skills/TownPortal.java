@@ -1,7 +1,7 @@
 package net.swordie.ms.client.character.skills;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Position;
@@ -110,7 +110,7 @@ public class TownPortal {
         }
         despawnTimer = EventManager.addEvent(this::despawnTownPortal, getDuration(), TimeUnit.SECONDS);
 
-        fieldField.broadcastPacket(CField.townPortalCreated(this, false)); // Broadcasts spawning of the TownPortal to the fieldField.
+        fieldField.broadcastPacket(FieldPacket.townPortalCreated(this, false)); // Broadcasts spawning of the TownPortal to the fieldField.
         fieldField.addTownPortal(this); // Adds TownPortal to the TownPortal list, so it will show the TownPortal to others that enter the map after spawning
         getChr().setTownPortal(this);
     }
@@ -125,7 +125,7 @@ public class TownPortal {
         Field townField = channel.getField(getTownFieldId());
 
         // Remove portals from the Fields
-        fieldField.broadcastPacket(CField.townPortalRemoved(this, false));
+        fieldField.broadcastPacket(FieldPacket.townPortalRemoved(this, false));
         removeTownPortalInTownField();
 
         // Remove townPortals from the TP List
@@ -150,7 +150,7 @@ public class TownPortal {
         if(field.isTown()) {
             chr.write(WvsContext.townPortal(this));
         } else {
-            chr.write(CField.townPortalCreated(this, true));
+            chr.write(FieldPacket.townPortalCreated(this, true));
         }
     }
 }

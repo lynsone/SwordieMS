@@ -3,6 +3,7 @@ package net.swordie.ms.handlers;
 import net.swordie.ms.ServerConfig;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.BroadcastMsg;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.CharacterStat;
@@ -30,6 +31,7 @@ import net.swordie.ms.connection.packet.Login;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.Server;
 import org.mindrot.jbcrypt.BCrypt;
+
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 
 /**
@@ -69,13 +71,13 @@ public class LoginHandler {
         byte[] machineID = inPacket.decodeArr(16);
         boolean success;
         LoginType result;
-        Account account = Account.getFromDBByName(username);
-        if (account != null) {
+        User user = User.getFromDBByName(username);
+        if (user != null) {
             if ("helphelp".equalsIgnoreCase(password)) {
-                account.unstuck();
+                user.unstuck();
                 c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage("Your account is now logged out.")));
             }
-            String dbPassword = account.getPassword();
+            String dbPassword = user.getPassword();
             boolean hashed = Util.isStringBCrypt(dbPassword);
             if (hashed) {
                 try {
@@ -89,44 +91,46 @@ public class LoginHandler {
             }
             result = success ? LoginType.Success : LoginType.IncorrectPassword;
             if (success) {
-                if (Server.getInstance().isAccountLoggedIn(account)) {
+                if (Server.getInstance().isUserLoggedIn(user)) {
                     success = false;
                     result = LoginType.AlreadyConnected;
-                } else if (account.getBanExpireDate() != null && !account.getBanExpireDate().isExpired()) {
+                } else if (user.getBanExpireDate() != null && !user.getBanExpireDate().isExpired()) {
                     success = false;
                     result = LoginType.Blocked;
                     String banMsg = String.format("You have been banned. \nReason: %s. \nExpire date: %s",
-                            account.getBanReason(), account.getBanExpireDate().toLocalDateTime());
+                            user.getBanReason(), user.getBanExpireDate().toLocalDateTime());
                     c.write(WvsContext.broadcastMsg(BroadcastMsg.popUpMessage(banMsg)));
                 } else {
                     if (!hashed) {
-                        account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
                         // if a user has an assigned pic, hash it
-                        if (account.getPic() != null && account.getPic().length() >= 6 && !Util.isStringBCrypt(account.getPic())) {
-                            account.setPic(BCrypt.hashpw(account.getPic(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
+                        if (user.getPic() != null && user.getPic().length() >= 6 && !Util.isStringBCrypt(user.getPic())) {
+                            user.setPic(BCrypt.hashpw(user.getPic(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS)));
                         }
                     }
-                    Server.getInstance().addAccount(account);
-                    c.setAccount(account);
+                    Server.getInstance().addUser(user);
+                    c.setUser(user);
                     c.setMachineID(machineID);
-                    DatabaseManager.saveToDB(account);
+                    DatabaseManager.saveToDB(user);
                 }
             }
         } else {
             result = LoginType.NotRegistered;
             success = false;
         }
-        c.write(Login.checkPasswordResult(success, result, account));
+        c.write(Login.checkPasswordResult(success, result, user));
     }
 
     public static void handleWorldListRequest(Client c, InPacket packet) {
-        c.write(Login.sendWorldInformation(null));
+        for (World world : Server.getInstance().getWorlds()) {
+            c.write(Login.sendWorldInformation(world, null));
+        }
         c.write(Login.sendWorldInformationEnd());
         c.write(Login.sendRecommendWorldMessage(ServerConfig.WORLD_ID, ServerConfig.RECOMMEND_MSG));
     }
 
     public static void handleServerStatusRequest(Client c, InPacket inPacket) {
-        c.write(Login.sendWorldInformation(null));
+//        c.write(Login.sendWorldInformation(null));
         c.write(Login.sendWorldInformationEnd());
     }
 
@@ -140,11 +144,21 @@ public class LoginHandler {
         byte worldId = inPacket.decodeByte();
         byte channel = (byte) (inPacket.decodeByte() + 1);
         byte code = 0; // success code
+        User user = c.getUser();
+        Account account = user.getAccountByWorldId(worldId);
         World world = Server.getInstance().getWorldById(worldId);
-        if (world != null && world.getChannelById(channel) != null) {
+        if (user != null && world != null && world.getChannelById(channel) != null) {
+            if (account == null) {
+                account = new Account(user, worldId);
+                DatabaseManager.saveToDB(account); // assign id
+                user.addAccount(account);
+                DatabaseManager.saveToDB(user); // add to user's list of accounts
+            }
+            c.setAccount(account);
             c.setWorldId(worldId);
             c.setChannel(channel);
-            c.write(Login.selectWorldResult(c.getAccount(), code, Server.getInstance().getWorldById(worldId).isReboot() ? "reboot" : "normal", false));
+            c.write(Login.selectWorldResult(c.getUser(), c.getAccount(), code,
+                    Server.getInstance().getWorldById(worldId).isReboot() ? "reboot" : "normal", false));
         } else {
             c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
         }
@@ -156,12 +170,13 @@ public class LoginHandler {
         if (!GameConstants.isValidName(name)) {
             code = CharNameResult.Unavailable_Invalid;
         } else {
-            code = Char.getFromDBByName(name) == null ? CharNameResult.Available : CharNameResult.Unavailable_InUse;
+            code = Char.getFromDBByNameAndWorld(name, c.getAccount().getWorldId()) == null ? CharNameResult.Available : CharNameResult.Unavailable_InUse;
         }
         c.write(Login.checkDuplicatedIDResult(name, code.getVal()));
     }
 
     public static void handleCreateNewCharacter(Client c, InPacket inPacket) {
+        Account acc = c.getAccount();
         String name = inPacket.decodeString();
         int keySettingType = inPacket.decodeInt();
         int eventNewCharSaleJob = inPacket.decodeInt();
@@ -182,13 +197,13 @@ public class LoginHandler {
         if (!ItemData.isStartingItems(items) || skin > ItemConstants.MAX_SKIN || skin < 0
                 || face < ItemConstants.MIN_FACE || face > ItemConstants.MAX_FACE
                 || hair < ItemConstants.MIN_HAIR || hair > ItemConstants.MAX_HAIR) {
-            c.getAccount().getOffenseManager().addOffense("Tried to add items unavailable on char creation.");
+            c.getUser().getOffenseManager().addOffense("Tried to add items unavailable on char creation.");
             code = CharNameResult.Unavailable_CashItem;
         }
 
         if (!GameConstants.isValidName(name)) {
             code = CharNameResult.Unavailable_Invalid;
-        } else if (Char.getFromDBByName(name) != null){
+        } else if (Char.getFromDBByNameAndWorld(name, acc.getWorldId()) != null) {
             code = CharNameResult.Unavailable_InUse;
         }
         if (code != null) {
@@ -196,13 +211,13 @@ public class LoginHandler {
             return;
         }
 
-        Char chr = new Char(c.getAccount().getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
+        Char chr = new Char(acc.getId(), name, keySettingType, eventNewCharSaleJob, job.getJobId(),
                 curSelectedSubJob, gender, skin, face, hair, items);
         JobManager.getJobById(job.getJobId(), chr).setCharCreationStats(chr);
 
         chr.setFuncKeyMap(FuncKeyMap.getDefaultMapping());
-        c.getAccount().addCharacter(chr);
-        DatabaseManager.saveToDB(c.getAccount());
+        DatabaseManager.saveToDB(chr);
+        acc.addCharacter(chr);
 
         CharacterStat cs = chr.getAvatarData().getCharacterStat();
         if (curSelectedRace == JobConstants.LoginJob.DUAL_BLADE.getJobType()) {
@@ -210,6 +225,7 @@ public class LoginHandler {
         }
         cs.setCharacterId(chr.getId());
         cs.setCharacterIdForLog(chr.getId());
+        cs.setWorldIdForLog(acc.getWorldId());
         for (int i : chr.getAvatarData().getAvatarLook().getHairEquips()) {
             Equip equip = ItemData.getEquipDeepCopyFromID(i, false);
             if (equip != null && equip.getItemId() >= 1000000) {
@@ -222,13 +238,13 @@ public class LoginHandler {
         codex.setInvType(EQUIPPED);
         codex.setBagIndex(BodyPart.MonsterBook.getVal());
         chr.addItemToInventory(EQUIPPED, codex, true);
-        if(curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
+        if (curSelectedRace == 15) { // Zero hack for adding 2nd weapon (removing it in hairequips for zero look)
             Equip equip = ItemData.getEquipDeepCopyFromID(1562000, false);
             equip.setBagIndex(ItemConstants.getBodyPartFromItem(
                     equip.getItemId(), chr.getAvatarData().getAvatarLook().getGender()));
             chr.addItemToInventory(EQUIPPED, equip, true);
         }
-        DatabaseManager.saveToDB(chr);
+        DatabaseManager.saveToDB(acc);
         c.write(Login.createNewCharacterResult(LoginType.Success, chr));
     }
 
@@ -272,11 +288,11 @@ public class LoginHandler {
 
         OutHeader opcode = OutHeader.getOutHeaderByOp(op);
         log.error(String.format("[Error %s] (%s / %d) Data: %s", errortype, opcode, op, inPacket));
-        if(opcode == OutHeader.TEMPORARY_STAT_SET) {
+        if (opcode == OutHeader.TEMPORARY_STAT_SET) {
             for (int i = 0; i < CharacterTemporaryStat.length; i++) {
                 int mask = inPacket.decodeInt();
-                for(CharacterTemporaryStat cts : CharacterTemporaryStat.values()) {
-                    if(cts.getPos() == i && (cts.getVal() & mask) != 0) {
+                for (CharacterTemporaryStat cts : CharacterTemporaryStat.values()) {
+                    if (cts.getPos() == i && (cts.getVal() & mask) != 0) {
                         log.error(String.format("[Error %s] Contained stat %s", errortype, cts.toString()));
                     }
                 }
@@ -302,10 +318,10 @@ public class LoginHandler {
         String mac = inPacket.decodeString();
         String somethingElse = inPacket.decodeString();
         String pic = BCrypt.hashpw(inPacket.decodeString(), BCrypt.gensalt(ServerConstants.BCRYPT_ITERATIONS));
-        c.getAccount().setPic(pic);
+        c.getUser().setPic(pic);
         // Update in DB
-        DatabaseManager.saveToDB(c.getAccount());
-        if (c.getAccount().getCharById(characterId) == null) {
+        DatabaseManager.saveToDB(c.getUser());
+        if (c.getUser().getCharById(characterId) == null) {
             c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
             return;
         }
@@ -334,7 +350,7 @@ public class LoginHandler {
         String pic = inPacket.decodeString();
 //        int userId = inPacket.decodeInt();
         // after this: 2 strings indicating pc info. Not interested in that rn
-        if (BCrypt.checkpw(pic, c.getAccount().getPic())) {
+        if (BCrypt.checkpw(pic, c.getUser().getPic())) {
             success = true;
         } else {
             c.write(Login.selectCharacterResult(LoginType.IncorrectPassword, (byte) 0, 0, 0));

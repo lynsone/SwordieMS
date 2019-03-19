@@ -3,6 +3,7 @@ package net.swordie.ms.world.shop.cashshop;
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Inventory;
 import net.swordie.ms.client.character.items.Item;
@@ -26,6 +27,7 @@ public class CashShopHandler {
 
     public static void handleCashShopCashItemRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
+        User user = chr.getUser();
         Account account = chr.getAccount();
         Trunk trunk = account.getTrunk();
         byte type = inPacket.decodeByte();
@@ -59,15 +61,15 @@ public class CashShopHandler {
                         }
                         break;
                     case 2: // Maple points
-                        if (account.getMaplePoints() >= cost) {
-                            account.deductMaplePoints(cost);
+                        if (user.getMaplePoints() >= cost) {
+                            user.deductMaplePoints(cost);
                         } else {
                             notEnoughMoney = true;
                         }
                         break;
                     case 4: // Prepaid
-                        if (account.getNxPrepaid() >= cost) {
-                            account.deductNXPrepaid(cost);
+                        if (user.getNxPrepaid() >= cost) {
+                            user.deductNXPrepaid(cost);
                         } else {
                             notEnoughMoney = true;
                         }

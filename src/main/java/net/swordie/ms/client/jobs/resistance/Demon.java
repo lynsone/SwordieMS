@@ -12,7 +12,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.BaseStat;
@@ -630,7 +630,7 @@ public class Demon extends Job {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                     0, 500, (int) System.currentTimeMillis(), 1, 0,
                     new Position(0, -100));
-            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
                     mob.getPosition(), NETHER_SHIELD_ATOM, mob.getPosition()));
     }
@@ -653,7 +653,7 @@ public class Demon extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 35, 4,
                         anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position());
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, NETHER_SHIELD_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), NETHER_SHIELD_ATOM, mob.getPosition()));
             }
@@ -781,7 +781,7 @@ public class Demon extends Job {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, speed, 5,
                         angle, 50, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.write(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.write(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, 0, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), 0, mob.getPosition()));
             } else {
@@ -806,7 +806,7 @@ public class Demon extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, speed, 5,
                             angle, 50, (int) System.currentTimeMillis(), 1, 0,
                             new Position(0, 0));
-                    chr.write(CField.createForceAtom(true, chr.getId(), mobID, type,
+                    chr.write(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                             true, mobID, 0, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), 0, mob.getPosition()));
                 }
@@ -829,7 +829,7 @@ public class Demon extends Job {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, speed, 4,
                     angle, 50, (int) System.currentTimeMillis(), 1, 0,
                     new Position(0, 0));
-            chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                     true, mobID, 0, forceAtomInfo, new Rect(), 0, 300,
                     life.getPosition(), 0, life.getPosition()));
         }

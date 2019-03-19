@@ -16,7 +16,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.connection.packet.WvsContext;
 import net.swordie.ms.constants.JobConstants;
@@ -684,7 +684,7 @@ public class Zero extends Job {
         chr.heal(chr.getMaxHP());
         tsm.removeStatsBySkill(REWIND);
         tsm.sendResetStatPacket();
-        chr.write(User.effect(Effect.skillSpecial(REWIND)));
+        chr.write(UserPacket.effect(Effect.skillSpecial(REWIND)));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(REWIND)));
     }
 }

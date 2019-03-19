@@ -2,6 +2,7 @@ package net.swordie.ms.connection.db;
 
 import net.swordie.ms.client.Account;
 import net.swordie.ms.client.LinkSkill;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.alliance.Alliance;
 import net.swordie.ms.client.anticheat.Offense;
 import net.swordie.ms.client.anticheat.OffenseManager;
@@ -69,6 +70,7 @@ public class DatabaseManager {
         Configuration configuration = new Configuration().configure();
         configuration.setProperty("autoReconnect", "true");
         Class[] dbClasses = new Class[] {
+                User.class,
                 FileTime.class,
                 SystemTime.class,
                 NonCombatStatDayLimit.class,

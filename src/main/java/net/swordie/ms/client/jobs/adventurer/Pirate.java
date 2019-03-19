@@ -14,7 +14,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.JobConstants;
@@ -309,7 +309,7 @@ public class Pirate extends Beginner {
                 }
                 int random = new Random().nextInt(upbound)+1;
 
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.write(UserPacket.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
 
                 if(random < 2) {
@@ -338,8 +338,8 @@ public class Pirate extends Beginner {
                 random = new Random().nextInt(upbound)+1;
                 int randomDD = new Random().nextInt(upbound)+1;
 
-                chr.write(User.effect(Effect.skillAffectedSelect(skillID, slv, random, false)));
-                chr.write(User.effect(Effect.skillAffectedSelect(skillID, slv, randomDD, true)));
+                chr.write(UserPacket.effect(Effect.skillAffectedSelect(skillID, slv, random, false)));
+                chr.write(UserPacket.effect(Effect.skillAffectedSelect(skillID, slv, randomDD, true)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffectedSelect(skillID, slv, random, false)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffectedSelect(skillID, slv, randomDD, true)));
 
@@ -731,7 +731,7 @@ public class Pirate extends Beginner {
         Skill skill = chr.getSkill(BARREL_ROULETTE);
         byte slv = (byte) skill.getCurrentLevel();
         SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
-        chr.write(User.effect(Effect.skillAffectedSelect(BARREL_ROULETTE, slv, roulette, false)));
+        chr.write(UserPacket.effect(Effect.skillAffectedSelect(BARREL_ROULETTE, slv, roulette, false)));
         switch (roulette) {
             case 1: // Extra Attack (Final Attack)
                 //Handled, See Final Attack Handler
@@ -987,7 +987,7 @@ public class Pirate extends Beginner {
                     energy = getMaximumEnergy();
                 }
             }
-            chr.write(User.effect(Effect.skillAffected(getViperEnergySkill().getSkillId(), (byte) 1, 0)));
+            chr.write(UserPacket.effect(Effect.skillAffected(getViperEnergySkill().getSkillId(), (byte) 1, 0)));
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(getViperEnergySkill().getSkillId(), (byte) 1, 0)));
         } else {
             energy = deductViperEnergyCost(skillId);

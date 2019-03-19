@@ -5,7 +5,7 @@ import net.swordie.ms.client.character.skills.Option;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.ChatType;
@@ -75,11 +75,11 @@ public class RuneStone {
     }
 
     public void spawnRune(Char chr) {
-        chr.write(CField.runeStoneAppear(this));
+        chr.write(FieldPacket.runeStoneAppear(this));
     }
 
     public void despawnRune(Char chr) {
-        chr.write(CField.runeStoneClearAndAllRegister());
+        chr.write(FieldPacket.runeStoneClearAndAllRegister());
     }
 
     public RuneStone getRandomRuneStone(Field field) {

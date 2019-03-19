@@ -15,7 +15,7 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
@@ -552,7 +552,7 @@ public class AngelicBuster extends Job {
 
     private void rechargeABSkills() {
         Effect effect = Effect.createABRechargeEffect();
-        chr.write(User.effect(effect));
+        chr.write(UserPacket.effect(effect));
         chr.write(UserLocal.resetStateForOffSkill());
     }
 

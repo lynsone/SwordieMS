@@ -11,7 +11,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.UserLocal;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.AssistType;
@@ -418,7 +418,7 @@ public class WindArcher extends Noblesse {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstImpact, secondImpact,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position(0, 0)); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), TRIFLING_WIND_ATOM, mob.getPosition()));
                     } else {
@@ -428,7 +428,7 @@ public class WindArcher extends Noblesse {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, firstImpact, secondImpact,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position(0, 0)); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, TRIFLING_WIND_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), TRIFLING_WIND_ATOM, mob.getPosition()));
                     }
@@ -455,7 +455,7 @@ public class WindArcher extends Noblesse {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 5, 5,
                             270, 0, (int) System.currentTimeMillis(), 1, 0,
                             new Position(35, ranY)); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, STORM_BRINGER, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), STORM_BRINGER, mob.getPosition()));
                 }

@@ -2,6 +2,7 @@ package net.swordie.ms.client.character.commands;
 
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
@@ -1157,6 +1158,33 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"nx", "setnx"}, requiredType = Tester)
+    public static class NxCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int nx = Integer.parseInt(args[1]);
+            chr.addNx(nx);
+        }
+    }
+
+    @Command(names = {"dp", "setdp"}, requiredType = Tester)
+    public static class DpCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int dp = Integer.parseInt(args[1]);
+            User user = chr.getUser();
+            user.setDonationPoints(dp);
+        }
+    }
+
+    @Command(names = {"vp", "setvp"}, requiredType = Tester)
+    public static class VpCommand extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int vp = Integer.parseInt(args[1]);
+            User user = chr.getUser();
+            user.setVotePoints(vp);
+        }
+    }
+
+
     @Command(names = {"goto"}, requiredType = Tester)
     public static class GoTo extends AdminCommand {
         public static void execute(Char chr, String[] args) {
@@ -1600,7 +1628,7 @@ public class AdminCommands {
                     return;
                 }
             }
-            Account banAccount = banChr.getAccount();
+            User banUser = banChr.getUser();
             LocalDateTime banDate = LocalDateTime.now();
             switch (amountType) {
                 case "m":
@@ -1627,9 +1655,9 @@ public class AdminCommands {
                     chr.chatMessage(SpeakerChannel, String.format("Unknown date type %s", amountType));
                     break;
             }
-            banAccount.setBanExpireDate(FileTime.fromDate(banDate));
-            banAccount.setBanReason(reason);
-            banAccount.getOffenseManager().addOffense(reason, chr.getId());
+            banUser.setBanExpireDate(FileTime.fromDate(banDate));
+            banUser.setBanReason(reason);
+            banUser.getOffenseManager().addOffense(reason, chr.getId());
             chr.chatMessage(SpeakerChannel, String.format("Character %s has been banned. Expire date: %s", name, banDate));
             if (online) {
                 banChr.write(WvsContext.returnToTitle());

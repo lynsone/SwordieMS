@@ -12,7 +12,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
@@ -447,7 +447,7 @@ public class Xenon extends Job {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                     anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
-            chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, getPinPointSkill(), forceAtomInfo, new Rect(), 0, 300,
                     mob.getPosition(), 0, mob.getPosition()));
         }
@@ -608,7 +608,7 @@ public class Xenon extends Job {
                     faiList.add(fai);
                     mobList.add(mobID);
                 }
-                chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
+                chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), fae.getForceAtomType(), true,
                         mobList, AEGIS_SYSTEM_ATOM, faiList, null, 0, 0,
                         null, 0, null));
             }

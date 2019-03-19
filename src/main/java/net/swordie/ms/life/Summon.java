@@ -16,7 +16,7 @@ import net.swordie.ms.client.jobs.resistance.Mechanic;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.Summoned;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
@@ -320,7 +320,7 @@ public class Summon extends Life {
                 }
                 break;
         }
-        chr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));
+        chr.write(UserPacket.effect(Effect.skillAffected(skillID, (byte) 1, getObjectId())));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillAffected(skillID, (byte) 1, getObjectId())));
     }
 

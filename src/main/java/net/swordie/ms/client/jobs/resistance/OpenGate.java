@@ -2,7 +2,7 @@ package net.swordie.ms.client.jobs.resistance;
 
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.party.Party;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.util.Position;
 import net.swordie.ms.world.field.Field;
@@ -85,7 +85,7 @@ public class OpenGate {
             }
         }
 
-        field.broadcastPacket(CField.openGateCreated(this));
+        field.broadcastPacket(FieldPacket.openGateCreated(this));
         field.addOpenGate(this);
 
         if(openGateDuration != null && !openGateDuration.isDone()) {
@@ -95,7 +95,7 @@ public class OpenGate {
     }
 
     public void despawnOpenGate(Field field) {
-        field.broadcastPacket(CField.openGateRemoved(this));
+        field.broadcastPacket(FieldPacket.openGateRemoved(this));
         field.removeOpenGate(this);
         if (openGateDuration != null) {
             openGateDuration.cancel(true);
@@ -103,7 +103,7 @@ public class OpenGate {
     }
 
     public void showOpenGate(Field field) {
-        field.broadcastPacket(CField.openGateCreated(this));
+        field.broadcastPacket(FieldPacket.openGateCreated(this));
     }
 
 }

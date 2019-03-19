@@ -18,7 +18,6 @@ import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.ForceAtomEnum;
-import net.swordie.ms.enums.Stat;
 import net.swordie.ms.life.AffectedArea;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -254,7 +253,7 @@ public class Phantom extends Job {
                 xOpt = 1;
                 break;
         }
-        chr.write(User.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
+        chr.write(UserPacket.effect(Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
         chr.write(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/2003.img/skill/20031210/affected/"+ (randomInt-1))));
 
         o.nOption = randomInt;
@@ -604,7 +603,7 @@ public class Phantom extends Job {
         tsm.removeStatsBySkill(skill.getSkillId());
         tsm.sendResetStatPacket();
         chr.chatMessage("You have been revived by Final Feint.");
-        chr.write(User.effect(Effect.skillSpecial(skill.getSkillId())));
+        chr.write(UserPacket.effect(Effect.skillSpecial(skill.getSkillId())));
         chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.skillSpecial(skill.getSkillId())));
 
         o.nOption = 1;

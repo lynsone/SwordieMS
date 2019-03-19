@@ -13,7 +13,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.CField;
 import net.swordie.ms.connection.packet.Effect;
-import net.swordie.ms.connection.packet.User;
+import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.enums.*;
@@ -184,7 +184,7 @@ public class Mechanic extends Citizen {
             case ROLL_OF_THE_DICE:
                 int random = new Random().nextInt(6)+1;
 
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.write(UserPacket.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
 
                 if(random < 2) {
@@ -202,8 +202,8 @@ public class Mechanic extends Citizen {
                 random = new Random().nextInt(6)+1;
                 int randomDD = new Random().nextInt(6)+1;
 
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
-                chr.write(User.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
+                chr.write(UserPacket.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
+                chr.write(UserPacket.effect(Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/affected/" + random)));
                 chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.avatarOriented("Skill/"+ (skillID/10000) +".img/skill/"+ skillID +"/specialAffected/" + randomDD)));
 

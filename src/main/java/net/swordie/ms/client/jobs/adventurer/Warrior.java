@@ -1149,7 +1149,7 @@ public class Warrior extends Beginner {
                             randomPartyChr.heal(randomPartyChr.getMaxHP());
                             partyTSM.putCharacterStatValue(NotDamaged, o1);
                             partyTSM.sendSetStatPacket();
-                            randomPartyChr.write(User.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
+                            randomPartyChr.write(UserPacket.effect(Effect.skillAffected(skillID, (byte) 1, 0)));
                             randomPartyChr.getField().broadcastPacket(UserRemote.effect(randomPartyChr.getId(), Effect.skillAffected(skillID, (byte) 1, 0)));
                         }
                     }
@@ -1356,7 +1356,7 @@ public class Warrior extends Beginner {
             tsm.sendSetStatPacket();
 
 
-            chr.write(User.effect(Effect.showFinalPactEffect(FINAL_PACT, (byte) 1, 0, true))); // Manually broadcasting Effect packet, as FINAL PACT isn't actually ever called.
+            chr.write(UserPacket.effect(Effect.showFinalPactEffect(FINAL_PACT, (byte) 1, 0, true))); // Manually broadcasting Effect packet, as FINAL PACT isn't actually ever called.
             chr.getField().broadcastPacket(UserRemote.effect(chr.getId(), Effect.showFinalPactEffect(FINAL_PACT, (byte) 1, 0, true)));
 
             lastFinalPact = System.currentTimeMillis();

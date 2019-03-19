@@ -1,7 +1,7 @@
 package net.swordie.ms.client.character.scene;
 
 import net.swordie.ms.client.character.Char;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.loaders.EffectData;
 import net.swordie.ms.world.field.Field;
@@ -57,7 +57,7 @@ public class Scene {
                 case FieldEffect:
 //                    if(ei.getX() == 0 && ei.getY() == 0) {
                         EventManager.addEvent(() ->
-                                chr.write(CField.fieldEffect(FieldEffect.getFieldEffectFromWz(
+                                chr.write(FieldPacket.fieldEffect(FieldEffect.getFieldEffectFromWz(
                                         path,
                                         0
                                 ))), delay, TimeUnit.MILLISECONDS);
