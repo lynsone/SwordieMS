@@ -1441,7 +1441,7 @@ public class WorldHandler {
                         int fieldId = inPacket.decodeInt();
                         Field field = chr.getOrCreateFieldByCurrentInstanceType(fieldId);
                         if (field == null || (field.getFieldLimit() & FieldOption.TeleportItemLimit.getVal()) > 0 ||
-                            !FieldData.getWorldMapFields().contains(fieldId)) {
+                                !FieldData.getWorldMapFields().contains(fieldId)) {
                             chr.chatMessage("You may not warp to that map.");
                             chr.dispose();
                             return;
@@ -3050,7 +3050,7 @@ public class WorldHandler {
         Field field = chr.getField();
         if (GameConstants.getMaplerunnerField(field.getId()) == -1 &&
                 ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
-                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0)) {
+                        (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0)) {
             chr.dispose();
             return;
         }
@@ -6253,7 +6253,7 @@ public class WorldHandler {
         short unk = inPacket.decodeShort();
 
         Char driverChr = field.getCharByID(driverChrId);
-        if(driverChr == null ) {
+        if (driverChr == null) {
             return;
         }
         driverChr.write(WvsContext.setPassenserRequest(chr.getId()));
@@ -6290,7 +6290,7 @@ public class WorldHandler {
     public static void handleTransferFreeMarketRequest(Char chr, InPacket inPacket) {
         byte toChannelID = (byte) (inPacket.decodeByte() + 1);
         int fieldID = inPacket.decodeInt();
-        if (chr.getWorld().getChannelById(toChannelID) != null  && GameConstants.isFreeMarketField(fieldID)
+        if (chr.getWorld().getChannelById(toChannelID) != null && GameConstants.isFreeMarketField(fieldID)
                 && GameConstants.isFreeMarketField(chr.getField().getId())) {
             Field toField = chr.getClient().getChannelInstance().getField(fieldID);
             if (toField == null) {

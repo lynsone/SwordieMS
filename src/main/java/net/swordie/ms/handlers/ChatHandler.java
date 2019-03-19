@@ -7,7 +7,9 @@ import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.ChatSocket;
 import net.swordie.ms.Server;
 import net.swordie.ms.enums.GroupMessageType;
+import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.world.World;
+import net.swordie.ms.world.WorldHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,13 +31,13 @@ public class ChatHandler {
         int level = inPacket.decodeInt();
         int job = inPacket.decodeInt();
         Char chr = null;
-        for(World w : Server.getInstance().getWorlds()) {
+        for (World w : Server.getInstance().getWorlds()) {
             chr = w.getCharByID(charID);
-            if(chr != null) {
+            if (chr != null) {
                 break;
             }
         }
-        if(chr != null) {
+        if (chr != null) {
             chr.setChatClient(c);
             c.setChr(chr);
             connectedClients.put(accID, c);
@@ -53,7 +55,7 @@ public class ChatHandler {
         String msg = inPacket.decodeString();
         int size = inPacket.decodeInt();
         for (int i = 0; i < size; i++) {
-            if(connectedClients.containsKey(i)) {
+            if (connectedClients.containsKey(i)) {
                 connectedClients.get(i).write(ChatSocket.friendChatMessage(accID, chr.getId(), null, msg, false));
             }
         }

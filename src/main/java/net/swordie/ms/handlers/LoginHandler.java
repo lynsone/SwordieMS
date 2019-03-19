@@ -40,7 +40,6 @@ import static net.swordie.ms.enums.InvType.EQUIPPED;
 public class LoginHandler {
 
     private static final org.apache.log4j.Logger log = LogManager.getRootLogger();
-    private static int id;
 
     public static void handlePermissionRequest(Client client, InPacket inPacket) {
         byte locale = inPacket.decodeByte();
@@ -302,10 +301,6 @@ public class LoginHandler {
             CashItemType cit = CashItemType.getResultTypeByVal(cashType);
             log.error(String.format("[Error %s] CashItemType %s", errortype, cit == null ? "Unknown" : cit.toString()));
         }
-    }
-
-    public static int getId() {
-        return id;
     }
 
     public static void handlePrivateServerPacket(Client c, InPacket inPacket) {
