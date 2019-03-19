@@ -312,7 +312,7 @@ public class Shade extends Job {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 15, 7,
                     305, 400, (int) System.currentTimeMillis(), 1, 0,
                     new Position(chr.isLeft() ? 0 : -50, -50));
-            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            field.broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mobID, atomid, forceAtomInfo, new Rect(), 0, 300,
                     mob.getPosition(), atomid, mob.getPosition()));
         }
@@ -336,7 +336,7 @@ public class Shade extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 4,
                             anglenum, 100, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
-                    chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                             true, mobID, FOX_SPIRITS_ATOM_2, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), FOX_SPIRITS_ATOM_2, mob.getPosition()));
                 } else {
@@ -345,7 +345,7 @@ public class Shade extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 25, 4,
                             anglenum, 100, (int) System.currentTimeMillis(), 1, 0,
                             new Position());
-                    chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                             true, mobID, FOX_SPIRITS_ATOM, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), FOX_SPIRITS_ATOM, mob.getPosition()));
                 }

@@ -2482,7 +2482,7 @@ public class Char {
 			write(UserLocal.deathCountInfo(getDeathCount()));
 		}
 		if (field.getEliteState() == EliteState.EliteBoss) {
-			write(CField.eliteState(EliteState.EliteBoss, true, GameConstants.ELITE_BOSS_BGM, null, null));
+			write(FieldPacket.eliteState(EliteState.EliteBoss, true, GameConstants.ELITE_BOSS_BGM, null, null));
 		}
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
@@ -2491,7 +2491,7 @@ public class Char {
 			mob.addObserver(getScriptManager());
 		}
 		if (getFieldInstanceType() == CHANNEL) {
-			write(CField.setQuickMoveInfo(GameConstants.getQuickMoveInfos().stream().filter(qmi -> !qmi.isNoInstances() || getField().isChannelField()).collect(Collectors.toList())));
+			write(FieldPacket.setQuickMoveInfo(GameConstants.getQuickMoveInfos().stream().filter(qmi -> !qmi.isNoInstances() || getField().isChannelField()).collect(Collectors.toList())));
 		}
 		if (JobConstants.isAngelicBuster(getJob())) {
 			write(UserLocal.setDressChanged(false, true));
@@ -3349,9 +3349,9 @@ public class Char {
 
 	private void showProperUI(int fromField, int toField) {
 		if (GameConstants.getMaplerunnerField(toField) > 0 && GameConstants.getMaplerunnerField(fromField) <= 0) {
-			write(CField.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+			write(FieldPacket.openUI(UIType.UI_PLATFORM_STAGE_LEAVE));
 		} else if (GameConstants.getMaplerunnerField(fromField) > 0 && GameConstants.getMaplerunnerField(toField) <= 0) {
-			write(CField.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
+			write(FieldPacket.closeUI(UIType.UI_PLATFORM_STAGE_LEAVE));
 		}
 	}
 
@@ -4439,7 +4439,7 @@ public class Char {
 					break;
 			}
 			addTraitExp(trait, (int) Math.pow(2, (level + 1) + 2));
-			write(CField.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
+			write(FieldPacket.fieldEffect(FieldEffect.playSound("profession/levelup", 100)));
 		}
 	}
 

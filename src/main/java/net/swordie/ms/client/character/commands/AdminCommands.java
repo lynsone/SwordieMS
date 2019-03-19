@@ -1,7 +1,6 @@
 package net.swordie.ms.client.character.commands;
 
 import net.swordie.ms.Server;
-import net.swordie.ms.client.Account;
 import net.swordie.ms.client.User;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.items.Equip;
@@ -940,7 +939,7 @@ public class AdminCommands {
                 return;
             }
             Position position = new Position(portal.getX(), portal.getY());
-            chr.write(CField.teleport(position, chr));
+            chr.write(FieldPacket.teleport(position, chr));
         }
     }
 
@@ -960,7 +959,7 @@ public class AdminCommands {
             List<Integer> mobs = new ArrayList<>();
             int mobID = mob.getObjectId();
             mobs.add(mobID);
-            chr.getField().broadcastPacket(CField.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
+            chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, -1, chr.getId(), ForceAtomEnum.KINESIS_ORB_REAL.getForceAtomType(),
                     true, mobs, 142110011, fais, null, 0, 0, null, 142110011, mob.getPosition()));
 
         }

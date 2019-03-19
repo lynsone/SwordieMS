@@ -12,7 +12,7 @@ import net.swordie.ms.client.character.skills.info.MobAttackInfo;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
@@ -399,7 +399,7 @@ public class Archer extends Beginner {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 13, 12,
                                 num, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position());
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobId, QUIVER_CARTRIDGE_ATOM, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), 0, mob.getPosition()));
                     }

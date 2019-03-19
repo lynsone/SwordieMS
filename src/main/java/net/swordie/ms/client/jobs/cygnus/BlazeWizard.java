@@ -517,7 +517,7 @@ public class BlazeWizard extends Noblesse {
         chr.chatMessage("You have been revived by Phoenix Run.");
 
         Position position = chr.getPosition();
-        chr.write(CField.teleport(new Position(position.getX() + (chr.isLeft() ? + 350 : - 350), position.getY()), chr));
+        chr.write(FieldPacket.teleport(new Position(position.getX() + (chr.isLeft() ? + 350 : - 350), position.getY()), chr));
 
         // Hit effect
         chr.write(UserPacket.effect(Effect.skillUse(PHOENIX_RUN_EFFECTS, slv, 0)));

@@ -16,7 +16,7 @@ import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
@@ -826,7 +826,7 @@ public class BeastTamer extends Job {
                 Char pmChr = pm.getChr();
                 if (pmChr.getId() != chr.getId() && pmChr.getClient().getChannel() == chr.getClient().getChannel() && pmChr.getLevel() > 9) {
                     pmChr.warp(chr.getField());
-                    pmChr.write(CField.teleport(chr.getPosition(), pmChr));
+                    pmChr.write(FieldPacket.teleport(chr.getPosition(), pmChr));
                 }
                 pmChr.dispose();
             }

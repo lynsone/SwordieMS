@@ -11,7 +11,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.CField;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.Effect;
 import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.connection.packet.UserRemote;
@@ -390,7 +390,7 @@ public class Mechanic extends Citizen {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 25,
                     0, 200 + (i * 2), (int) System.currentTimeMillis(), 1, 0,
                     new Position());
-            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            field.broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mob.getObjectId(), HOMING_BEACON, forceAtomInfo, rect, 90, 30,
                     mob.getPosition(), 0, mob.getPosition()));
         }
@@ -420,7 +420,7 @@ public class Mechanic extends Citizen {
             ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 25,
                     0, 200, (int) System.currentTimeMillis(), 1, 0,
                     new Position());
-            field.broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+            field.broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                     true, mob.getObjectId(), HOMING_BEACON, forceAtomInfo, rect, 90, 30,
                     mob.getPosition(), 0, mob.getPosition()));
         }

@@ -941,7 +941,7 @@ public class Magician extends Beginner {
         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                 0, 500, (int) System.currentTimeMillis(), 1, 0,
                 new Position(0, -100));
-        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                 true, mobID2, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                 life.getPosition(), MEGIDDO_FLAME_ATOM, life.getPosition()));
     }
@@ -963,7 +963,7 @@ public class Magician extends Beginner {
                 ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 30, 5,
                         anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                         new Position(0, 0));
-                chr.getField().broadcastPacket(CField.createForceAtom(true, chr.getId(), mobID, type,
+                chr.getField().broadcastPacket(FieldPacket.createForceAtom(true, chr.getId(), mobID, type,
                         true, mobID, MEGIDDO_FLAME_ATOM, forceAtomInfo, new Rect(), 0, 300,
                         mob.getPosition(), MEGIDDO_FLAME_ATOM, mob.getPosition()));
             }

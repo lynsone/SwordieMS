@@ -334,7 +334,7 @@ public class Phantom extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                     } else if (chr.hasSkill(CARTE_BLANCHE)) {
@@ -344,7 +344,7 @@ public class Phantom extends Job {
                         ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                                 anglenum, 0, (int) System.currentTimeMillis(), 1, 0,
                                 new Position()); //Slightly behind the player
-                        chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                        chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                                 true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
                                 mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                     }
@@ -379,7 +379,7 @@ public class Phantom extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 35,
                             350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_NOIR, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), CARTE_NOIR, mob.getPosition()));
                 } else if (chr.hasSkill(CARTE_BLANCHE)) {
@@ -389,7 +389,7 @@ public class Phantom extends Job {
                     ForceAtomInfo forceAtomInfo = new ForceAtomInfo(1, inc, 20, 40,
                             350 - (2 * i), i * 5, (int) System.currentTimeMillis(), 1, 0,
                             new Position()); //Slightly behind the player
-                    chr.getField().broadcastPacket(CField.createForceAtom(false, 0, chr.getId(), type,
+                    chr.getField().broadcastPacket(FieldPacket.createForceAtom(false, 0, chr.getId(), type,
                             true, mobID, CARTE_BLANCHE, forceAtomInfo, new Rect(), 0, 300,
                             mob.getPosition(), CARTE_BLANCHE, mob.getPosition()));
                 }
