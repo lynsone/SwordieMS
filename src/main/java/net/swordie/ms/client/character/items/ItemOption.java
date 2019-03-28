@@ -95,6 +95,22 @@ public class ItemOption {
         this.string = string;
     }
 
+    public String getString(int level) {
+        level = level / 10;
+        String str = getString();
+        String[] split = str.split("#");
+        String[] split2 = split[1].split("[% ]");
+        String opt = split2[0];
+        int val = -1;
+        for (Map.Entry<ItemOptionType, Integer> e : getMiscValuesByLevel(level).entrySet()) {
+            val = e.getValue();
+        }
+        for (Map.Entry<BaseStat, Double> e : getStatValuesByLevel(level).entrySet()) {
+            val = e.getValue().intValue();
+        }
+        return str.replace("#" + opt, val + "");
+    }
+
     public String getString() {
         return string;
     }
