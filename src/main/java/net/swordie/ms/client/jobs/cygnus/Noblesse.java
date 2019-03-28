@@ -22,10 +22,14 @@ public class Noblesse extends Job {
 
     public static final int ELEMENTAL_SLASH = 10001244;
     public static final int ELEMENTAL_SHIFT_BASE = 10000252;
+    public static final int ELEMENTAL_SHIFT_HIGH = 10001253;
+    public static final int ELEMENTAL_SHIFT_FLASH = 10001254;
 
     private int[] addedSkills = {
             ELEMENTAL_SLASH,
-            ELEMENTAL_SHIFT_BASE
+            ELEMENTAL_SHIFT_BASE,
+            ELEMENTAL_SHIFT_HIGH,
+            ELEMENTAL_SHIFT_FLASH
     };
 
     public Noblesse(Char chr) {
@@ -34,8 +38,10 @@ public class Noblesse extends Job {
             for (int id : addedSkills) {
                 if (!chr.hasSkill(id)) {
                     Skill skill = SkillData.getSkillDeepCopyById(id);
-                    skill.setCurrentLevel(1);
-                    chr.addSkill(skill);
+                    if (skill != null) {
+                        skill.setCurrentLevel(1);
+                        chr.addSkill(skill);
+                    }
                 }
             }
         }

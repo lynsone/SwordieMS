@@ -1,40 +1,64 @@
-# Maple Road : Maple Tree Hill (4000011)  Map for Advanture Tutorial
+# Maple Road : Maple Tree Hill (4000011)  Map for Explorer Tutorial
 
-# NPC name - "???"
-UNK_NPC = 10300
+UNK_NPC = 10300 # NPC name - "???"
 
-VELLUM_STONE = 1064028
-if sm.hasQuest(32202):
-    sm.dispose()
-else:
-    sm.lockInGameUI(True)
-    sm.showFieldEffect("maplemap/enter/10000", 0)
-    sm.sendDelay(1000)
+# Tutorial skipper snippet
+def skip_tutorial():
+	MAPLE_ADMINISTARTOR = 2007
 
+	quests_to_complete = [
+		32202, # Mystical Maple Tree
+		32203  # The New Explorer
+	]
 
-    sm.spawnNpc(UNK_NPC, -240, 220)
-    sm.showNpcSpecialActionByTemplateId(UNK_NPC, "summon", 0)
-    sm.showEffect("Effect/Direction12.img/effect/tuto/BalloonMsg1/1", 900, 0, -120, 0, sm.getNpcObjectIdByTemplateId(UNK_NPC), False, 0)
-    sm.sendDelay(1800)
+	map_to_warp = 104000000 # Lith Harbor
+	target_level = 10
 
-    sm.moveNpcByTemplateId(UNK_NPC, False, 1000, 100)
-    sm.moveCamera(False, 200, 200, 200)
+	sm.setSpeakerID(MAPLE_ADMINISTARTOR)
+	sm.removeEscapeButton()
+	sm.lockInGameUI(True)
 
-    # The delay is for letting the Npc move
-    sm.sendDelay(3000)
+	if sm.sendAskYesNo("Would you like to skip the tutorial questline and instantly arrive at #m" + str(map_to_warp) + "#?"):
+		if sm.getChr().getLevel() < target_level:
+			sm.addLevel(target_level - sm.getChr().getLevel())
 
-    sm.moveCamera(True, 0, 0, 0)
+		for quest in quests_to_complete:
+			sm.completeQuestNoRewards(quest)
+		
+		sm.warp(map_to_warp)
+		
+	sm.lockInGameUI(False)
+	sm.dispose()
 
-    sm.sendDelay(900)
+if not sm.hasQuest(32202) or not sm.hasQuestCompleted(32203):
+	skip_tutorial()
+	sm.lockInGameUI(True)
+	sm.showFieldEffect("maplemap/enter/10000", 0)
+	sm.sendDelay(1000)
 
-    sm.setSpeakerID(0)
-    sm.setSpeakerType(3)
-    sm.removeEscapeButton()
-    sm.setPlayerAsSpeaker()
-    sm.sendNext("Who was that girl? Why did she run away when she saw me?")
-    sm.sendNext("Maybe I'll follow her..")
+	sm.spawnNpc(UNK_NPC, -240, 220)
+	sm.showNpcSpecialActionByTemplateId(UNK_NPC, "summon", 0)
+	sm.showEffect("Effect/Direction12.img/effect/tuto/BalloonMsg1/1", 900, 0, -120, 0, sm.getNpcObjectIdByTemplateId(UNK_NPC), False, 0)
+	sm.sendDelay(1800)
 
-    sm.removeNpc(UNK_NPC)
-    sm.completeQuestNoRewards(32202)
-    sm.lockInGameUI(False)
-    sm.dispose()
+	sm.moveNpcByTemplateId(UNK_NPC, False, 1000, 100)
+	sm.moveCamera(False, 200, 200, 200)
+
+	# The delay is for letting the Npc move
+	sm.sendDelay(3000)
+
+	sm.moveCamera(True, 0, 0, 0)
+
+	sm.sendDelay(900)
+
+	sm.setSpeakerID(0)
+	sm.setSpeakerType(3)
+	sm.removeEscapeButton()
+	sm.setPlayerAsSpeaker()
+	sm.sendNext("Who was that girl? Why did she run away when she saw me?")
+	sm.sendNext("Maybe I'll follow her..")
+
+	sm.removeNpc(UNK_NPC)
+	sm.completeQuestNoRewards(32202)
+	sm.lockInGameUI(False)
+	sm.dispose()
