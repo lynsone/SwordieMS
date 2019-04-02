@@ -3413,6 +3413,12 @@ public class Char {
 		return canHold;
 	}
 
+	public boolean canHold(int id, int quantity) {
+		Item item = ItemData.getItemDeepCopy(id);
+		item.setQuantity(quantity);
+		return canHold(Collections.singletonList(item));
+	}
+
 	/**
 	 * Recursive function that checks if this Char can hold a list of items in their inventory.
 	 *

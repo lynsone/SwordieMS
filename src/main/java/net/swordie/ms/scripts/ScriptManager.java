@@ -1137,7 +1137,7 @@ public interface ScriptManager extends Observer {
 
 	/**
 	 * Determines if the linked {@link Char} can hold a specific item.
-	 * Example: "if(sm.canHold(100)) {}"
+	 * Example: "if sm.canHold(100):"
 	 *
 	 * @param itemID
 	 * 		The ID of the item.
@@ -1145,6 +1145,19 @@ public interface ScriptManager extends Observer {
 	 * @return True if the linked {@link Char} can hold the item.
 	 */
 	boolean canHold(int itemID);
+
+	/**
+	 * Determines if the linked {@link Char} can hold a given amount of a specific item.
+	 * Example: "if sm.canHold(1301000, 2):"
+	 *
+	 * @param itemID
+	 * 		The ID of the item.
+	 * @param quantity
+	 * 		The quantity of the item
+	 *
+	 * @return True if the linked {@link Char} can hold the item.
+	 */
+	boolean canHold(int itemID, int quantity);
 
 	/**
 	 * Returns the amount of empty slots {@link Char} has in the specified Inventory Type.
