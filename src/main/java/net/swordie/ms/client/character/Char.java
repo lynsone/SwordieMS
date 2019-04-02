@@ -3416,7 +3416,9 @@ public class Char {
 	public boolean canHold(int id, int quantity) {
 		Item item = ItemData.getItemDeepCopy(id);
 		item.setQuantity(quantity);
-		return canHold(Collections.singletonList(item));
+		List<Item> items = new ArrayList<>();
+		items.add(item);
+		return canHold(items);
 	}
 
 	/**
