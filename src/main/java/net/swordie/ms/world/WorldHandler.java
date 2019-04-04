@@ -2177,8 +2177,9 @@ public class WorldHandler {
         if (textChair) {
             text = inpacket.decodeString(); // text to display
         }
-        if (text.length() == 0 || text.length() > 10 || !Util.isValidString(text) || !chr.hasItem(itemId)) {
+        if (textChair && (text.length() > 12 || !Util.isValidString(text) || !chr.hasItem(itemId))) {
             chr.chatMessage("Invalid text.");
+            chr.dispose();
             return;
         }
 
