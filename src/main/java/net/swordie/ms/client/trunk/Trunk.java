@@ -8,6 +8,7 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.DBChar;
 import net.swordie.ms.enums.InvType;
 import net.swordie.ms.loaders.ItemData;
+import net.swordie.ms.util.Util;
 import net.swordie.ms.world.shop.cashshop.CashItemInfo;
 
 import javax.persistence.*;
@@ -146,5 +147,13 @@ public class Trunk {
             CashItemInfo cii = getLocker().get(slot);
             getLocker().remove(cii);
         }
+    }
+
+    public CashItemInfo getLockerItemBySn(long sn) {
+        return Util.findWithPred(getLocker(), cii -> cii.getItem() != null && cii.getItem().getId() == sn);
+    }
+
+    public boolean isFull() {
+        return getLocker().size() >= GameConstants.MAX_LOCKER_SIZE;
     }
 }

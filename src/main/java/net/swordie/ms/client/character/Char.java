@@ -80,6 +80,7 @@ import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.awt.*;
@@ -192,7 +193,7 @@ public class Char {
 	@OneToMany(cascade = CascadeType.ALL)
 	private Set<ChosenSkill> chosenSkills;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "hyperrockfields", joinColumns = @JoinColumn(name = "CharID"))
 	@Column(name = "fieldid")
 	@OrderColumn(name = "ord")
@@ -204,7 +205,7 @@ public class Char {
 	private int partyID = 0; // Just for DB purposes
 	private int previousFieldID;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "skillcooltimes", joinColumns = @JoinColumn(name = "charID"))
 	@MapKeyColumn(name = "skillid")
 	@Column(name = "nextusabletime")

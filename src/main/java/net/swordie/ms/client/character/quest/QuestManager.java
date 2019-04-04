@@ -42,7 +42,7 @@ public class QuestManager {
 @CollectionTable(name="<name_of_join_table>")
 @MapKeyColumn(name="<name_of_map_key_in_table>")
      */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @CollectionTable(name = "questlists")
     @MapKeyColumn(name = "questID")

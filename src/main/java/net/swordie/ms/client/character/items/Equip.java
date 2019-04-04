@@ -1172,7 +1172,7 @@ public class Equip extends Item {
         outPacket.encodeLong(getId()); // ?
         outPacket.encodeInt(-1); // ?
         // GW_CashItemOption
-        outPacket.encodeLong(getCashItemSerialNumber());
+        outPacket.encodeLong(getId());
         outPacket.encodeFT(getDateExpire());
         outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
         for (int i = 0; i < 2; i++) {

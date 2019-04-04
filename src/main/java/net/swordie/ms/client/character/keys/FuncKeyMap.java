@@ -12,7 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "funckeymap")
 public class FuncKeyMap {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -36,8 +37,8 @@ public class FuncKeyMap {
     }
 
     public Keymapping getMappingAt(int index) {
-        for(Keymapping km : getKeymap()) {
-            if(km.getIndex() == index) {
+        for (Keymapping km : getKeymap()) {
+            if (km.getIndex() == index) {
                 return km;
             }
         }
@@ -46,13 +47,13 @@ public class FuncKeyMap {
 
     public void encode(OutPacket outPacket) {
 
-        if(getKeymap().size() == 0) {
+        if (getKeymap().size() == 0) {
             outPacket.encodeByte(true);
         } else {
             outPacket.encodeByte(false);
             for (int i = 0; i < MAX_KEYBINDS; i++) {
                 Keymapping tuple = getMappingAt(i);
-                if(tuple == null) {
+                if (tuple == null) {
                     outPacket.encodeByte(0);
                     outPacket.encodeInt(0);
                 } else {
@@ -65,7 +66,7 @@ public class FuncKeyMap {
 
     public void putKeyBinding(int index, byte type, int value) {
         Keymapping km = getMappingAt(index);
-        if(km == null) {
+        if (km == null) {
             km = new Keymapping();
             km.setIndex(index);
             km.setType(type);

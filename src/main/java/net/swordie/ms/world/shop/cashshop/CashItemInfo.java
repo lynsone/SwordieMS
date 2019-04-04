@@ -1,6 +1,9 @@
 package net.swordie.ms.world.shop.cashshop;
 
+import net.swordie.ms.client.character.Char;
+import net.swordie.ms.client.character.items.Equip;
 import net.swordie.ms.client.character.items.Item;
+import net.swordie.ms.client.character.items.PetItem;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.FileTimeConverter;
 import net.swordie.ms.connection.db.InlinedIntArrayConverter;
@@ -8,6 +11,9 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.util.FileTime;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,16 +25,11 @@ public class CashItemInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long unsure;
     private int accountID;
     private int characterID;
-    private int itemID;
     private int commodityID;
-    private short quantity;
     private String buyCharacterID;
 
-    @Convert(converter = FileTimeConverter.class)
-    private FileTime dateExpire;
     private int paybackRate;
     private double discount;
     private int orderNo;
@@ -36,22 +37,21 @@ public class CashItemInfo {
     private boolean refundable;
     private byte sourceFlag;
     private boolean storeBank;
-    private long cashItemSN;
-    private int grade;
     private int position;
-    @Convert(converter = InlinedIntArrayConverter.class)
-    private int[] options = new int[3];
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "itemid")
+    private Item item;
 
     public void encode(OutPacket outPacket) {
         // size 102
-        outPacket.encodeLong(getUnsure());
+        outPacket.encodeLong(item.getId());
         outPacket.encodeInt(getAccountID());
         outPacket.encodeInt(getCharacterID());
-        outPacket.encodeInt(getItemID());
+        outPacket.encodeInt(item.getItemId());
         outPacket.encodeInt(getCommodityID());
-        outPacket.encodeShort(getQuantity());
-        outPacket.encodeString(getBuyCharacterID(), 13);
-        outPacket.encodeFT(getDateExpire());
+        outPacket.encodeShort(item.getQuantity());
+        outPacket.encodeString(getBuyCharacterID(), 13); // gifter
+        outPacket.encodeFT(item.getDateExpire());
         outPacket.encodeInt(getPaybackRate());
         outPacket.encodeLong((long) getDiscount());
         outPacket.encodeInt(getOrderNo());
@@ -60,20 +60,26 @@ public class CashItemInfo {
         outPacket.encodeByte(getSourceFlag());
         outPacket.encodeByte(isStoreBank());
         // GW_CashItemOption::Decode
-        outPacket.encodeLong(getCashItemSN());
-        outPacket.encodeFT(getDateExpire());
-        outPacket.encodeInt(getGrade());
-        for (int i : getOptions()) {
-            outPacket.encodeInt(i);
+        outPacket.encodeLong(0);
+        outPacket.encodeFT(item.getDateExpire());
+        if (item instanceof Equip) {
+            Equip equip = (Equip) item;
+            outPacket.encodeInt(equip.getGrade());
+            int totalOptSize = 3;
+            for (int i = 0; i < totalOptSize; i++) {
+                if (i < equip.getOptions().size()) {
+                    outPacket.encodeInt(equip.getOptions().get(i));
+                } else {
+                    outPacket.encodeInt(0);
+                }
+            }
+        } else {
+            outPacket.encodeInt(0);
+            int totalOptSize = 3;
+            for (int i = 0; i < totalOptSize; i++) {
+                outPacket.encodeInt(0);
+            }
         }
-    }
-
-    public long getUnsure() {
-        return unsure;
-    }
-
-    public void setUnsure(long unsure) {
-        this.unsure = unsure;
     }
 
     public int getAccountID() {
@@ -92,14 +98,6 @@ public class CashItemInfo {
         this.characterID = characterID;
     }
 
-    public int getItemID() {
-        return itemID;
-    }
-
-    public void setItemID(int itemID) {
-        this.itemID = itemID;
-    }
-
     public int getCommodityID() {
         return commodityID;
     }
@@ -108,28 +106,12 @@ public class CashItemInfo {
         this.commodityID = commodityID;
     }
 
-    public short getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(short quantity) {
-        this.quantity = quantity;
-    }
-
     public String getBuyCharacterID() {
         return buyCharacterID;
     }
 
     public void setBuyCharacterID(String buyCharacterID) {
         this.buyCharacterID = buyCharacterID;
-    }
-
-    public FileTime getDateExpire() {
-        return dateExpire;
-    }
-
-    public void setDateExpire(FileTime dateExpire) {
-        this.dateExpire = dateExpire;
     }
 
     public int getPaybackRate() {
@@ -188,28 +170,10 @@ public class CashItemInfo {
         this.storeBank = storeBank;
     }
 
-    public long getCashItemSN() {
-        return cashItemSN;
-    }
-
-    public void setCashItemSN(long cashItemSN) {
-        this.cashItemSN = cashItemSN;
-    }
-
-    public int getGrade() {
-        return grade;
-    }
-
-    public void setGrade(int grade) {
-        this.grade = grade;
-    }
-
-    public int[] getOptions() {
-        return options;
-    }
-
-    public void setOptions(int[] options) {
-        this.options = options;
+    public List<Integer> getOptions() {
+        return !(item instanceof Equip)
+                ? new ArrayList<>(Arrays.asList(0, 0, 0))
+                : ((Equip) item).getOptions().subList(0, 3); // take the first 3 options
     }
 
     public long getId() {
@@ -233,21 +197,37 @@ public class CashItemInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CashItemInfo that = (CashItemInfo) o;
-        return itemID == that.itemID &&
-                cashItemSN == that.cashItemSN;
+        return getItem().equals(that.getItem());
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(itemID, cashItemSN);
+        return Objects.hash(id, item);
     }
 
-    public Item toItem() {
-        Item res = ItemData.getItemDeepCopy(getItemID());
-        if (getDateExpire() != null) {
-            res.setDateExpire(getDateExpire().deepCopy());
+    public void setItem(Item item) {
+        this.item = item;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    /**
+     * Creates a CashItemInfo from a given cash Item. If the Item is not a cash Item, returns null.
+     *
+     * @param chr  the chr to which the items belongs to
+     * @param item the item from which the CashItemInfo should be created from
+     * @return corresponding CashItemInfo
+     */
+    public static CashItemInfo fromItem(Char chr, Item item) {
+        if (!item.isCash() && !(item instanceof PetItem)) {
+            return null;
         }
-        return res;
+        CashItemInfo cii = new CashItemInfo();
+        cii.setAccountID(chr.getAccId());
+        cii.setCommodityID(1); // could grab this from cashshop sql
+        cii.setItem(item);
+        return cii;
     }
 }

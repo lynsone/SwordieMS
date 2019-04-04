@@ -266,4 +266,13 @@ public class CCashShop {
 
         return outPacket;
     }
+
+    public static OutPacket resMoveStoLDone(CashItemInfo cii) {
+        OutPacket outPacket = new OutPacket(OutHeader.CASH_SHOP_CASH_ITEM_RESULT);
+
+        outPacket.encodeByte(CashItemType.Res_MoveStoL_Done.getVal());
+        cii.encode(outPacket);
+
+        return outPacket;
+    }
 }

@@ -72,14 +72,10 @@ create table trunks(
 
 create table cashiteminfos(
 	id bigint not null auto_increment,
-    unsure long,
     accountid int,
     characterid int,
-    itemid int,
     commodityid int,
-    quantity smallint,
     buycharacterid varchar(255),
-    dateexpire datetime(3),
     paybackrate int,
     discount double,
     orderno int,
@@ -87,9 +83,7 @@ create table cashiteminfos(
     refundable boolean,
     sourceflag tinyint,
     storebank boolean,
-    cashitemsn bigint,
-    grade int,
-    options varchar(255),
+    itemid int,
     trunkid int,
     position int,
     primary key (id)

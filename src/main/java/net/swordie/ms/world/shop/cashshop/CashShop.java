@@ -19,17 +19,11 @@ public class CashShop {
     private boolean usingOTP;
     private boolean usingNewOTP;
     private boolean betaTest;
-    private CashItemInfo cii = new CashItemInfo();
     private final String BANNER_URL = "https://i.ytimg.com/vi/aXwf3CvmEC8/hqdefault.jpg";
 
     public CashShop() {
         items = new TreeMap<>(Comparator.comparingInt(CashShopCategory::getIdx));
         saleItems = new ArrayList<>();
-        cii.setItemID(5160013);
-        cii.setAccountID(0);
-        cii.setCharacterID(0);
-        cii.setCashItemSN(1);
-        cii.setUnsure(1);
     }
 
     public Map<CashShopCategory, List<CashShopItem>> getItems() {

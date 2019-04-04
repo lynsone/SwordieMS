@@ -9,10 +9,12 @@ import net.swordie.ms.client.character.items.Inventory;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.client.trunk.Trunk;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.connection.packet.CCashShop;
 import net.swordie.ms.enums.CashShopActionType;
+import net.swordie.ms.enums.InvType;
 import org.apache.log4j.Logger;
 
 /**
@@ -81,17 +83,19 @@ public class CashShopHandler {
                     return;
                 }
                 CashItemInfo cii = csi.toCashItemInfo(account, chr);
+                DatabaseManager.saveToDB(cii); // ensures the item has a unique ID
                 account.getTrunk().addCashItem(cii);
                 c.write(CCashShop.cashItemResBuyDone(cii, null, null, 0));
-                c.write(CCashShop.error());
                 c.write(CCashShop.queryCashResult(chr));
                 break;
             case Req_MoveLtoS:
-                int idk3 = inPacket.decodeInt();
-                int idk4 = inPacket.decodeInt();
-                byte slot = (byte) (inPacket.decodeByte() - 1);
-                cii = trunk.getLockerItemBySlot(slot);
-                Item item = cii.toItem();
+                long itemSn = inPacket.decodeLong();
+                cii = trunk.getLockerItemBySn(itemSn);
+                if (cii == null) {
+                    c.write(CCashShop.fullInventoryMsg());
+                    return;
+                }
+                Item item = cii.getItem();
                 Inventory inventory;
                 if (ItemConstants.isEquip(item.getItemId())) {
                     inventory = chr.getEquipInventory();
@@ -102,14 +106,34 @@ public class CashShopHandler {
                     c.write(CCashShop.fullInventoryMsg());
                     return;
                 }
-                trunk.removeCashItemBySlot(slot);
+                trunk.getLocker().remove(cii);
                 chr.addItemToInventory(item);
                 c.write(CCashShop.resMoveLtoSDone(item));
                 c.write(CCashShop.loadLockerDone(account));
                 break;
-//            case Req_MoveStoL:
-//
-//                break;
+            case Req_MoveStoL:
+                itemSn = inPacket.decodeLong();
+                Inventory inv = chr.getInventoryByType(InvType.getInvTypeByVal(inPacket.decodeByte()));
+                item = inv == null ? null : inv.getItemBySN(itemSn);
+                if (item == null) {
+                    c.write(CCashShop.error());
+                    chr.dispose();
+                    return;
+                }
+                if (trunk.isFull()) {
+                    c.write(CCashShop.fullInventoryMsg());
+                    return;
+                }
+                int quant = item.getQuantity();
+                chr.consumeItem(item);
+                cii = CashItemInfo.fromItem(chr, item);
+                item.setQuantity(quant);
+                DatabaseManager.saveToDB(cii);
+                trunk.addCashItem(cii);
+                c.write(CCashShop.resMoveStoLDone(cii)); // this shit crashes even if the cash item sn is correct
+                c.write(CCashShop.loadLockerDone(account));
+                c.write(CCashShop.queryCashResult(chr));
+                break;
             default:
                 c.write(CCashShop.error());
                 log.error("Unhandled cash shop cash item request " + cit);
@@ -133,6 +157,7 @@ public class CashShopHandler {
                 chr.write(CCashShop.openCategoryResult(cashShop, categoryIdx));
                 break;
             case Req_Favorite:
+            case Req_Leave:
                 break;
 
             default:

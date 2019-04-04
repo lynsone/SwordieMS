@@ -382,6 +382,10 @@ public enum OutHeader {
     SET_OBJECT_STATE(458),
     DESTROY(459),
     STALK_RESULT(461),
+    // CField_Massacre::OnPacket
+    MASSACRE_INC_GAUGE(462),
+    MASSACRE_RESULT(463),
+    // CField::OnPacket
     INIT(464),
     FOOT_HOLD_MOVE(465),
     CORRECT_FOOT_HOLD_MOVE(466),
@@ -428,8 +432,6 @@ public enum OutHeader {
     CREATE_MIRROR_IMAGE(514),
     FUNTION_FOOTHOLD_MAN(515),
 
-    // CField_Massacre::OnPacket
-    MASSACRE_INC_GAUGE(462),
 
     // CField_KillCount::OnPacket
     FIELD_KILL_COUNT(470),

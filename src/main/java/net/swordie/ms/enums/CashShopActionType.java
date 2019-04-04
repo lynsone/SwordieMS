@@ -19,6 +19,7 @@ public enum CashShopActionType {
     Res_21(21),
     Res_22(22),
     Req_OpenCategory(101),
+    Req_Leave(102),
     Req_Favorite(103);
 
     private int val;
