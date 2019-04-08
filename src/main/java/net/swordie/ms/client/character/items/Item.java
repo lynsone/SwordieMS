@@ -14,6 +14,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
+import static net.swordie.ms.enums.InvType.CASH;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
 import static net.swordie.ms.enums.InventoryOperation.ADD;
 
@@ -161,16 +162,15 @@ public class Item implements Serializable, Encodable {
     }
 
     public boolean isCash() {
-        return isCash;
+        return isCash || getInvType() == CASH;
     }
 
     public void encode(OutPacket outPacket) {
         outPacket.encodeByte(getType().getVal());
         // GW_ItemSlotBase
         outPacket.encodeInt(getItemId());
-        boolean hasSN = getInvType() == InvType.CASH;
-        outPacket.encodeByte(hasSN);
-        if (hasSN) {
+        outPacket.encodeByte(isCash());
+        if (isCash()) {
             outPacket.encodeLong(getId());
         }
         outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));

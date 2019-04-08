@@ -109,7 +109,6 @@ public class CashShopHandler {
                 trunk.getLocker().remove(cii);
                 chr.addItemToInventory(item);
                 c.write(CCashShop.resMoveLtoSDone(item));
-                c.write(CCashShop.loadLockerDone(account));
                 break;
             case Req_MoveStoL:
                 itemSn = inPacket.decodeLong();
@@ -125,13 +124,12 @@ public class CashShopHandler {
                     return;
                 }
                 int quant = item.getQuantity();
-                chr.consumeItem(item);
                 cii = CashItemInfo.fromItem(chr, item);
+                c.write(CCashShop.resMoveStoLDone(cii));
+                chr.consumeItem(item);
                 item.setQuantity(quant);
                 DatabaseManager.saveToDB(cii);
                 trunk.addCashItem(cii);
-                c.write(CCashShop.resMoveStoLDone(cii)); // this shit crashes even if the cash item sn is correct
-                c.write(CCashShop.loadLockerDone(account));
                 c.write(CCashShop.queryCashResult(chr));
                 break;
             default:

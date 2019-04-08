@@ -1169,15 +1169,19 @@ public class Equip extends Item {
             // sockets 0 through 2 (-1 = none, 0 = empty, >0 = filled
             outPacket.encodeShort(getSocket(i));
         }
-        outPacket.encodeLong(getId()); // ?
-        outPacket.encodeInt(-1); // ?
-        // GW_CashItemOption
-        outPacket.encodeLong(getId());
-        outPacket.encodeFT(getDateExpire());
-        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME));
-        for (int i = 0; i < 2; i++) {
-            outPacket.encodeLong(0);
+        if (!isCash()) {
+            outPacket.encodeLong(getId());
         }
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME)); // ftEquipped
+        outPacket.encodeInt(-1); // nPrevBonusExpRate
+        // GW_CashItemOption::Decode
+        outPacket.encodeLong(isCash() ? 0 : getId()); // cash sn already encoded in the super's encode
+        outPacket.encodeFT(FileTime.fromType(FileTime.Type.MAX_TIME)); // ftDateExpire
+        outPacket.encodeInt(getGrade());
+        for (int i = 0; i < 3; i++) {
+            outPacket.encodeInt(getOptionBase(i));
+        }
+        // ~
         outPacket.encodeShort(getSoulOptionId()); // soul ID
         outPacket.encodeShort(getSoulSocketId()); // enchanter ID
         outPacket.encodeShort(getSoulOption()); // optionID (same as potentials)
