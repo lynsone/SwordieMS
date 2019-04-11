@@ -100,6 +100,7 @@ public class Server extends Properties {
 		boolean exists = file.exists();
 		if (!exists) {
 			log.info("Dat files cannot be found (at least not the equip dats). All dats will now be generated. This may take a long while.");
+			Util.makeDirIfAbsent(ServerConstants.DAT_DIR);
 			for (Class c : DataClasses.datCreators) {
 				try {
 					Method m = c.getMethod("generateDatFiles");
