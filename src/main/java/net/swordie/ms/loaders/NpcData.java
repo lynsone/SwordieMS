@@ -136,10 +136,13 @@ public class NpcData {
 	}
 
 	private static NpcShopDlg loadNpcShopDlgFromDB(int id) {
+		List<NpcShopItem> items = (List<NpcShopItem>) DatabaseManager.getObjListFromDB(NpcShopItem.class, "shopid", id);
+		if (items == null || items.size() == 0) {
+			return null;
+		}
 		NpcShopDlg nsd = new NpcShopDlg();
 		nsd.setNpcTemplateID(id);
 		nsd.setShopID(id);
-		List<NpcShopItem> items = (List<NpcShopItem>) DatabaseManager.getObjListFromDB(NpcShopItem.class, "shopid", id);
 		items.sort(Comparator.comparingInt(NpcShopItem::getItemID));
 		nsd.setItems(items);
 		addShop(id, nsd);
