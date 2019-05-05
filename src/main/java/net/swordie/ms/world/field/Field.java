@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -522,6 +523,11 @@ public class Field {
     }
 
     public void removeChar(Char chr) {
+        // remove char's dragon
+        Dragon dragon = chr.getDragon();
+        if (dragon != null) {
+            removeLife(dragon);
+        }
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
         // change controllers for which the chr was the controller of

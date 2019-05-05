@@ -1308,11 +1308,20 @@ public class WorldHandler {
         boolean isLeft = inPacket.decodeByte() != 0;
 
         Life life = field.getLifeByObjectID(summonObjId);
-        if (life == null || !(life instanceof Summon)) {
+        if (!(life instanceof Summon)) {
             return;
         }
 
         ((Summon) life).onHit(damage, mobTemplateId);
+    }
+
+    public static void handleDragonMove(Char chr, InPacket inPacket) {
+        Dragon dragon = chr.getDragon();
+        if (dragon != null && dragon.getOwner() == chr) {
+            MovementInfo movementInfo = new MovementInfo(inPacket);
+            movementInfo.applyTo(dragon);
+            chr.getField().broadcastPacket(DragonPool.moveDragon(dragon, movementInfo), chr);
+        }
     }
 
     public static void handleUserFlameOrbRequest(Char chr, InPacket inPacket) {
@@ -6314,6 +6323,7 @@ public class WorldHandler {
             return;
         }
         MovementInfo mi = new MovementInfo(inPacket);
+        mi.applyTo(android);
         chr.getField().broadcastPacket(AndroidPacket.move(android, mi), chr);
     }
 }

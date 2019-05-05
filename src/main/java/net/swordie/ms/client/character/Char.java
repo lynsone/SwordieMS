@@ -56,10 +56,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Android;
-import net.swordie.ms.life.Familiar;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
@@ -2488,6 +2485,10 @@ public class Char {
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
 		}
+		Dragon dragon = getDragon();
+		if (dragon != null) {
+			toField.spawnLife(dragon, null);
+		}
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
 		}
@@ -4519,6 +4520,14 @@ public class Char {
 
 	public List<Integer> getQuickslotKeys() {
 		return quickslotKeys;
+	}
+
+	public Dragon getDragon() {
+		Dragon dragon = null;
+		if (getJobHandler() instanceof Evan) {
+			dragon = ((Evan) getJobHandler()).getDragon();
+		}
+		return dragon;
 	}
 
 	/**

@@ -335,9 +335,8 @@ public class LoginHandler {
         if (c.isAuthorized() && c.getAccount().hasCharacter(characterId)) {
             Server.getInstance().getWorldById(worldId).getChannelById(channelId).addClientInTransfer(channelId, characterId, c);
             c.write(Login.selectCharacterResult(LoginType.Success, (byte) 0, channel.getPort(), characterId));
-        } else {
-            c.write(Login.selectCharacterResult(LoginType.UnauthorizedUser, (byte) 0, 0, 0));
         }
+        // if anything is wrong, the 2nd pwd authorizer should return an error
     }
 
     public static boolean handleCheckSpwRequest(Client c, InPacket inPacket) {
