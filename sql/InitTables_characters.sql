@@ -258,6 +258,8 @@ create table equips (
 	fdamage smallint,
 	flevel smallint,
     superioreqp tinyint,
+    android int,
+    androidgrade int,
     primary key (itemid),
     foreign key (itemid) references items(id) on delete cascade
 );

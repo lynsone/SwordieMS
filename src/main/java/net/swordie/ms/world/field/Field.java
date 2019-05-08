@@ -528,6 +528,11 @@ public class Field {
         if (dragon != null) {
             removeLife(dragon);
         }
+        // remove char's android
+        Android android = chr.getAndroid();
+        if (android != null) {
+            removeLife(android);
+        }
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
         // change controllers for which the chr was the controller of

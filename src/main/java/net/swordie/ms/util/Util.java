@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 /**
  * Created on 2/28/2017.
@@ -439,5 +440,15 @@ public class Util {
      */
     public static int toInt(byte[] arr) {
         return (arr[0] << 24) | (arr[1] << 16) | (arr[2] << 8) | arr[3];
+    }
+
+    /**
+     * Checks whether or not a raw int array contains a value.
+     * @param arr the array to check the value
+     * @param checkVal the value to look for
+     * @return whether or not the array contains the value
+     */
+    public static boolean arrayContains(int[] arr, int checkVal) {
+        return IntStream.of(arr).anyMatch(val -> val == checkVal);
     }
 }
