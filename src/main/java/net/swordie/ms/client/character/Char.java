@@ -3844,6 +3844,14 @@ public class Char {
 			if (getTemporaryStatManager().hasStatBySkillId(RuneStone.LIBERATE_THE_RUNE_OF_SKILL) && cdInMillis > 5000 && !si.isNotCooltimeReset()) {
 				cdInMillis = 5000;
 			}
+
+
+			// Customized  skill cooldowns
+			int fixedSkillCD = SkillConstants.getSkillCooldown(skillID);
+			if(fixedSkillCD != -1) {
+				cdInMillis = fixedSkillCD;
+			}
+
 			if (!hasSkillCDBypass() && cdInMillis > 0) {
 				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));

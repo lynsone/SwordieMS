@@ -454,17 +454,39 @@ public class Field {
     }
 
     public void spawnLife(Life life, Char onlyChar) {
+
         addLife(life);
         if (getChars().size() > 0) {
-            Char controller = null;
+
+            //=======================================
+            //Normal Controller System
+            //=======================================
+
+            /*Char controller = null;
             if (getLifeToControllers().containsKey(life)) {
                 controller = getLifeToControllers().get(life);
             }
             if (controller == null) {
                 setRandomController(life);
             }
+            life.broadcastSpawnPacket(onlyChar);*/
+
+            
+
+
+            //=======================================
+            //Controller system Adjusted for Auto Aggro
+            //=======================================
+
+            Char controller = getChars().get(0);
+            life.notifyControllerChange(controller);
+            putLifeController(life,controller);
+
             life.broadcastSpawnPacket(onlyChar);
         }
+
+
+
     }
 
     private void setRandomController(Life life) {

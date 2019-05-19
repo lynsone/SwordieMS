@@ -70,6 +70,9 @@ public class Server extends Properties {
 		StringData.load();
 		FieldData.loadWorldMap();
 
+		FieldData.loadNPCFromSQL();
+		log.info("Finished loading custom NPCs in " + (System.currentTimeMillis() - startNow) + "ms");
+
 		MapleCrypto.initialize(ServerConstants.VERSION);
 		new Thread(new LoginAcceptor()).start();
 		new Thread(new ChatAcceptor()).start();

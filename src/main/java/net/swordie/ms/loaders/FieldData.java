@@ -137,6 +137,38 @@ public class FieldData {
         }
     }
 
+    public static void loadNPCFromSQL() {
+
+        Session session = DatabaseManager.getSession();
+        Transaction transaction = session.beginTransaction();
+
+        Query loadNpcQuery = session.createNativeQuery("SELECT * FROM npc");
+
+        List<Object[]> results =loadNpcQuery.getResultList();
+
+        for(Object[] r : results) {
+            Npc n = NpcData.getNpcDeepCopyById((Integer)r[1]);
+            Field f = getFieldById( (Integer)r[2] );
+
+            Position p = new Position();
+            p.setX((Integer)r[3]);
+            p.setY((Integer)r[4]);
+
+            n.setPosition(p);
+            n.setCy((Integer)r[5]);
+            n.setRx0((Integer)r[6]);
+            n.setRx1((Integer)r[7]);
+            n.setFh((Integer)r[8]);
+
+            f.addLife(n);
+        }
+
+
+        transaction.commit();
+        session.close();
+
+    }
+
     private static void loadFieldInfoFromWz() {
         String wzDir = ServerConstants.WZ_DIR + "/Map.wz/Map";
         File dir = new File(wzDir);
