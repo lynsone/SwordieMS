@@ -111,7 +111,7 @@ public class EtcData {
         return ai;
     }
 
-    public static void generateDats() {
+    public static void generateDatFiles() {
         log.info("Started generating etc data.");
         Util.makeDirIfAbsent(ServerConstants.DAT_DIR + "/etc");
         long start = System.currentTimeMillis();
@@ -125,6 +125,6 @@ public class EtcData {
     }
 
     public static void main(String[] args) {
-        generateDats();
+        generateDatFiles();
     }
 }
