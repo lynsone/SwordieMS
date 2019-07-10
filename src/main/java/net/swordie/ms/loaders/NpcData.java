@@ -105,7 +105,9 @@ public class NpcData {
 
 	public static Npc getNpcDeepCopyById(int id) {
 		Npc res = getNpc(id);
-		if (res == null) {
+		if(res != null) {
+			res = res.deepCopy();
+		} else {
 			File file = new File(String.format("%s/npc/%d.dat", ServerConstants.DAT_DIR, id));
 			if (file.exists()) {
 				res = loadNpcFromDat(file).deepCopy();

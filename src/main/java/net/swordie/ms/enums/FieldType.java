@@ -1,5 +1,7 @@
 package net.swordie.ms.enums;
 
+import java.util.Arrays;
+
 public enum FieldType {
     // Thank you KMST leak <3
     DEAFULT(0),
@@ -162,10 +164,7 @@ public enum FieldType {
     }
 
     public static FieldType getByVal(int val) {
-        if (val >= 0 && val < values().length) {
-            return values()[val];
-        }
-        return null;
+        return Arrays.stream(values()).filter(ft -> ft.val == val).findFirst().orElse(null);
     }
 
     public int getVal() {
