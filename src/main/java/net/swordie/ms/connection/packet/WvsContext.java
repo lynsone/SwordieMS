@@ -933,9 +933,9 @@ public class WvsContext {
         // result shit seems random based on ^ notes so no enum
         OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
 
-        outPacket.encodeByte(returnResult.ordinal());
+        outPacket.encodeByte(returnResult.getVal());
         outPacket.encodeInt(result);
-        if(returnResult.equals(GoldHammerResult.Success)){
+        if (returnResult.equals(GoldHammerResult.Success)) {
             outPacket.encodeInt(upgradesLeft);
         }
         

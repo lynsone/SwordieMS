@@ -5323,7 +5323,7 @@ public class WorldHandler {
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
         if (chr.getClient().getWorld().isReboot()) {
-            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 1, 0));
+            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Error, 1, 0));
             chr.getOffenseManager().addOffense(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
             return;
         }
@@ -5347,7 +5347,7 @@ public class WorldHandler {
 
         if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
                 hammer == null || !ItemConstants.isGoldHammer(hammer) || hammerID != hammer.getItemId()) {
-            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 1, 0));
+            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Error, 1, 0));
             chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
                     chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
             return;
@@ -5359,7 +5359,7 @@ public class WorldHandler {
             if (equip.getIuc() >= maxHammers) {
                 chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) an invalid equip (id %d)",
                         chr.getId(), hammerID, equip.getItemId()));
-                chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 2, 0));
+                chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Error, 2, 0));
                 return;
             }
 
@@ -5381,10 +5381,10 @@ public class WorldHandler {
     public static void handleGoldHammerComplete(Char chr, InPacket inPacket) {
         int returnResult = inPacket.decodeInt();
         int result = inPacket.decodeInt();
-        if(returnResult == GoldHammerResult.Success.ordinal() || returnResult == GoldHammerResult.Fail.ordinal()){
+        if (returnResult == GoldHammerResult.Success.ordinal() || returnResult == GoldHammerResult.Fail.ordinal()) {
             //I think its ok to just send back the result given.
 	        chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Done, result, 0));
-        }else{
+        } else {
 	        chr.getOffenseManager().addOffense(String.format("Character %d have invalid gold hammer complete returnResult %d",
 		        chr.getId(), returnResult));
         }
