@@ -2943,11 +2943,17 @@ public class Char {
 	 */
 	public void consumeItem(int id, int quantity) {
 		Item checkItem = ItemData.getItemDeepCopy(id);
-		Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
-		if (item != null) {
-			int consumed = quantity > item.getQuantity() ? 0 : item.getQuantity() - quantity;
-			item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
-			consumeItem(item);
+		if (checkItem != null) {
+			Item item = getInventoryByType(checkItem.getInvType()).getItemByItemID(id);
+			if (item != null) {
+				int itemQuantity = item.getQuantity();
+				int consumed = quantity > itemQuantity ? 0 : itemQuantity - quantity;
+				item.setQuantity(consumed + 1); // +1 because 1 gets consumed by consumeItem(item)
+				consumeItem(item);
+				if (quantity > itemQuantity) {
+					consumeItem(id, quantity - itemQuantity);
+				}
+			}
 		}
 	}
 
@@ -3436,10 +3442,13 @@ public class Char {
 	}
 
 	public boolean canHold(int id, int quantity) {
-		Item item = ItemData.getItemDeepCopy(id);
-		item.setQuantity(quantity);
+		int slotMax = ItemData.getItemInfoByID(id).getSlotMax();
 		List<Item> items = new ArrayList<>();
-		items.add(item);
+		for(int i = quantity; i > 0; i -= slotMax){
+			Item item = ItemData.getItemDeepCopy(id);
+			item.setQuantity(i > slotMax ? slotMax : i);
+			items.add(item);
+		}
 		return canHold(items);
 	}
 
