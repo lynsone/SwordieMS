@@ -70,6 +70,14 @@ public class MobPool {
         return outPacket;
     }
 
+    public static OutPacket forceChase(int mobID,boolean chase) {
+        OutPacket outPacket = new OutPacket(OutHeader.MOB_FORCE_CHASE);
+
+        outPacket.encodeInt(mobID);
+        outPacket.encodeByte(chase);
+        return outPacket;
+    }
+
     public static OutPacket damaged(int mobID, long damage, int templateID, byte type, int hp, int maxHp) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_DAMAGED);
 

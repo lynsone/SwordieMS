@@ -5,4 +5,6 @@ public class CustomConstants {
     public static final int BUFFED_MOB_HP_MULTIPLIER = 1000;
     public static final int BUFFED_MOB_SCALE = 120; //Default scale is 100
     public static final int BUFFED_MOB_DAMAGE_MULTIPLIER = 10;
+
+    public static final boolean AUTO_AGGRO = false;
 }

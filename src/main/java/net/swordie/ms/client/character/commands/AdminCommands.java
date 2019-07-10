@@ -547,6 +547,122 @@ public class AdminCommands {
         }
     }
 
+    @Command(names = {"pnpc"}, requiredType = GameMaster)
+    public static class PNPC extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+            int id = Integer.parseInt(args[1]);
+            Npc npc = NpcData.getNpcDeepCopyById(id);
+            if (npc == null) {
+                chr.chatMessage("Could not find an npc with that ID.");
+                return;
+            }
+            Field field = chr.getField();
+            Position pos = chr.getPosition();
+            npc.setPosition(pos.deepCopy());
+            npc.setCy(chr.getPosition().getY());
+            npc.setRx0(chr.getPosition().getX() + 50);
+            npc.setRx1(chr.getPosition().getX() - 50);
+            npc.setFh(chr.getFoothold());
+            npc.setNotRespawnable(true);
+            if (npc.getField() == null) {
+                npc.setField(field);
+            }
+            field.spawnLife(npc, null);
+            log.debug("npc has id " + npc.getObjectId());
+
+            Session session = DatabaseManager.getSession();
+            Transaction transaction = session.beginTransaction();
+
+            Query npcQuery = session.createNativeQuery("INSERT INTO npc (npcid,mapid,x,y,cy,rx0,rx1,fh) VALUES (:npcid,:mapid,:x,:y,:cy,:rx0,:rx1,:fh)");
+            npcQuery.setParameter("npcid",id);
+            npcQuery.setParameter("mapid",field.getId());
+            npcQuery.setParameter("x",pos.getX());
+            npcQuery.setParameter("y",pos.getY());
+            npcQuery.setParameter("cy",npc.getCy());
+            npcQuery.setParameter("rx0",npc.getRx0());
+            npcQuery.setParameter("rx1",npc.getRx1());
+            npcQuery.setParameter("fh",npc.getFh());
+
+
+
+            npcQuery.executeUpdate();
+
+            transaction.commit();
+            session.close();
+
+        }
+    }
+
+
+    @Command(names = {"map"}, requiredType = Player)
+    public static class MapInfo extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            String str = "";
+
+            for(Char c : chr.getField().getChars()) {
+                str += c.getName();
+                if(chr.getField().getChars().indexOf(c) != chr.getField().getChars().size()) {
+                    str += ", ";
+                }
+            }
+
+            chr.chatMessage(SystemNotice,str);
+
+        }
+    }
+
+    @Command(names = {"forcechase"}, requiredType = GameMaster)
+    public static class ForceChase extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            for(Mob m : chr.getField().getMobs()) {
+                log.debug(m.isUserControll());
+            }
+
+            for(Mob m : chr.getField().getMobs()) {
+                //c.write(MobPool.damaged(mob.getObjectId(), dmg, mob.getTemplateId(), (byte) 1, (int) mob.getHp(), (int) mob.getMaxHp()));
+                //chr.getField().broadcastPacket(MobPool.damaged(m.getObjectId(),(long)2000,m.getTemplateId(),(byte)1,(int)m.getHp(),(int)m.getMaxHp()));
+                chr.getField().broadcastPacket(MobPool.forceChase(m.getObjectId(),false));
+            }
+
+        }
+    }
+
+    @Command(names = {"setcontroller"}, requiredType = GameMaster)
+    public static class SetController extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            String chrName = args[1];
+
+            Char newController = chr.getField().getCharByName(chrName);
+            if(newController == null) {
+                chr.chatMessage("Character not found");
+                return;
+            }
+
+            for(Mob m : chr.getField().getMobs()) {
+                m.notifyControllerChange(newController);
+                chr.getField().putLifeController(m, newController);
+            }
+
+        }
+    }
+
+    @Command(names = {"mobcontroller"}, requiredType = GameMaster)
+    public static class MobController extends AdminCommand {
+        public static void execute(Char chr, String[] args) {
+
+            String chrName = args[1];
+
+            for(Mob m : chr.getField().getMobs()) {
+               Char controller = m.getField().getLifeToControllers().get(m);
+               chr.chatMessage(m.getObjectId() + " : " + controller.getName());
+            }
+
+        }
+    }
+
     @Command(names = {"testdrop"}, requiredType = Tester)
     public static class TestDrop extends AdminCommand {
         public static void execute(Char chr, String[] args) {
