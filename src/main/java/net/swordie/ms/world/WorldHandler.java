@@ -5381,7 +5381,7 @@ public class WorldHandler {
     public static void handleGoldHammerComplete(Char chr, InPacket inPacket) {
         int returnResult = inPacket.decodeInt();
         int result = inPacket.decodeInt();
-        if (returnResult == GoldHammerResult.Success.ordinal() || returnResult == GoldHammerResult.Fail.ordinal()) {
+        if (returnResult == GoldHammerResult.Success.getVal() || returnResult == GoldHammerResult.Fail.getVal()) {
             //I think its ok to just send back the result given.
 	        chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Done, result, 0));
         } else {
