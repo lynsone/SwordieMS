@@ -52,7 +52,9 @@ public class AndroidPacket {
 
         outPacket.encodeInt(android.getChrId());
 
-        outPacket.encodeByte(0xF); // from the right: 1st 7 bits for each equip, 8th bit for face+eye+hair+name
+        // from the right: 1st 7 bits for each equip, 8th bit for face+eye+hair+name
+        // 0xFF is a full update
+        outPacket.encodeByte(0xFF);
         for (int itemId : android.getItems()) {
             outPacket.encodeInt(itemId);
         }

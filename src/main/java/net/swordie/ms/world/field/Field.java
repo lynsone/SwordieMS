@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
+import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -453,17 +454,39 @@ public class Field {
     }
 
     public void spawnLife(Life life, Char onlyChar) {
+
         addLife(life);
         if (getChars().size() > 0) {
-            Char controller = null;
+
+            //=======================================
+            //Normal Controller System
+            //=======================================
+
+            /*Char controller = null;
             if (getLifeToControllers().containsKey(life)) {
                 controller = getLifeToControllers().get(life);
             }
             if (controller == null) {
                 setRandomController(life);
             }
+            life.broadcastSpawnPacket(onlyChar);*/
+
+            
+
+
+            //=======================================
+            //Controller system Adjusted for Auto Aggro
+            //=======================================
+
+            Char controller = getChars().get(0);
+            life.notifyControllerChange(controller);
+            putLifeController(life,controller);
+
             life.broadcastSpawnPacket(onlyChar);
         }
+
+
+
     }
 
     private void setRandomController(Life life) {
@@ -522,6 +545,16 @@ public class Field {
     }
 
     public void removeChar(Char chr) {
+        // remove char's dragon
+        Dragon dragon = chr.getDragon();
+        if (dragon != null) {
+            removeLife(dragon);
+        }
+        // remove char's android
+        Android android = chr.getAndroid();
+        if (android != null) {
+            removeLife(android);
+        }
         getChars().remove(chr);
         broadcastPacket(UserPool.userLeaveField(chr), chr);
         // change controllers for which the chr was the controller of

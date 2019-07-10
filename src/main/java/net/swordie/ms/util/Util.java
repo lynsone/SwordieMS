@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 /**
  * Created on 2/28/2017.
@@ -377,6 +378,12 @@ public class Util {
         return (int) Math.min(Integer.MAX_VALUE, num);
     }
 
+    /**
+     * Creates a Set of given elements.
+     * @param elems a list of elements
+     * @param <T> the type of the elements
+     * @return a new Set created from the elements
+     */
     public static <T> Set<T> makeSet(T... elems) {
         Set<T> set = new HashSet<>();
         for (T elem : elems) {
@@ -385,19 +392,63 @@ public class Util {
         return set;
     }
 
-    public static boolean isDigitLetterString(String name) {
-        return name != null && name.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
+    /**
+     * Checks if a String is purely made out of digits and/or letters.
+     * @param str the String to check
+     * @return if the String only contains digits and/or letters
+     */
+    public static boolean isDigitLetterString(String str) {
+        return str != null && str.matches("[a-zA-Z0-9]+"); // maybe allow special characters?
     }
 
-    public static boolean isValidString(String name) {
-        return name != null && name.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
+    /**
+     * Checks if a String is valid enough that it won't crash other users.
+     * @param str the String to check
+     * @return whether or not the String is valid
+     */
+    public static boolean isValidString(String str) {
+        return str != null && str.matches("[a-zA-Z0-9`~!@#$%^&*()_+-={}|\\\\;':\",./<>?]*");
     }
 
+    /**
+     * Checks if a String is an int.
+     * @param val the String to check
+     * @return whether or not the String is an int
+     */
     public static boolean isInteger(String val) {
         if (val != null && val.matches("^-?[0-9]+") && val.length() <= 10) {
             long longVal = Long.parseLong(val);
             return longVal >= Integer.MIN_VALUE && longVal <= Integer.MAX_VALUE;
         }
         return false;
+    }
+
+    /**
+     * Rotates a given value by a certain amount left.
+     * @param value the value to rotate
+     * @param rotateAmount the amount to rotate
+     * @return the rotated value
+     */
+    public static int rotateLeft(int value, byte rotateAmount) {
+        return ((value) << (rotateAmount)) | ((value) >>> (32 - (rotateAmount)));
+    }
+
+    /**
+     * Creates an int from a byte array of length >= 4, Big Endian.
+     * @param arr the arr to convert
+     * @return the BE int from the array
+     */
+    public static int toInt(byte[] arr) {
+        return (arr[0] << 24) | (arr[1] << 16) | (arr[2] << 8) | arr[3];
+    }
+
+    /**
+     * Checks whether or not a raw int array contains a value.
+     * @param arr the array to check the value
+     * @param checkVal the value to look for
+     * @return whether or not the array contains the value
+     */
+    public static boolean arrayContains(int[] arr, int checkVal) {
+        return IntStream.of(arr).anyMatch(val -> val == checkVal);
     }
 }

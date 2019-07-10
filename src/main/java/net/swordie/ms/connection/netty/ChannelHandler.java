@@ -351,6 +351,9 @@ public class ChannelHandler extends SimpleChannelInboundHandler<InPacket> {
             case SUMMONED_HIT:
                 WorldHandler.handleSummonedHit(c, inPacket);
                 break;
+            case DRAGON_MOVE:
+                WorldHandler.handleDragonMove(chr, inPacket);
+                break;
             case USER_REQUEST_INSTANCE_TABLE:
                 WorldHandler.handleUserRequestInstanceTable(chr, inPacket);
                 break;

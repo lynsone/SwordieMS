@@ -26,7 +26,8 @@ public class DataClasses {
                 QuestData.class,
                 ReactorData.class,
                 SkillData.class,
-                StringData.class
+                StringData.class,
+                EtcData.class
                 )
         );
     }

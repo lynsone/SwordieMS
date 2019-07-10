@@ -2,6 +2,7 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.client.character.items.*;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.*;
@@ -155,6 +156,8 @@ public class ItemData {
             }
             equip.setFixedGrade(dataInputStream.readInt());
             equip.setSpecialGrade(dataInputStream.readInt());
+            equip.setAndroid(dataInputStream.readInt());
+            equip.setAndroidGrade(dataInputStream.readInt());
             equips.put(equip.getItemId(), equip);
         } catch (IOException e) {
             e.printStackTrace();
@@ -210,7 +213,9 @@ public class ItemData {
                 dataOutputStream.writeBoolean(equip.isEquipTradeBlock());
                 dataOutputStream.writeBoolean(equip.isFixedPotential());
                 dataOutputStream.writeBoolean(equip.isNoPotential());
-                dataOutputStream.writeBoolean(equip.isBossReward() || Arrays.asList(ItemConstants.NON_KMS_BOSS_SETS).contains(equip.getSetItemID()) || Arrays.asList(ItemConstants.NON_KMS_BOSS_ITEMS).contains(equip.getItemId()));
+                dataOutputStream.writeBoolean(equip.isBossReward()
+                        || Util.arrayContains(ItemConstants.NON_KMS_BOSS_SETS, equip.getSetItemID())
+                        || Util.arrayContains(ItemConstants.NON_KMS_BOSS_ITEMS, equip.getItemId()));
                 dataOutputStream.writeBoolean(equip.isSuperiorEqp());
                 dataOutputStream.writeShort(equip.getiReduceReq());
                 dataOutputStream.writeBoolean(equip.isHasIUCMax());
@@ -228,6 +233,8 @@ public class ItemData {
                 }
                 dataOutputStream.writeInt(equip.getFixedGrade());
                 dataOutputStream.writeInt(equip.getSpecialGrade());
+                dataOutputStream.writeInt(equip.getAndroid());
+                dataOutputStream.writeInt(equip.getAndroidGrade());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -423,6 +430,12 @@ public class ItemData {
                                         Map<String, String> optionAttr = XMLApi.getAttributes(optionNode);
                                         options.set(index, Integer.parseInt(optionAttr.get("value")));
                                     }
+                                    break;
+                                case "android":
+                                    equip.setAndroid(Integer.parseInt(value));
+                                    break;
+                                case "grade":
+                                    equip.setAndroidGrade(Integer.parseInt(value));
                                     break;
                             }
                             for (int i = 0; i < 7 - options.size(); i++) {
@@ -1336,7 +1349,8 @@ public class ItemData {
                                 if (value == null) {
                                     continue;
                                 }
-                                value = value.replace("\\r\\n", "").replace("[R8]", "");
+                                value = value.replace("[\r\n]", "").replace("[R8]", "")
+                                        .replace("\\r", "").replace("\\n", "");
                                 switch (name) {
                                     case "count":
                                         iri.setCount(Integer.parseInt(value));
@@ -1817,6 +1831,7 @@ public class ItemData {
     }
 
     public static void main(String[] args) {
+        DatabaseManager.init();
         generateDatFiles();
     }
 

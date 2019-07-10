@@ -45,6 +45,11 @@ public class MobGen extends Life {
             mob.setMad(mob.getMad() + 250);
         }
         field.spawnLife(mob, null);
+
+        if(CustomConstants.AUTO_AGGRO) {
+            field.broadcastPacket(MobPool.forceChase(mob.getObjectId(),false));
+        }
+
         setNextPossibleSpawnTime(System.currentTimeMillis() + (getMob().getMobTime() * 1000));
         setHasSpawned(true);
     }

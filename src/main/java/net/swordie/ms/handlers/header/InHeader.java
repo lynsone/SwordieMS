@@ -1042,6 +1042,7 @@ public enum InHeader {
             AUTH_HEARTBEAT,
             OBTACLE_ATOM_COLLISION,
             ANDROID_MOVE,
+            DRAGON_MOVE,
             USER_HIT,
             USER_EMOTION,
             USER_B2_BODY_REQUEST

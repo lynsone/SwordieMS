@@ -6,6 +6,9 @@ import net.swordie.ms.client.character.items.Inventory;
 import net.swordie.ms.client.character.items.Item;
 import net.swordie.ms.connection.Encodable;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.packet.AndroidPacket;
+import net.swordie.ms.loaders.containerclasses.AndroidInfo;
+import net.swordie.ms.util.Util;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -36,6 +39,15 @@ public class Android extends Life implements Encodable {
         this.hair = hair;
         this.face = face;
         this.name = name;
+    }
+
+    public Android(Char chr, AndroidInfo androidInfo) {
+        super(androidInfo.getId());
+        this.ownerChar = chr;
+        this.skin = (short) (int) Util.getRandomFromCollection(androidInfo.getSkins()); // double cast...
+        this.hair = (short) (int) Util.getRandomFromCollection(androidInfo.getHairs());
+        this.face = (short) (int) Util.getRandomFromCollection(androidInfo.getFaces());
+        this.name = "Android";
     }
 
     public void encode(OutPacket outPacket) {
@@ -109,5 +121,20 @@ public class Android extends Life implements Encodable {
             items.add(item == null ? 0 : item.getItemId());
         }
         return items;
+    }
+
+    @Override
+    public void broadcastSpawnPacket(Char onlyChar) {
+        OutPacket outPacket = AndroidPacket.created(this);
+        if (onlyChar == null) {
+            getField().broadcastPacket(outPacket);
+        } else {
+            onlyChar.write(outPacket);
+        }
+    }
+
+    @Override
+    public void broadcastLeavePacket() {
+        getField().broadcastPacket(AndroidPacket.removed(this));
     }
 }

@@ -56,14 +56,12 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
-import net.swordie.ms.life.AffectedArea;
-import net.swordie.ms.life.Android;
-import net.swordie.ms.life.Familiar;
-import net.swordie.ms.life.Summon;
+import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.*;
+import net.swordie.ms.loaders.containerclasses.AndroidInfo;
 import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
@@ -93,7 +91,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.swordie.ms.client.character.items.BodyPart.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.*;
 import static net.swordie.ms.enums.ChatType.SpeakerChannel;
 import static net.swordie.ms.enums.ChatType.SystemNotice;
@@ -773,7 +770,7 @@ public class Char {
 			// Normal equipped items
 			for (Item item : equippedItems) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() > BPBase.getVal() && item.getBagIndex() < BPEnd.getVal()) {
+				if (item.getBagIndex() > BodyPart.BPBase.getVal() && item.getBagIndex() < BodyPart.BPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -782,7 +779,7 @@ public class Char {
 			// Cash equipped items
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= CBPBase.getVal() && item.getBagIndex() <= CBPEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.CBPBase.getVal() && item.getBagIndex() <= BodyPart.CBPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex() - 100);
 					equip.encode(outPacket);
 				}
@@ -798,7 +795,7 @@ public class Char {
 			// NonBPEquip::Decode (Evan)
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= EvanBase.getVal() && item.getBagIndex() < EvanEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.EvanBase.getVal() && item.getBagIndex() < BodyPart.EvanEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -808,7 +805,7 @@ public class Char {
 			// >= 20k < 200024?
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= MechBase.getVal() && item.getBagIndex() < MechEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.MechBase.getVal() && item.getBagIndex() < BodyPart.MechEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -826,7 +823,7 @@ public class Char {
 			// Android
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= APBase.getVal() && item.getBagIndex() <= APEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.APBase.getVal() && item.getBagIndex() <= BodyPart.APEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -835,7 +832,7 @@ public class Char {
 			// Angelic Buster
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= DUBase.getVal() && item.getBagIndex() < DUEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.DUBase.getVal() && item.getBagIndex() < BodyPart.DUEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -844,7 +841,7 @@ public class Char {
 			// Bits
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= BitsBase.getVal() && item.getBagIndex() < BitsEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.BitsBase.getVal() && item.getBagIndex() < BodyPart.BitsEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -853,7 +850,7 @@ public class Char {
 			// Zero
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= ZeroBase.getVal() && item.getBagIndex() < ZeroEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.ZeroBase.getVal() && item.getBagIndex() < BodyPart.ZeroEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -862,7 +859,7 @@ public class Char {
 			// Totems
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= TotemBase.getVal() && item.getBagIndex() < TotemEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.TotemBase.getVal() && item.getBagIndex() < BodyPart.TotemEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -871,7 +868,7 @@ public class Char {
 			// Maybe zero beta cash?
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= MBPBase.getVal() && item.getBagIndex() < MBPEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.MBPBase.getVal() && item.getBagIndex() < BodyPart.MBPEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -880,7 +877,7 @@ public class Char {
 			// Haku
 			for (Item item : getEquippedInventory().getItems()) {
 				Equip equip = (Equip) item;
-				if (item.getBagIndex() >= HakuStart.getVal() && item.getBagIndex() < HakuEnd.getVal()) {
+				if (item.getBagIndex() >= BodyPart.HakuStart.getVal() && item.getBagIndex() < BodyPart.HakuEnd.getVal()) {
 					outPacket.encodeShort(equip.getBagIndex());
 					equip.encode(outPacket);
 				}
@@ -2194,6 +2191,12 @@ public class Char {
 		if (JobConstants.isDemonAvenger(getJob())) {
 			((Demon) getJobHandler()).sendHpUpdate();
 		}
+		if (ItemConstants.isAndroid(itemID) || ItemConstants.isMechanicalHeart(itemID)) {
+			if (getAndroid() != null) {
+				getField().removeLife(getAndroid());
+			}
+			setAndroid(null);
+		}
 	}
 
 	/**
@@ -2217,11 +2220,14 @@ public class Char {
 		getInventoryByType(EQUIP).removeItem(item);
 		getInventoryByType(EQUIPPED).addItem(item);
 		List<Integer> hairEquips = getAvatarData().getAvatarLook().getHairEquips();
-		if (ItemConstants.isWeapon(itemID)) {
-			al.setWeaponId(itemID);
-		}
-		if (!hairEquips.contains(itemID)) {
-			hairEquips.add(itemID);
+		if (item.getBagIndex() < BodyPart.APBase.getVal() || item.getBagIndex() > BodyPart.APEnd.getVal()){
+			// only add if not part of your own body
+			if (ItemConstants.isWeapon(itemID)) {
+				al.setWeaponId(itemID);
+			}
+			if (!hairEquips.contains(itemID)) {
+				hairEquips.add(itemID);
+			}
 		}
 		if (!equip.hasAttribute(EquipAttribute.NoNonCombatStatGain) && equip.getCharmEXP() != 0) {
 			addStatAndSendPacket(Stat.charmEXP, equip.getCharmEXP());
@@ -2251,6 +2257,13 @@ public class Char {
 		initSoulMP();
 		if (JobConstants.isDemonAvenger(getJob())) {
 			((Demon) getJobHandler()).sendHpUpdate();
+		}
+		// check android status
+		if (ItemConstants.isAndroid(itemID) || ItemConstants.isMechanicalHeart(itemID)) {
+			initAndroid(true);
+			if (getAndroid() != null) {
+				getField().spawnLife(getAndroid(), null);
+			}
 		}
 		return true;
 	}
@@ -2487,6 +2500,14 @@ public class Char {
 		}
 		if (getActiveFamiliar() != null) {
 			getField().broadcastPacket(CFamiliar.familiarEnterField(getId(), true, getActiveFamiliar(), true, false));
+		}
+		Dragon dragon = getDragon();
+		if (dragon != null) {
+			toField.spawnLife(dragon, null);
+		}
+		Android android = getAndroid();
+		if (android != null) {
+			toField.spawnLife(android, null);
 		}
 		for (Mob mob : toField.getMobs()) {
 			mob.addObserver(getScriptManager());
@@ -3357,7 +3378,7 @@ public class Char {
 	}
 
 	public int calculateBulletIDForAttack() {
-		Item weapon = getEquippedInventory().getFirstItemByBodyPart(Weapon);
+		Item weapon = getEquippedInventory().getFirstItemByBodyPart(BodyPart.Weapon);
 		if (weapon == null) {
 			return 0;
 		}
@@ -3607,7 +3628,7 @@ public class Char {
 	}
 
 	public void initSoulMP() {
-		Equip weapon = (Equip) getEquippedItemByBodyPart(Weapon);
+		Equip weapon = (Equip) getEquippedItemByBodyPart(BodyPart.Weapon);
 		TemporaryStatManager tsm = getTemporaryStatManager();
 		if (weapon != null && weapon.getSoulSocketId() != 0 && !tsm.hasStat(SoulMP)) {
 			Option o = new Option();
@@ -3823,6 +3844,14 @@ public class Char {
 			if (getTemporaryStatManager().hasStatBySkillId(RuneStone.LIBERATE_THE_RUNE_OF_SKILL) && cdInMillis > 5000 && !si.isNotCooltimeReset()) {
 				cdInMillis = 5000;
 			}
+
+
+			// Customized  skill cooldowns
+			int fixedSkillCD = SkillConstants.getSkillCooldown(skillID);
+			if(fixedSkillCD != -1) {
+				cdInMillis = fixedSkillCD;
+			}
+
 			if (!hasSkillCDBypass() && cdInMillis > 0) {
 				addSkillCoolTime(skillID, System.currentTimeMillis() + cdInMillis);
 				write(UserLocal.skillCooltimeSetM(skillID, cdInMillis));
@@ -4521,6 +4550,14 @@ public class Char {
 		return quickslotKeys;
 	}
 
+	public Dragon getDragon() {
+		Dragon dragon = null;
+		if (getJobHandler() instanceof Evan) {
+			dragon = ((Evan) getJobHandler()).getDragon();
+		}
+		return dragon;
+	}
+
 	/**
 	 * Checks if this Char has a skill with at least a given level.
 	 * @param skillID the skill to get
@@ -4544,4 +4581,27 @@ public class Char {
         this.android = android;
     }
 
+	/**
+	 * Initializes this Char's Android according to their heart + android equips. Will not do anything if an Android
+	 * already exists.
+	 * @param override Whether or not to override the old Android if one exists.
+	 */
+	public void initAndroid(boolean override) {
+		if (getAndroid() == null || override) {
+			Item heart = getEquippedItemByBodyPart(BodyPart.MechanicalHeart);
+			Item android = getEquippedItemByBodyPart(BodyPart.Android);
+			if (heart != null && android != null && ((Equip) heart).getAndroidGrade() + 3 >= ((Equip) android).getAndroidGrade()) {
+				int androidId = ((Equip) android).getAndroid();
+				AndroidInfo androidInfo = EtcData.getAndroidInfoById(androidId);
+				if (getAndroid() != null) {
+					getField().removeLife(getAndroid());
+				}
+				Android newAndroid = new Android(this, androidInfo);
+				if (getPosition() != null) {
+					newAndroid.setPosition(getPosition().deepCopy());
+				}
+				setAndroid(newAndroid);
+			}
+		}
+	}
 }

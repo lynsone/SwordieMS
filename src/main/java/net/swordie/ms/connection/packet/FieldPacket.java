@@ -21,6 +21,7 @@ import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.AffectedArea;
+import net.swordie.ms.life.Dragon;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.pet.Pet;
 import net.swordie.ms.loaders.containerclasses.MakingSkillRecipe;
@@ -514,19 +515,6 @@ public class FieldPacket {
         return outPacket;
     }
 
-    public static OutPacket createDragon(Char chr) {
-        OutPacket outPacket = new OutPacket(OutHeader.DRAGON_CREATED);
-
-        outPacket.encodeInt(chr.getId());
-        outPacket.encodeInt(chr.getPosition().getX());
-        outPacket.encodeInt(chr.getPosition().getY());
-        outPacket.encodeByte(4); //Move Action
-        outPacket.encodeShort(0);
-        outPacket.encodeShort(chr.getJob());
-
-        return outPacket;
-    }
-
 
 
     public static OutPacket questClear(int qrKey) {
@@ -546,14 +534,6 @@ public class FieldPacket {
             outPacket.encodeFT(times.getMiddle());
             outPacket.encodeFT(times.getRight());
         }
-
-        return outPacket;
-    }
-
-    public static OutPacket removeDragon(Char chr) {
-        OutPacket outPacket = new OutPacket(OutHeader.DRAGON_REMOVE);
-
-        outPacket.encodeInt(chr.getId());
 
         return outPacket;
     }
