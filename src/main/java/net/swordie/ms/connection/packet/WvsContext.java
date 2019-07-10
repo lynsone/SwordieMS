@@ -915,7 +915,7 @@ public class WvsContext {
      * Creates a packet to indicate the golden hammer is finished.
      *
      * @param returnResult See below
-     * @param msg
+     * @param result
      *  when returnResult is:
      *    0 or 1:
      *      Anything: Golden hammer refinement applied
@@ -929,20 +929,16 @@ public class WvsContext {
      * @param upgradesLeft amount of upgrades left. NOTE: ((v9 >> 8) & 0xFF) - v9 + 2) (where v9 = upgradesLeft)
      * @return the created packet
      */
-    public static OutPacket goldHammerItemUpgradeResult(byte returnResult, int msg, int upgradesLeft) {
-        // Could create an enum for returnResult/msg, but it's not used often enough to warrant this
+    public static OutPacket goldHammerItemUpgradeResult(GoldHammerResult returnResult, int result, int upgradesLeft) {
+        // result shit seems random based on ^ notes so no enum
         OutPacket outPacket = new OutPacket(OutHeader.GOLD_HAMMER_ITEM_UPGRADE_RESULT);
 
-        outPacket.encodeByte(returnResult);
-        if (returnResult == 0) {
-            outPacket.encodeInt(msg);
+        outPacket.encodeByte(returnResult.ordinal());
+        outPacket.encodeInt(result);
+        if(returnResult.equals(GoldHammerResult.Success)){
             outPacket.encodeInt(upgradesLeft);
-        } else if (returnResult == 1) {
-            // ?
-        } else if (returnResult >= 2) {
-            outPacket.encodeInt(msg);
         }
-
+        
         return outPacket;
     }
 

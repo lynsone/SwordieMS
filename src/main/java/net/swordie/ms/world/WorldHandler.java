@@ -5323,71 +5323,71 @@ public class WorldHandler {
 
     public static void handleGoldHammerRequest(Char chr, InPacket inPacket) {
         if (chr.getClient().getWorld().isReboot()) {
-            chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
+            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 1, 0));
             chr.getOffenseManager().addOffense(String.format("Character %d attempted to hammer in reboot world.", chr.getId()));
             return;
         }
-
-        final int delay = 2700; // 2.7 sec delay to match golden hammer's animation
 
         inPacket.decodeInt(); // tick
         int iPos = inPacket.decodeInt(); // hammer slot
         int hammerID = inPacket.decodeInt(); // hammer item id
         inPacket.decodeInt(); // use hammer? useless though
         int ePos = inPacket.decodeInt(); // equip slot
+	    
+        Equip equip = (Equip) chr.getInventoryByType(EQUIP).getItemBySlot((short) ePos);
+        Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short) iPos);
+        short maxHammers = ItemConstants.MAX_HAMMER_SLOTS;
 
-        EventManager.addEvent(() -> {
-            Equip equip = (Equip) chr.getInventoryByType(EQUIP).getItemBySlot((short) ePos);
-            Item hammer = chr.getInventoryByType(CONSUME).getItemBySlot((short) iPos);
-            short maxHammers = ItemConstants.MAX_HAMMER_SLOTS;
-
-            if (equip != null) {
-                Equip defaultEquip = ItemData.getEquipById(equip.getItemId());
-                if (defaultEquip.isHasIUCMax()) {
-                    maxHammers = defaultEquip.getIUCMax();
-                }
+        if (equip != null) {
+            Equip defaultEquip = ItemData.getEquipById(equip.getItemId());
+            if (defaultEquip.isHasIUCMax()) {
+                maxHammers = defaultEquip.getIUCMax();
             }
+        }
 
-            if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
-                    hammer == null || !ItemConstants.isGoldHammer(hammer) || hammerID != hammer.getItemId()) {
-                chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 1, 0));
-                chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
-                        chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
+        if (equip == null || !ItemConstants.canEquipGoldHammer(equip) ||
+                hammer == null || !ItemConstants.isGoldHammer(hammer) || hammerID != hammer.getItemId()) {
+            chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 1, 0));
+            chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) on an invalid equip (id %d)",
+                    chr.getId(), hammer == null ? 0 : hammer.getItemId(), equip == null ? 0 : equip.getItemId()));
+            return;
+        }
+
+        Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
+
+        if (vals.size() > 0) {
+            if (equip.getIuc() >= maxHammers) {
+                chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) an invalid equip (id %d)",
+                        chr.getId(), hammerID, equip.getItemId()));
+                chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Err, 2, 0));
                 return;
             }
 
-            Map<ScrollStat, Integer> vals = ItemData.getItemInfoByID(hammer.getItemId()).getScrollStats();
+            boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
 
-            if (vals.size() > 0) {
-                if (equip.getIuc() >= maxHammers) {
-                    chr.getOffenseManager().addOffense(String.format("Character %d tried to use hammer (id %d) an invalid equip (%d/%d)",
-                            chr.getId(), equip == null ? 0 : equip.getItemId()));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 3, 2, 0));
-                    return;
-                }
-
-                boolean success = Util.succeedProp(vals.getOrDefault(ScrollStat.success, 100));
-
-                if (success) {
-                    equip.addStat(iuc, 1); // +1 hammer used
-                    equip.addStat(tuc, 1); // +1 upgrades available
-                    equip.updateToChar(chr);
-                    chr.chatMessage(String.format("Successfully expanded upgrade slots. (%d/%d)", equip.getIuc(), maxHammers));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 0, 1, equip.getIuc()));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 0, 0));
-                } else {
-                    chr.chatMessage(String.format("Failed to expand upgrade slots. (%d/%d)", equip.getIuc(), maxHammers));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 0, 1, equip.getIuc()));
-                    chr.write(WvsContext.goldHammerItemUpgradeResult((byte) 2, 1, 0));
-                }
-
-                chr.consumeItem(hammer.getItemId(), 1);
+            if (success) {
+                equip.addStat(iuc, 1); // +1 hammer used
+                equip.addStat(tuc, 1); // +1 upgrades available
+                equip.updateToChar(chr);
+                chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Success, 0, equip.getIuc()));
+            } else {
+                chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Fail, 1, equip.getIuc()));
             }
-        }, delay);
+
+            chr.consumeItem(hammer.getItemId(), 1);
+        }
     }
 
     public static void handleGoldHammerComplete(Char chr, InPacket inPacket) {
-        chr.dispose();
+        int returnResult = inPacket.decodeInt();
+        int result = inPacket.decodeInt();
+        if(returnResult == GoldHammerResult.Success.ordinal() || returnResult == GoldHammerResult.Fail.ordinal()){
+            //I think its ok to just send back the result given.
+	        chr.write(WvsContext.goldHammerItemUpgradeResult(GoldHammerResult.Done, result, 0));
+        }else{
+	        chr.getOffenseManager().addOffense(String.format("Character %d have invalid gold hammer complete returnResult %d",
+		        chr.getId(), returnResult));
+        }
     }
 
     public static void handleUserRequestInstanceTable(Char chr, InPacket inPacket) {
