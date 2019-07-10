@@ -17,6 +17,7 @@ import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants.JobEnum;
@@ -39,6 +40,9 @@ import net.swordie.ms.util.Util;
 import net.swordie.ms.world.field.Field;
 import net.swordie.ms.world.field.Portal;
 import org.apache.log4j.LogManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

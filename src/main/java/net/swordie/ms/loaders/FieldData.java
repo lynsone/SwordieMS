@@ -1,6 +1,7 @@
 package net.swordie.ms.loaders;
 
 import net.swordie.ms.client.character.runestones.RuneStone;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.enums.FieldOption;
 import net.swordie.ms.enums.FieldType;
@@ -10,6 +11,9 @@ import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.life.Reactor;
 import net.swordie.ms.ServerConstants;
 import org.apache.log4j.LogManager;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import net.swordie.ms.util.Position;

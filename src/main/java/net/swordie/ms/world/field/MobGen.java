@@ -1,5 +1,6 @@
 package net.swordie.ms.world.field;
 
+import net.swordie.ms.connection.packet.MobPool;
 import net.swordie.ms.constants.CustomConstants;
 import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.life.Life;
