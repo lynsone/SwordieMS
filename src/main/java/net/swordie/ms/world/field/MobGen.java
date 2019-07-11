@@ -71,7 +71,8 @@ public class MobGen extends Life {
                 getNextPossibleSpawnTime() < System.currentTimeMillis() &&
                 (getMob().getMobTime() != -1 || !hasSpawned()) &&
                 (field.hasKishin() ||
-                        field.getMobsInRect(getPosition().getRectAround(GameConstants.MOB_CHECK_RECT)).size() == 0);
+                        field.getMobsInRect(getPosition().getRectAround(GameConstants.MOB_CHECK_RECT)).size() == 0 ||
+                        getMob().getMobTime() == -1);
     }
 
     public long getNextPossibleSpawnTime() {
