@@ -226,6 +226,16 @@ public abstract class Job {
 					summon.setFlyMob(true);
 					field.spawnSummon(summon);
 				}
+				else if (noviceSkill == 1026) { // soaring
+					if (field.isFly()) {
+						Option option = new Option();
+						option.nOption = 1;
+						option.rOption = skillID;
+						option.tOption = 0;
+						tsm.putCharacterStatValue(Flying, option);
+						tsm.sendSetStatPacket();
+					}
+				}
 				// TOOD: make sure user owns skill
 				switch (skillID) {
 					case MONOLITH:
