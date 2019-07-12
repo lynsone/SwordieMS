@@ -2479,6 +2479,9 @@ public class Char {
 				tsm.removeStatsBySkill(skill);
 			}
 		}
+		if (tsm.hasStat(Flying) && !toField.isFly()) {
+			tsm.removeStat(Flying, false);
+		}
 		notifyChanges();
 		toField.execUserEnterScript(this);
 		initPets();
