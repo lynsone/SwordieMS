@@ -82,6 +82,10 @@ public class UserHandler {
         }
     }
 
+    @Handler(op = InHeader.USER_HIT)
+    public static void handleUserHit(Char chr, InPacket inPacket) {
+        chr.getJobHandler().handleHit(inPacket);
+    }
 
     @Handler(op = InHeader.USER_GROWTH_HELPER_REQUEST)
     public static void handleUserGrowthRequestHelper(Client c, InPacket inPacket) {

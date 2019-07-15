@@ -389,12 +389,10 @@ public abstract class Job {
 	/**
 	 * Handles the initial part of a hit, the initial packet processing.
 	 *
-	 * @param c
-	 * 		The client
 	 * @param inPacket
 	 * 		The packet to be processed
 	 */
-	public void handleHit(Client c, InPacket inPacket) {
+	public void handleHit(InPacket inPacket) {
 		int idk1 = inPacket.decodeInt();
 		inPacket.decodeInt(); // tick
 		byte idk2 = inPacket.decodeByte(); // -1?
