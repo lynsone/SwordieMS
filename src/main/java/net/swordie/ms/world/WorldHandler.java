@@ -3129,7 +3129,12 @@ public class WorldHandler {
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
                 }
-                if (!chr.canHold(itemID)) {
+                if (nsi.getMaxPerSlot() == 0 ? quantity != 1 : quantity > nsi.getMaxPerSlot()) {
+                    log.warn(String.format("Possible hack: max slot for shop itemID %d is %d, got %d (chr %d)", nsi.getItemID(), nsi.getMaxPerSlot(), quantity, chr.getId()));
+                    return;
+                }
+                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
+                if (itemQuantity == 1 ? !chr.canHold(itemID) : !chr.canHold(itemID, itemQuantity)) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
                     return;
                 }
@@ -3149,7 +3154,6 @@ public class WorldHandler {
                     }
                     chr.deductMoney(cost);
                 }
-                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity * itemQuantity);
                 chr.addItemToInventory(item);
@@ -3182,6 +3186,10 @@ public class WorldHandler {
                 item = chr.getInventoryByType(it).getItemBySlot(slot);
                 if (item == null || item.getItemId() != itemID) {
                     chr.chatMessage("Could not find that item.");
+                    return;
+                }
+                if (!chr.hasItemCount(itemID, quantity)) {
+                    log.warn(String.format("Possible hack: User tried to sell %d amount of item %d while owning less (chr %d)", quantity, itemID, chr.getId()));
                     return;
                 }
                 if (ItemConstants.isEquip(itemID)) {
