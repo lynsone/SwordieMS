@@ -14,7 +14,6 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatBase;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
-import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.nova.Kaiser;
 import net.swordie.ms.connection.OutPacket;
 import net.swordie.ms.connection.db.DatabaseManager;
@@ -24,7 +23,6 @@ import net.swordie.ms.constants.JobConstants.JobEnum;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.header.OutHeader;
 import net.swordie.ms.life.Android;
-import net.swordie.ms.life.Dragon;
 import net.swordie.ms.life.Life;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobStat;
@@ -52,7 +50,7 @@ import java.util.*;
 import static net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat.RideVehicle;
 import static net.swordie.ms.enums.AccountType.*;
 import static net.swordie.ms.enums.ChatType.*;
-import static net.swordie.ms.enums.InventoryOperation.ADD;
+import static net.swordie.ms.enums.InventoryOperation.Add;
 
 /**
  * Created on 12/22/2017.
@@ -725,7 +723,7 @@ public class AdminCommands {
 
             chr.addItemToInventory(InvType.EQUIP, equip, false);
             chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) equip.getBagIndex(), (byte) 1,
+                    Add, (short) equip.getBagIndex(), (byte) 1,
                     0, equip));
 
         }
@@ -779,7 +777,7 @@ public class AdminCommands {
                         }
                         chr.addItemToInventory(equip);
                         chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                                ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+                                Add, (short) equip.getBagIndex(), (byte) -1, 0, equip));
                         return;
                     }
                     item = ItemData.getItemDeepCopy(id);
@@ -789,7 +787,7 @@ public class AdminCommands {
                     item.setQuantity(quant);
                     chr.addItemToInventory(item);
                     chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                            ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                            Add, (short) item.getBagIndex(), (byte) -1, 0, item));
                     return;
                 }
             }
@@ -821,7 +819,7 @@ public class AdminCommands {
             Item hyperTP2 = ItemData.getItemDeepCopy(hyperTP);
             chr.addItemToInventory(hyperTP2.getInvType(), hyperTP2, false);
             chr.getClient().write(WvsContext.inventoryOperation(true, false,
-                    ADD, (short) hyperTP2.getBagIndex(), (byte) -1, 0, hyperTP2));
+                    Add, (short) hyperTP2.getBagIndex(), (byte) -1, 0, hyperTP2));
         }
     }
 

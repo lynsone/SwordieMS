@@ -214,10 +214,10 @@ public class UserLocal {
         outPacket.encodeByte(req.getVal());
         if (req.getVal() <= 2) {
             outPacket.encodeByte(res.getVal());
-            if (res == DamageSkinType.DamageSkinSave_Success) {
+            if (res == DamageSkinType.Res_Success) {
                 chr.encodeDamageSkins(outPacket);
             }
-        } else if (req == DamageSkinType.DamageSkinSaveReq_SendInfo) {
+        } else if (req == DamageSkinType.Req_SendInfo) {
             chr.encodeDamageSkins(outPacket);
         }
         return outPacket;

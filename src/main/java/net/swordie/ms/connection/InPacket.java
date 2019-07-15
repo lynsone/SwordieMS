@@ -165,4 +165,12 @@ public class InPacket extends Packet {
     public void release() {
         byteBuf.release();
     }
+
+    /**
+     * Reads a rectangle (int l, int t, int r, int b) and returns this.
+     * @return The rectangle that has been read.
+     */
+    public Rect decodeIntRect() {
+        return new Rect(decodePositionInt(), decodePositionInt());
+    }
 }

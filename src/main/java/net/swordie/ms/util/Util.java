@@ -451,4 +451,25 @@ public class Util {
     public static boolean arrayContains(int[] arr, int checkVal) {
         return IntStream.of(arr).anyMatch(val -> val == checkVal);
     }
+
+
+    /**
+     * Searches through the given directory recursively to find all files
+     * @param toAdd the set to add the files to
+     * @param dir the directory to start in
+     */
+    public static void findAllFilesInDirectory(Set<File> toAdd, File dir) {
+        // depth first search
+        if (dir != null) {
+            if (dir.isDirectory()) {
+                for (File file : Objects.requireNonNull(dir.listFiles())) {
+                    if (file.isDirectory()) {
+                        findAllFilesInDirectory(toAdd, file);
+                    } else {
+                        toAdd.add(file);
+                    }
+                }
+            }
+        }
+    }
 }

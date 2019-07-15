@@ -1,20 +1,14 @@
 package net.swordie.ms.client;
 
-import net.swordie.ms.Server;
-import net.swordie.ms.client.anticheat.OffenseManager;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.MonsterCollection;
 import net.swordie.ms.client.character.damage.DamageSkinSaveData;
 import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.client.trunk.Trunk;
-import net.swordie.ms.connection.db.FileTimeConverter;
+import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.SkillConstants;
-import net.swordie.ms.enums.AccountType;
-import net.swordie.ms.enums.PicStatus;
 import net.swordie.ms.loaders.StringData;
-import net.swordie.ms.connection.db.DatabaseManager;
-import net.swordie.ms.util.FileTime;
 import net.swordie.ms.util.Util;
 import org.apache.log4j.Logger;
 
@@ -160,6 +154,10 @@ public class Account {
         return getDamageSkins().stream().filter(d -> d.getItemID() == itemID).findAny().orElse(null);
     }
 
+    public DamageSkinSaveData getDamageSkinBySkinID(int skinID) {
+        return getDamageSkins().stream().filter(d -> d.getDamageSkinID() == skinID).findAny().orElse(null);
+    }
+
     public Trunk getTrunk() {
         if(trunk == null) {
             trunk = new Trunk((byte) 20);
@@ -261,4 +259,5 @@ public class Account {
     public void setCurrentChr(Char currentChr) {
         this.currentChr = currentChr;
     }
+
 }

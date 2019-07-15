@@ -78,7 +78,6 @@ import net.swordie.ms.world.shop.NpcShopDlg;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.awt.*;
@@ -570,7 +569,7 @@ public class Char {
 				}
 				existingItem.addQuantity(quantity);
 				write(WvsContext.inventoryOperation(true, false,
-						UPDATE_QUANTITY, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
+						UpdateQuantity, (short) existingItem.getBagIndex(), (byte) -1, 0, existingItem));
 				Item copy = item.deepCopy();
 				copy.setQuantity(quantity);
 				if (rec) {
@@ -590,7 +589,7 @@ public class Char {
 				}
 				inventory.addItem(item);
 				write(WvsContext.inventoryOperation(true, false,
-						ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                        Add, (short) item.getBagIndex(), (byte) -1, 0, item));
 				if (rec) {
 					addItemToInventory(itemCopy);
 				}
@@ -2143,6 +2142,26 @@ public class Char {
 	}
 
 	/**
+	 * Sends a formatted message to this Char with a default color {@link ChatType#SystemNotice}.
+	 * @param msg The message to display
+	 * @param args The format arguments
+	 */
+	public void chatMessage(String msg, Object... args) {
+		chatMessage(SystemNotice, msg, args);
+	}
+
+	/**
+	 * Sends a formatted message to this Char with a given {@link ChatType colour}.
+	 *
+	 * @param clr The Colour this message should be in.
+	 * @param msg The message to display.
+	 * @param args The format arguments
+	 */
+	public void chatMessage(ChatType clr, String msg, Object... args) {
+		write(UserLocal.chatMsg(clr, String.format(msg, args)));
+	}
+
+	/**
 	 * Sends a message to this Char with a given {@link ChatType colour}.
 	 *
 	 * @param clr The Colour this message should be in.
@@ -2366,6 +2385,30 @@ public class Char {
 				break;
 		}
 		return res;
+	}
+
+	/**
+	 * Warps this Char to a given field at the starting portal.
+	 *
+	 * @param fieldId the ID of the field to warp to
+	 */
+	public void warp(int fieldId) {
+		warp(getOrCreateFieldByCurrentInstanceType(fieldId));
+	}
+
+	/**
+	 * Warps this Char to a given field at the given portal. If the portal doesn't exist, takes the starting portal.
+	 *
+	 * @param fieldId the ID of the field to warp to
+	 * @param portalId the ID of the portal where the Char should spawn
+	 */
+	public void warp(int fieldId, int portalId) {
+		Field field = getOrCreateFieldByCurrentInstanceType(fieldId);
+		Portal portal = field.getPortalByID(portalId);
+		if (portal == null) {
+			portal = field.getDefaultPortal();
+		}
+		warp(field, portal);
 	}
 
 	/**
@@ -2923,11 +2966,11 @@ public class Char {
 				bagIndex = (short) -bagIndex;
 			}
 			write(WvsContext.inventoryOperation(true, false,
-					REMOVE, bagIndex, (byte) 0, 0, item));
+					Remove, bagIndex, (byte) 0, 0, item));
 		} else {
 			item.setQuantity(item.getQuantity() - 1);
 			write(WvsContext.inventoryOperation(true, false,
-					UPDATE_QUANTITY, (short) item.getBagIndex(), (byte) -1, 0, item));
+					UpdateQuantity, (short) item.getBagIndex(), (byte) -1, 0, item));
 		}
 		setBulletIDForAttack(calculateBulletIDForAttack());
 	}
@@ -4079,14 +4122,14 @@ public class Char {
 			Equip equip = ItemData.getEquipDeepCopyFromID(id, false);
 			addItemToInventory(equip.getInvType(), equip, false);
 			getClient().write(WvsContext.inventoryOperation(true, false,
-					ADD, (short) equip.getBagIndex(), (byte) -1, 0, equip));
+                    Add, (short) equip.getBagIndex(), (byte) -1, 0, equip));
 
 		} else {    //Item
 			Item item = ItemData.getItemDeepCopy(id);
 			item.setQuantity(quantity);
 			addItemToInventory(item);
 			getClient().write(WvsContext.inventoryOperation(true, false,
-					ADD, (short) item.getBagIndex(), (byte) -1, 0, item));
+                    Add, (short) item.getBagIndex(), (byte) -1, 0, item));
 
 		}
 	}
@@ -4612,5 +4655,48 @@ public class Char {
 				setAndroid(newAndroid);
 			}
 		}
+	}
+
+	public void useStatChangeItem(Item item, boolean consume) {
+		TemporaryStatManager tsm = getTemporaryStatManager();
+		int itemID = item.getItemId();
+		Map<SpecStat, Integer> specStats = ItemData.getItemInfoByID(itemID).getSpecStats();
+		if (specStats.size() > 0) {
+			ItemBuffs.giveItemBuffsFromItemID(this, tsm, itemID);
+		} else {
+			switch (itemID) {
+				case 2050004: // All cure
+					tsm.removeAllDebuffs();
+					break;
+				default:
+					chatMessage(ChatType.Mob, String.format("Unhandled stat change item %d", itemID));
+			}
+		}
+		if (consume) {
+			consumeItem(item);
+		}
+		dispose();
+	}
+
+	public int getSpentActiveHyperSkillSp() {
+		int sp = 0;
+		for (Skill skill : getSkills()) {
+			SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+			if (si.getHyper() == 2) {
+				sp += skill.getCurrentLevel();
+			}
+		}
+		return sp;
+	}
+
+	public int getSpentPassiveHyperSkillSp() {
+		int sp = 0;
+		for (Skill skill : getSkills()) {
+			SkillInfo si = SkillData.getSkillInfoById(skill.getSkillId());
+			if (si.getHyper() == 1) {
+				sp += skill.getCurrentLevel();
+			}
+		}
+		return sp;
 	}
 }

@@ -17,7 +17,9 @@ import net.swordie.ms.client.jobs.resistance.Xenon;
 import net.swordie.ms.client.jobs.sengoku.Kanna;
 import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.life.mob.MobStat;
+import net.swordie.ms.life.mob.skill.MobSkillStat;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.loaders.containerclasses.MobSkillInfo;
 import net.swordie.ms.util.Rect;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.mob.MobTemporaryStat;
@@ -47,6 +49,17 @@ public class AffectedArea extends Life {
 
     public AffectedArea(int templateId) {
         super(templateId);
+    }
+
+    public static AffectedArea getMobAA(Mob mob, short skill, short slv, MobSkillInfo msi) {
+        AffectedArea aa = new AffectedArea(0);
+
+        aa.setSkillID(skill);
+        aa.setSlv((byte) slv);
+        aa.setDuration(msi.getSkillStatIntValue(MobSkillStat.time) * 1000);
+        aa.setRect(mob.getPosition().getRectAround(new Rect(msi.getLt(), msi.getRb())));
+
+        return aa;
     }
 
     public Rect getRect() {

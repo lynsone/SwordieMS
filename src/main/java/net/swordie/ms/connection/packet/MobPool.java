@@ -271,7 +271,7 @@ public class MobPool {
             outPacket.encodeByte(msi.getSkillStatIntValue(MobSkillStat.noGravity)); // bNoGravity
             boolean notDestroyByCollide = msi.getSkillStatIntValue(MobSkillStat.notDestroyByCollide) != 0;
             outPacket.encodeByte(notDestroyByCollide); // bNotDestroyByCollide
-            if (msi.getId() == MobSkillID.BOUNCE_ATTACK.getVal() && (msi.getLevel() == 3 || msi.getLevel() == 4)) {
+            if (msi.getId() == MobSkillID.BounceAttack.getVal() && (msi.getLevel() == 3 || msi.getLevel() == 4)) {
                 outPacket.encodePositionInt(msi.getRb2());
             }
             if (notDestroyByCollide) {
@@ -286,7 +286,7 @@ public class MobPool {
         return outPacket;
     }
 
-    public static OutPacket teleportRequest(int skillAfter) {
+    public static OutPacket teleportRequest(int skillAfter, Position position) {
         OutPacket outPacket = new OutPacket(OutHeader.MOB_TELEPORT_REQUEST);
 
         outPacket.encodeByte(skillAfter == 0);
@@ -300,7 +300,7 @@ public class MobPool {
                 case 8:
                 case 9:
                 case 10:
-                    outPacket.encodePositionInt(new Position(0, 0)); // possible position?
+                    outPacket.encodePositionInt(position); // possible position?
                     break;
                 case 4:
                     outPacket.encodeInt(0); // possible x?

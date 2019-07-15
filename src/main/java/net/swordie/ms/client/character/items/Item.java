@@ -16,7 +16,7 @@ import java.util.*;
 
 import static net.swordie.ms.enums.InvType.CASH;
 import static net.swordie.ms.enums.InvType.EQUIPPED;
-import static net.swordie.ms.enums.InventoryOperation.ADD;
+import static net.swordie.ms.enums.InventoryOperation.Add;
 
 /**
  * GW_ItemSlotBase
@@ -230,7 +230,7 @@ public class Item implements Serializable, Encodable {
      */
     public void updateToChar(Char chr) {
         short bagIndex = (short) (getInvType() == EQUIPPED ? - getBagIndex() : getBagIndex());
-        chr.write(WvsContext.inventoryOperation(true, false, ADD,
+        chr.write(WvsContext.inventoryOperation(true, false, Add,
                 bagIndex, (short) 0, 0, this));
     }
 

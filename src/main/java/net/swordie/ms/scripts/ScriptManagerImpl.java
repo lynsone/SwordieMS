@@ -29,10 +29,7 @@ import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.client.trunk.TrunkOpen;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.constants.ItemConstants;
-import net.swordie.ms.constants.JobConstants;
-import net.swordie.ms.constants.SkillConstants;
+import net.swordie.ms.constants.*;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.DeathType;
@@ -2191,26 +2188,27 @@ public class ScriptManagerImpl implements ScriptManager {
 		Account acc = chr.getAccount();
 		DamageSkinType error = null;
 		if (acc.getDamageSkins().size() >= GameConstants.DAMAGE_SKIN_MAX_SIZE) {
-			error = DamageSkinType.DamageSkinSave_Fail_SlotCount;
+			error = DamageSkinType.Res_Fail_SlotCount;
 		} else if (acc.getDamageSkinByItemID(itemID) != null) {
-//            error = DamageSkinType.DamageSkinSave_Fail_AlreadyExist;
+			error = DamageSkinType.Res_Fail_AlreadyExist;
 		}
 		if (error != null) {
-			chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_Reg, error, null));
+			chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.Req_Reg, error, null));
 		} else {
 			QuestManager qm = chr.getQuestManager();
-			Quest q = qm.getQuests().getOrDefault(7291, null);
+			Quest q = qm.getQuests().getOrDefault(QuestConstants.DAMAGE_SKIN, null);
 			if (q == null) {
-				q = new Quest(7291, QuestStatus.Started);
+				q = new Quest(QuestConstants.DAMAGE_SKIN, QuestStatus.Started);
 				qm.addQuest(q);
 			}
+			chr.consumeItem(itemID, 1);
 			DamageSkinSaveData dssd = DamageSkinSaveData.getByItemID(itemID);
 			q.setQrValue(String.valueOf(dssd.getDamageSkinID()));
 			acc.addDamageSkin(dssd);
 			chr.setDamageSkin(dssd);
-			chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.DamageSkinSaveReq_Reg,
-					DamageSkinType.DamageSkinSave_Success, chr));
-//            chr.write(User.setDamageSkin(chr));
+			chr.write(UserLocal.damageSkinSaveResult(DamageSkinType.Req_Reg,
+					DamageSkinType.Res_Success, chr));
+			chr.write(UserPacket.setDamageSkin(chr));
 			chr.write(WvsContext.questRecordMessage(q));
 		}
 		return error == null;

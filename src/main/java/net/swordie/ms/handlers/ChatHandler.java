@@ -1,15 +1,13 @@
 package net.swordie.ms.handlers;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.connection.InPacket;
-import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.ChatSocket;
-import net.swordie.ms.Server;
+import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.enums.GroupMessageType;
-import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.world.World;
-import net.swordie.ms.world.WorldHandler;
 
 import java.util.HashMap;
 import java.util.Map;

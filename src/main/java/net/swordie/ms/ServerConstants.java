@@ -13,6 +13,7 @@ public class ServerConstants {
 	public static final int MAX_CHARACTERS = JobConstants.LoginJob.values().length * 3;
 	public static final String SCRIPT_DIR = DIR + "/scripts";
 	public static final String RESOURCES_DIR = DIR + "/resources";
+	public static final String HANDLERS_DIR = DIR + "/src/main/java/net/swordie/ms/handlers";
 	public static final short VERSION = 176;
 	public static final String MINOR_VERSION = "1";
 	public static final int LOGIN_PORT = 8484;
