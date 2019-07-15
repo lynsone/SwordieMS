@@ -161,7 +161,6 @@ public class NpcHandler {
                     }
                     chr.deductMoney(cost);
                 }
-                itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity * itemQuantity);
                 chr.addItemToInventory(item);
