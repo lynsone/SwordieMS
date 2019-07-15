@@ -10,7 +10,6 @@ import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.trunk.*;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
-import net.swordie.ms.constants.GameConstants;
 import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.enums.ChatType;
 import net.swordie.ms.enums.InvType;
@@ -35,7 +34,6 @@ import net.swordie.ms.world.shop.NpcShopDlg;
 import net.swordie.ms.world.shop.NpcShopItem;
 import net.swordie.ms.world.shop.ShopRequestType;
 import net.swordie.ms.world.shop.result.MsgShopResult;
-import net.swordie.ms.world.shop.result.ShopResult;
 import net.swordie.ms.world.shop.result.ShopResultType;
 import org.apache.log4j.Logger;
 
@@ -135,7 +133,15 @@ public class NpcHandler {
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
                 }
-                if (!chr.canHold(itemID)) {
+                if (nsi.getMaxPerSlot() == 0 ? quantity != 1 : quantity > nsi.getMaxPerSlot()) {
+                    chr.getOffenseManager().addOffense(Offense.Type.Editing,
+                            String.format("Possible hack: max slot for shop itemID %d is %d, got %d",
+                            nsi.getItemID(), nsi.getMaxPerSlot(), quantity));
+                    chr.dispose();
+                    return;
+                }
+                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
+                if (itemQuantity == 1 ? !chr.canHold(itemID) : !chr.canHold(itemID, itemQuantity)) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
                     return;
                 }
@@ -155,7 +161,7 @@ public class NpcHandler {
                     }
                     chr.deductMoney(cost);
                 }
-                int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
+                itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity * itemQuantity);
                 chr.addItemToInventory(item);
@@ -188,6 +194,13 @@ public class NpcHandler {
                 item = chr.getInventoryByType(it).getItemBySlot(slot);
                 if (item == null || item.getItemId() != itemID) {
                     chr.chatMessage("Could not find that item.");
+                    return;
+                }
+                if (!chr.hasItemCount(itemID, quantity)) {
+                    chr.getOffenseManager().addOffense(Offense.Type.Editing,
+                            String.format("Possible hack: User tried to sell %d amount of item %d while owning less",
+                            quantity, itemID));
+                    chr.dispose();
                     return;
                 }
                 if (ItemConstants.isEquip(itemID)) {
