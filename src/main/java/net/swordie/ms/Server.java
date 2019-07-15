@@ -1,17 +1,19 @@
 package net.swordie.ms;
 
-import net.swordie.ms.client.Account;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.User;
-import net.swordie.ms.constants.GameConstants;
-import net.swordie.ms.loaders.*;
 import net.swordie.ms.connection.crypto.MapleCrypto;
 import net.swordie.ms.connection.db.DatabaseManager;
 import net.swordie.ms.connection.netty.ChannelAcceptor;
+import net.swordie.ms.connection.netty.ChannelHandler;
 import net.swordie.ms.connection.netty.ChatAcceptor;
 import net.swordie.ms.connection.netty.LoginAcceptor;
+import net.swordie.ms.constants.GameConstants;
+import net.swordie.ms.loaders.*;
 import net.swordie.ms.scripts.ScriptManagerImpl;
+import net.swordie.ms.util.Loader;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.util.container.Tuple;
 import net.swordie.ms.world.Channel;
 import net.swordie.ms.world.World;
 import net.swordie.ms.world.shop.cashshop.CashShop;
@@ -20,8 +22,6 @@ import net.swordie.ms.world.shop.cashshop.CashShopItem;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import net.swordie.ms.util.Loader;
-import net.swordie.ms.util.container.Tuple;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
@@ -69,6 +69,7 @@ public class Server extends Properties {
 		}
 		StringData.load();
 		FieldData.loadWorldMap();
+		ChannelHandler.initHandlers(false);
 
 		FieldData.loadNPCFromSQL();
 		log.info("Finished loading custom NPCs in " + (System.currentTimeMillis() - startNow) + "ms");
@@ -161,6 +162,7 @@ public class Server extends Properties {
 	}
 
 	public void clearCache() {
+		ChannelHandler.initHandlers(true);
 		DropData.clear();
 		FieldData.clear();
 		ItemData.clear();

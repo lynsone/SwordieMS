@@ -2,6 +2,8 @@ package net.swordie.ms.loaders;
 
 import net.swordie.ms.ServerConstants;
 import net.swordie.ms.loaders.containerclasses.AndroidInfo;
+import net.swordie.ms.util.Loader;
+import net.swordie.ms.util.Saver;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.XMLApi;
 import org.apache.log4j.Logger;
@@ -17,6 +19,7 @@ public class EtcData {
     private static final Logger log = Logger.getLogger(EtcData.class);
 
     private static Map<Integer, AndroidInfo> androidInfo = new HashMap<>();
+    private static final Map<Integer, Integer> familiarSkills = new HashMap<>();
 
 
     public static void loadAndroidsFromWz() {
@@ -126,5 +129,57 @@ public class EtcData {
 
     public static void main(String[] args) {
         generateDatFiles();
+    }
+
+    private static void loadFamiliarSkillsFromWz() {
+        File file = new File(String.format("%s/Etc.wz/FamiliarInfo.img.xml", ServerConstants.WZ_DIR));
+        Node root = XMLApi.getRoot(file);
+        Node mainNode = XMLApi.getAllChildren(root).get(0);
+        List<Node> nodes = XMLApi.getAllChildren(mainNode);
+        for (Node node : nodes) {
+            int id = Integer.parseInt(XMLApi.getNamedAttribute(node, "name"));
+            Node skillIDNode = XMLApi.getFirstChildByNameBF(node, "passive");
+            if (skillIDNode != null) {
+                int skillID = Integer.parseInt(XMLApi.getNamedAttribute(skillIDNode, "value"));
+                familiarSkills.put(id, skillID);
+            }
+        }
+    }
+
+
+    @Saver(varName = "familiarSkills")
+    private static void saveFamiliarSkills(File file) {
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+            dos.writeInt(familiarSkills.size());
+            for (Map.Entry<Integer, Integer> entry : familiarSkills.entrySet()) {
+                dos.writeInt(entry.getKey()); // familiar ID
+                dos.writeInt(entry.getValue()); // skill ID
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Loader(varName = "familiarSkills")
+    public static void loadFamiliarSkills(File file, boolean exists) {
+        if (!exists) {
+            loadFamiliarSkillsFromWz();
+            saveFamiliarSkills(file);
+        } else {
+            try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+                int gradeSkillSize = dis.readInt();
+                for (int j = 0; j < gradeSkillSize; j++) {
+                    int familiarID = dis.readInt();
+                    int skillID = dis.readInt();
+                    familiarSkills.put(familiarID, skillID);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static int getSkillByFamiliarID(int familiarID) {
+        return familiarSkills.get(familiarID);
     }
 }

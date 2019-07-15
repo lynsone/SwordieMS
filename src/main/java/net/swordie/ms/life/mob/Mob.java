@@ -29,6 +29,7 @@ import net.swordie.ms.loaders.ItemData;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
 import net.swordie.ms.util.Position;
+import net.swordie.ms.util.Rect;
 import net.swordie.ms.util.Util;
 import net.swordie.ms.util.container.Triple;
 import net.swordie.ms.util.container.Tuple;
@@ -142,6 +143,7 @@ public class Mob extends Life {
     private List<EscortDest> escortDest = new ArrayList<>();
     private int currentDestIndex = 0;
     private int escortStopDuration = 0;
+    private int mobSpawnerId;
 
     public Mob(int templateId) {
         super(templateId);
@@ -1898,5 +1900,51 @@ public class Mob extends Life {
                 getField().broadcastPacket(UserPacket.userHitByCounter(chr.getId(), hpDamage));
             }
         }
+    }
+
+    public synchronized void heal(int amount) {
+        long oldHp = getHp();
+        long newHp = oldHp + amount;
+        if (newHp > getMaxHp()) {
+            newHp = getMaxHp();
+        } else if (newHp < 0) {
+            newHp = 0;
+        }
+        setHp(newHp);
+        long diff = newHp - oldHp;
+        if (getField() != null & diff != 0) {
+            getField().broadcastPacket(MobPool.damaged(getObjectId(), diff, getTemplateId(),
+                    (byte) 0, Util.maxInt(getHp()), Util.maxInt(getMaxHp())));
+        }
+        if (oldHp > 0 && newHp <= 0) {
+            die(true);
+        }
+    }
+
+    public synchronized void healMP(int amount) {
+        long oldMp = getMp();
+        long newMp = oldMp + amount;
+        if (newMp > getMaxMp()) {
+            newMp = getMaxMp();
+        } else if (newMp < 0) {
+            newMp = 0;
+        }
+        setMp(newMp);
+    }
+
+
+    public void teleport(int xPos, int yPos) {
+        Rect possibleRect = getPosition().getRectAround(new Rect(-xPos, -yPos, xPos, yPos));
+        setPosition(new Position(Util.getRandom(possibleRect.getLeft(), possibleRect.getRight()),
+                Util.getRandom(possibleRect.getTop(), possibleRect.getBottom())));
+        getField().broadcastPacket(MobPool.teleportRequest(3, getPosition()));
+    }
+
+    public int getMobSpawnerId() {
+        return mobSpawnerId;
+    }
+
+    public void setMobSpawnerId(int mobSpawnerId) {
+        this.mobSpawnerId = mobSpawnerId;
     }
 }

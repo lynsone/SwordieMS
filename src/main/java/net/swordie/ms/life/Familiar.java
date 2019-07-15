@@ -27,6 +27,8 @@ public class Familiar extends Life {
     @Convert(converter = FileTimeConverter.class)
     private FileTime expiration = FileTime.fromType(FileTime.Type.MAX_TIME);
     private short vitality;
+    @Transient
+    private int skillID;
 
     public Familiar() {
         super(0);
@@ -144,5 +146,13 @@ public class Familiar extends Life {
 
     public void setVitality(short vitality) {
         this.vitality = vitality;
+    }
+
+    public int getSkillID() {
+        return skillID;
+    }
+
+    public void setSkillID(int skillID) {
+        this.skillID = skillID;
     }
 }

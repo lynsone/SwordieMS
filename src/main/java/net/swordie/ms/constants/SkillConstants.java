@@ -1467,4 +1467,15 @@ public class SkillConstants {
         // xxxx0073, where xxxx is the "0th" job
         return beginJob * 10000 + 73;
     }
+
+    public static int getSoaringByJob(short job) {
+        short beginJob = JobConstants.JobEnum.getJobById(job).getBeginnerJobId();
+        // xxxx1026, where xxxx is the "0th" job
+        return beginJob * 10000 + 1026;
+    }
+
+    public static boolean isBeginnerSpAddableSkill(int skillID) {
+        return skillID == 1000 || skillID == 1001 || skillID == 1002 || skillID == 140000291 || skillID == 30001000
+                || skillID == 30001001 || skillID == 30001002;
+    }
 }

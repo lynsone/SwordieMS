@@ -38,7 +38,7 @@ public enum ScrollStat {
     incRandVol,
     reqEquipLevelMax,
     createType,
-    optionType;
+    optionType, recover, reset, perfectReset;
 
     public static ScrollStat getScrollStatByString(String name) {
         return Arrays.stream(values()).filter(ss -> ss.toString().equalsIgnoreCase(name))

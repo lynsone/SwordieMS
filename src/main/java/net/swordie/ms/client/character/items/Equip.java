@@ -1999,4 +1999,16 @@ public class Equip extends Item {
     public int getAndroidGrade() {
         return androidGrade;
     }
+
+    public boolean canSafeguardHyperUpgrade() {
+        return !isSuperiorEqp() && chuc >= 12 && chuc < 17;
+    }
+
+    public void resetStats() {
+        Equip normalEquip = ItemData.getEquipDeepCopyFromID(getItemId(), false);
+        for (EquipBaseStat ebs : EquipBaseStat.values()) {
+            setBaseStat(ebs, normalEquip.getBaseStat(ebs));
+        }
+        resetFlameStats();
+    }
 }

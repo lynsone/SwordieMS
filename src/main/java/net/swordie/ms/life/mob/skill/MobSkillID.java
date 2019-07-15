@@ -1,117 +1,119 @@
 package net.swordie.ms.life.mob.skill;
 
+import net.swordie.ms.client.character.skills.temp.CharacterTemporaryStat;
+
 import java.util.Arrays;
 
 /**
  * Created on 3/18/2018.
  */
 public enum MobSkillID {
-    UNK(-1),
-    POWERUP(100),
-    MAGICUP(101),
-    PGUARDUP(102),
-    MGUARDUP(103),
-    HASTE(104),
-    MOB_CONSUME(105),
-    POWERUP_M(110),
-    MAGICUP_M(111),
-    PGUARDUP_M(112),
-    MGUARDUP_M(113),
-    HEAL_M(114),
-    HASTE_M(115),
-    SEAL(120),
-    DARKNESS(121),
-    WEAKNESS(122),
-    STUN(123),
-    CURSE(124),
-    POISON(125),
-    SLOW(126),
-    DISPEL(127),
-    ATTRACT(128),
-    BAN_MAP(129),
-    AREA_FIRE(130),
-    AREA_POISON(131),
-    REVERSE_INPUT(132),
-    UNDEAD(133),
-    STOP_PORTION(134),
-    STOP_MOTION(135),
-    FEAR(136),
-    FROZEN(137),
-    DISPEL_ITEM_OPTION(138),
-    PHYSICAL_IMMUNE(140),
-    MAGIC_IMMUNE(141),
-    HARDSKIN(142),
-    P_COUNTER(143),
-    M_COUNTER(144),
-    PM_COUNTER(145),
-    INVINCIBLE(146),
-    PAD(150),
-    MAD(151),
-    PDR(152),
-    MDR(153),
-    ACC(154),
-    EVA(155),
-    SPEED(156),
-    SEAL_SKILL(157),
-    BALROG_COUNTER(158),
-    TELEPORT(170),
-    USER_BOMB(171),
-    USER_MORPH(172),
-    DARK_TORNADO(173),
-    LAPIDIFICATION(174),
-    DEATHMARK(175),
-    DAMAGE(176),
-    VENOMSNAKE(177),
-    SLOWATTACK(178),
-    PAINMARK(179),
-    VAMPDEATH(180),
-    MAGNET(181),
-    GIVE_ME_HEAL(182),
-    FIRE_BOMB(183),
-    RETURN_TELEPORT(184),
-    AREA_FORCE(186),
-    NEAR_BUFF(187),
-    DAZZLE(188),
-    CAPDEBUFF_RED(189),
-    CAPDEBUFF_BLUE(190),
-    AREA_TIMEZONE(191),
-    SUMMON(200),
-    SUMMON2(201),
-    PASSIVE_FIREWALK(202),
-    BREAKDOWN_TIMEZONE(203),
-    ALL_KILL(204),
-    FIRE_BOMB_DISPEL(205),
-    AREA_TOSP(206),
-    HEKATON(207),
-    STUNMADE_BODY(208),
-    RESET_MOBSTAT(209),
-    AREA_ABNORMAL(211),
-    AREA_MOBBUFF(212),
-    AREA_WARNING(213),
-    CASTINGBAR(214),
-    OBSTACLE_ATTACK(215),
-    FIX_DAMR_BUFF(216),
-    BOUNCE_ATTACK(217),
-    DEBUFF_HALF(219),
-    KNOCKBACK(220),
-    AREA_INSTALL_BUFF(221),
-    AREA_INSTALLED_FIRE(222),
-    LASER_ATTACK(223),
-    LT_RB_DAMAGE(224),
-    SUMMON_SUBBODY(225),
-    TOOS(226),
-    AREA_FORCE_FROM_USER(227),
-    LASER_CONTROL(228),
-    DEC_JUMP(229),
-    FIRE_AT_RANDOM_ATTACK(230),
-    BATTLEFIELD_DEAD(231),
-    TOUCH_ME(232),
-    POWER_IMMUNE(233),
-    CONTAGION(234),
-    FIELD_COMMAND(235),
-    HANGOVER(236),
-    STIGMA(237),
-    NO(238),
+    Unk(-1),
+    PowerUp(100),
+    MagicUp(101),
+    PGuardUp(102),
+    MGuardUp(103),
+    Haste(104),
+    MobConsume(105),
+    PowerUpM(110),
+    MagicUpM(111),
+    PGuardUpM(112),
+    MGuardUpM(113),
+    HealM(114),
+    HasteM(115),
+    Seal(120),
+    Darkness(121),
+    Weakness(122),
+    Stun(123),
+    Curse(124),
+    Poison(125),
+    Slow(126),
+    Dispel(127),
+    Attract(128),
+    BanMap(129),
+    AreaFire(130),
+    AreaPoison(131),
+    ReverseInput(132),
+    Undead(133),
+    StopPortion(134),
+    StopMotion(135),
+    Fear(136),
+    Frozen(137),
+    DispelItemOption(138),
+    PhysicalImmune(140),
+    MagicImmune(141),
+    Hardskin(142),
+    PCounter(143),
+    MCounter(144),
+    PMCounter(145),
+    Invincible(146),
+    Pad(150),
+    Mad(151),
+    Pdr(152),
+    Mdr(153),
+    Acc(154),
+    Eva(155),
+    Speed(156),
+    SealSkill(157),
+    BalrogCounter(158),
+    Teleport(170),
+    UserBomb(171),
+    UserMorph(172),
+    DarkTornado(173),
+    Lapidification(174),
+    Deathmark(175),
+    Damage(176),
+    Venomsnake(177),
+    Slowattack(178),
+    PainMark(179),
+    VampDeath(180),
+    Magnet(181),
+    GiveMeHeal(182),
+    FireBomb(183),
+    ReturnTeleport(184),
+    AreaForce(186),
+    NearBuff(187),
+    Dazzle(188),
+    CapdebuffRed(189),
+    CapdebuffBlue(190),
+    AreaTimezone(191),
+    Summon(200),
+    Summon2(201),
+    PassiveFirewalk(202),
+    BreakdownTimezone(203),
+    AllKill(204),
+    FireBombDispel(205),
+    AreaTosp(206),
+    Hekaton(207),
+    StunmadeBody(208),
+    ResetMobstat(209),
+    AreaAbnormal(211),
+    AreaMobBuff(212),
+    AreaWarning(213),
+    CastingBar(214),
+    ObstacleAttack(215),
+    FixDamrBuff(216),
+    BounceAttack(217),
+    DebuffHalf(219),
+    Knockback(220),
+    AreaInstallBuff(221),
+    AreaInstalledFire(222),
+    LaserAttack(223),
+    LtRbDamage(224),
+    SummonSubbody(225),
+    Toos(226),
+    AreaForceFromUser(227),
+    LaserControl(228),
+    DecJump(229),
+    FireAtRandomAttack(230),
+    BattlefieldDead(231),
+    TouchMe(232),
+    PowerImmune(233),
+    Contagion(234),
+    FieldCommand(235),
+    Hangover(236),
+    Stigma(237),
+    No(238),
     ;
 
     private int val;
@@ -125,6 +127,49 @@ public enum MobSkillID {
     }
 
     public static MobSkillID getMobSkillIDByVal(int val) {
-        return Arrays.stream(values()).filter(m -> m.getVal() == val).findAny().orElse(UNK);
+        return Arrays.stream(values()).filter(m -> m.getVal() == val).findAny().orElse(Unk);
+    }
+
+    public static void main(String[] args) {
+        for (MobSkillID msi : values()) {
+            String s = "";
+            boolean capital = true;
+            for (char c : msi.toString().toCharArray()) {
+                if (!capital && Character.isLetter(c)) {
+                    c = Character.toLowerCase(c);
+                }
+                if (c != '_') {
+                    s += c;
+                    capital = false;
+                } else {
+                    capital = true;
+                }
+            }
+            System.out.printf("%s(%d),%n", s, msi.val);
+        }
+    }
+
+    public CharacterTemporaryStat getAffectedCTS() {
+        switch (this) {
+            case Seal:
+                return CharacterTemporaryStat.Seal;
+            case Darkness:
+                return CharacterTemporaryStat.Darkness;
+            case Weakness:
+                return CharacterTemporaryStat.Weakness;
+            case Stun:
+                return CharacterTemporaryStat.Stun;
+            case Curse:
+                return CharacterTemporaryStat.Curse;
+            case Slow:
+                return CharacterTemporaryStat.Slow;
+            case PainMark:
+                return CharacterTemporaryStat.PainMark;
+            case Poison:
+                return CharacterTemporaryStat.Poison;
+            case Fear:
+                return CharacterTemporaryStat.Fear;
+        }
+        return null;
     }
 }

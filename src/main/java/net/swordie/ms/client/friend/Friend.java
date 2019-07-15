@@ -136,4 +136,5 @@ public class Friend {
     public boolean isAccount() {
         return getFlag() > 4;
     }
+
 }

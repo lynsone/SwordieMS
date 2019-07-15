@@ -226,6 +226,16 @@ public abstract class Job {
 					summon.setFlyMob(true);
 					field.spawnSummon(summon);
 				}
+				else if (noviceSkill == 1026) { // soaring
+					if (field.isFly()) {
+						Option option = new Option();
+						option.nOption = 1;
+						option.rOption = skillID;
+						option.tOption = 0;
+						tsm.putCharacterStatValue(Flying, option);
+						tsm.sendSetStatPacket();
+					}
+				}
 				// TOOD: make sure user owns skill
 				switch (skillID) {
 					case MONOLITH:
@@ -379,12 +389,10 @@ public abstract class Job {
 	/**
 	 * Handles the initial part of a hit, the initial packet processing.
 	 *
-	 * @param c
-	 * 		The client
 	 * @param inPacket
 	 * 		The packet to be processed
 	 */
-	public void handleHit(Client c, InPacket inPacket) {
+	public void handleHit(InPacket inPacket) {
 		int idk1 = inPacket.decodeInt();
 		inPacket.decodeInt(); // tick
 		byte idk2 = inPacket.decodeByte(); // -1?

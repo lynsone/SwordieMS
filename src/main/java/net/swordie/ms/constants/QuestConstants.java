@@ -7,6 +7,7 @@ package net.swordie.ms.constants;
 public class QuestConstants {
     public static final int WILD_HUNTER_JAGUAR_STORAGE_ID = 23008;
     public static final int DIMENSION_LIBRARY = 32600;
+    public static final int DAMAGE_SKIN = 7291;
 
     public static final int SILENT_CRUSADE_WANTED_TAB_1 = 1648;
     public static final int SILENT_CRUSADE_WANTED_TAB_2 = 1649;
