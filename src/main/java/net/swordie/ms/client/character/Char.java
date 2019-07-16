@@ -53,7 +53,6 @@ import net.swordie.ms.constants.ItemConstants;
 import net.swordie.ms.constants.JobConstants;
 import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
-import net.swordie.ms.handlers.ChatHandler;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
 import net.swordie.ms.life.*;
@@ -3378,7 +3377,7 @@ public class Char {
 			getTradeRoom().cancelTrade();
 			other.chatMessage("Your trade partner disconnected.");
 		}
-		ChatHandler.removeClient(getAccId());
+		getWorld().getConnectedChatClients().remove(getAccId());
 		setOnline(false);
 		getJobHandler().handleCancelTimer(this);
 		getField().removeChar(this);

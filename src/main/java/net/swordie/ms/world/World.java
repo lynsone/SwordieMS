@@ -1,8 +1,8 @@
 package net.swordie.ms.world;
 
 import net.swordie.ms.client.Account;
+import net.swordie.ms.client.Client;
 import net.swordie.ms.client.alliance.Alliance;
-import net.swordie.ms.client.alliance.AllianceResult;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.guild.Guild;
 import net.swordie.ms.client.party.Party;
@@ -25,6 +25,7 @@ public class World {
     private Map<Integer, Party> parties = new HashMap<>();
     private Map<Integer, Guild> guilds = new HashMap<>();
     private Map<Integer, Alliance> alliances = new HashMap<>();
+    private static Map<Integer, Client> connectedChatClients = new HashMap<>();
     private int partyIDCounter = 1;
     private boolean charCreateBlock;
     private boolean reboot;
@@ -327,5 +328,9 @@ public class World {
         for (Channel channel : getChannels()) {
             channel.clearCache();
         }
+    }
+
+    public Map<Integer, Client> getConnectedChatClients(){
+        return connectedChatClients;
     }
 }

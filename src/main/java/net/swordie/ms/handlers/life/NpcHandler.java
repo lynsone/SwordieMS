@@ -141,7 +141,7 @@ public class NpcHandler {
                     return;
                 }
                 int itemQuantity = nsi.getQuantity() > 0 ? nsi.getQuantity() : 1;
-                if (itemQuantity == 1 ? !chr.canHold(itemID) : !chr.canHold(itemID, itemQuantity)) {
+                if (itemQuantity == 1 && quantity == 1 ? !chr.canHold(itemID) : !chr.canHold(itemID, itemQuantity * quantity)) {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
                     return;
                 }
