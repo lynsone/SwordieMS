@@ -169,11 +169,11 @@ public class NpcHandler {
                         return;
                     }
                     chr.deductMoney(cost);
-                    if(buyLimit>0) {
-                        int amountBought = chr.getItemBoughtAmounts().getOrDefault(nsi.getId(), 0);
-                        amountBought += quantity;
-                        chr.addItemBoughtAmount(nsi.getId(), amountBought);
-                    }
+                }
+                if(buyLimit>0) {
+                    int amountBought = chr.getItemBoughtAmounts().getOrDefault(nsi.getId(), 0);
+                    amountBought += quantity;
+                    chr.addItemBoughtAmount(nsi.getId(), amountBought);
                 }
                 Item item = ItemData.getItemDeepCopy(itemID);
                 item.setQuantity(quantity * itemQuantity);
