@@ -25,7 +25,7 @@ public class World {
     private Map<Integer, Party> parties = new HashMap<>();
     private Map<Integer, Guild> guilds = new HashMap<>();
     private Map<Integer, Alliance> alliances = new HashMap<>();
-    private static Map<Integer, Client> connectedChatClients = new HashMap<>();
+    private Map<Integer, Client> connectedChatClients = new HashMap<>();
     private int partyIDCounter = 1;
     private boolean charCreateBlock;
     private boolean reboot;
