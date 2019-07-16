@@ -74,7 +74,7 @@ public class PetHandler {
         chr.dispose();
     }
 
-    @Handler(op = InHeader.PET_FOOD_ITEM_USE_REQUEST)
+    @Handler(op = InHeader.USER_PET_FOOD_ITEM_USE_REQUEST)
     public static void handleUserPetFoodItemUseRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         Field field = chr.getField();

@@ -12,6 +12,7 @@ import net.swordie.ms.client.character.quest.Quest;
 import net.swordie.ms.client.character.quest.QuestManager;
 import net.swordie.ms.client.character.skills.Skill;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
+import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
@@ -350,5 +351,56 @@ public class SkillHandler {
         chr.getJobHandler().handleSkill(chr.getClient(), skillId, (byte) chr.getSkillLevel(skillId), inPacket);
     }
 
+    @Handler(op = InHeader.USER_SKILL_PREPARE_REQUEST)
+    public static void handleUserSkillPrepareRequest(Char chr, InPacket inPacket) {
+        Field field = chr.getField();
+        if ((field.getFieldLimit() & FieldOption.SkillLimit.getVal()) > 0 ||
+                (field.getFieldLimit() & FieldOption.MoveSkillOnly.getVal()) > 0) {
+            chr.dispose();
+            return;
+        }
+        int skillId = inPacket.decodeInt();
+        int startTime = inPacket.decodeInt();
+        int unknownInt = inPacket.decodeInt();
+        if (!chr.hasSkill(skillId)) {
+            return;
+        }
+        Skill skill = chr.getSkill(skillId);
+        chr.getField().broadcastPacket(UserRemote.skillPrepare(chr, skillId, (byte) skill.getCurrentLevel()), chr);
+    }
 
+    @Handler(op = InHeader.USER_SKILL_CANCEL_REQUEST)
+    public static void handleTemporaryStatResetRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        TemporaryStatManager tsm = chr.getTemporaryStatManager();
+        int skillId = inPacket.decodeInt();
+        tsm.removeStatsBySkill(skillId);
+
+        if (SkillConstants.isKeyDownSkill(skillId)) {
+            chr.getField().broadcastPacket(UserRemote.skillCancel(chr.getId(), skillId), chr);
+        }
+
+        if (skillId == net.swordie.ms.client.jobs.resistance.Mechanic.HUMANOID_MECH || skillId == net.swordie.ms.client.jobs.resistance.Mechanic.TANK_MECH) {
+            tsm.removeStatsBySkill(skillId + 100); // because of special use
+            tsm.sendResetStatPacket(true);
+        } else {
+            tsm.sendResetStatPacket();
+        }
+
+        chr.getJobHandler().handleSkillRemove(c, skillId);
+    }
+
+    @Handler(op = InHeader.USER_FINAL_ATTACK_REQUEST)
+    public static void handleUserFinalAttackRequest(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int skillID = inPacket.decodeInt();
+        if (!chr.hasSkill(skillID)) {
+            chr.getOffenseManager().addOffense("Tried to request a final attack of an unavailable skill.");
+            return;
+        }
+        int pSkill = inPacket.decodeInt();
+        int targetID = inPacket.decodeInt();
+        int requestTime = inPacket.decodeInt();
+        c.write(FieldPacket.finalAttackRequest(chr, skillID, chr.getJobHandler().getFinalAttackSkill(), 0, targetID, requestTime));
+    }
 }
