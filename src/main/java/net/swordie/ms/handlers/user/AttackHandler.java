@@ -8,6 +8,7 @@ import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.jobs.Job;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.cygnus.BlazeWizard;
+import net.swordie.ms.client.jobs.cygnus.NightWalker;
 import net.swordie.ms.client.party.PartyMember;
 import net.swordie.ms.connection.InPacket;
 import net.swordie.ms.connection.packet.*;
@@ -402,6 +403,12 @@ public class AttackHandler {
             if ( v674 || is_noconsume_usebullet_melee_attack(v669) )
               COutPacket::Encode4(&a, v1748);
           }*/
+        if (SkillConstants.isNoConsumeBullet(skillID) && header == InHeader.USER_MELEE_ATTACK) {
+            inPacket.decodeShort();
+            if (skillID == 14121052 || skillID == NightWalker.SHADOW_BAT_ATOM) {
+                inPacket.decodeInt();
+            }
+        }
         if (skillID == 25111005) {
             ai.spiritCoreEnhance = inPacket.decodeInt();
         }
@@ -438,6 +445,10 @@ public class AttackHandler {
             if (skillID == 37111005) {
                 mai.isResWarriorLiftPress = inPacket.decodeByte() != 0;
             }
+            if (SkillConstants.isKinesisPsychicLockSkill(skillID)) {
+                int idfk = inPacket.decodeInt();
+                int idfk1 = inPacket.decodeInt();
+            }
             // Begin PACKETMAKER::MakeAttackInfoPacket
             mai.type = inPacket.decodeByte();
             mai.currentAnimationName = "";
@@ -464,7 +475,7 @@ public class AttackHandler {
                 ai.x = inPacket.decodeShort();
                 ai.y = inPacket.decodeShort();
             }
-            if (header == InHeader.USER_MAGIC_ATTACK && skillID != 3211016) {
+            if (header == InHeader.USER_MAGIC_ATTACK && skillID != 3211016 && !SkillConstants.isKinesisPsychicAreaSkill(skillID)) {
                 short forcedX = inPacket.decodeShort();
                 short forcedY = inPacket.decodeShort();
                 boolean dragon = inPacket.decodeByte() != 0;

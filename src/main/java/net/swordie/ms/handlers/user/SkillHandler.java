@@ -210,7 +210,7 @@ public class SkillHandler {
     @Handler(op = InHeader.USER_THROW_GRENADE)
     public static void handleUserThrowGrenade(Char chr, InPacket inPacket) {
         Position pos = inPacket.decodePositionInt();
-        Position pos2 = inPacket.decodePositionInt();
+        int pos2 = inPacket.decodeInt();
         int keyDown = inPacket.decodeInt();
         int skillID = inPacket.decodeInt();
         int bySummonedID = inPacket.decodeInt(); // slv according to ida, but let's just take that server side

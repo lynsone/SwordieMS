@@ -59,7 +59,7 @@ public class JobSkillHandler {
         PsychicArea pa = new PsychicArea();
         pa.action = inPacket.decodeInt();
         pa.actionSpeed = inPacket.decodeInt();
-        pa.localPsychicAreaKey = inPacket.decodeInt();
+        pa.localPsychicAreaKey = inPacket.decodeInt() + 1;
         pa.psychicAreaKey = inPacket.decodeInt();
         pa.skillID = inPacket.decodeInt();
         pa.slv = inPacket.decodeShort();
@@ -73,16 +73,17 @@ public class JobSkillHandler {
         if (!chr.hasSkillWithSlv(pa.skillID, pa.slv)) {
             return;
         }
+        chr.addPsychicArea(pa);
         chr.write(FieldPacket.createPsychicArea(chr.getId(), pa));
-        chr.write(UserLocal.doActivePsychicArea(pa));
         chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), null, Collections.singletonList(pa)), chr);
         chr.chatMessage(ChatType.Mob, "SkillID: " + pa.skillID + " (Psychic Area)");
     }
 
     @Handler(op = InHeader.RELEASE_PSYCHIC_AREA)
     public static void handleReleasePsychicArea(Char chr, InPacket inPacket) {
-        int localPsychicAreaKey = inPacket.decodeInt();
-        chr.getField().broadcastPacket(FieldPacket.releasePsychicArea(localPsychicAreaKey));
+        int key = inPacket.decodeInt();
+        chr.write(FieldPacket.releasePsychicArea(chr.getId(), key));
+        chr.removePsychicArea(key);
     }
 
     @Handler(op = InHeader.CREATE_PSYCHIC_LOCK)
@@ -97,14 +98,18 @@ public class JobSkillHandler {
         while (inPacket.decodeByte() != 0) {
             PsychicLockBall plb = new PsychicLockBall();
             plb.localKey = inPacket.decodeInt();
-            plb.psychicLockKey = inPacket.decodeInt();
-            plb.psychicLockKey = i++;
+            plb.psychicLockKey = inPacket.decodeInt() + 1;
+            //plb.psychicLockKey = i;
             int mobID = inPacket.decodeInt();
             Life life = f.getLifeByObjectID(mobID);
+            if (life == null) {
+                mobID = 0;
+            }
             plb.mob = life == null ? null : (Mob) life;
             plb.stuffID = inPacket.decodeShort();
             plb.usableCount = inPacket.decodeShort();
             plb.posRelID = inPacket.decodeByte();
+            plb.posRelID = (byte) i++;
             plb.start = inPacket.decodePositionInt();
             plb.rel = inPacket.decodePositionInt();
             pl.psychicLockBalls.add(plb);
@@ -114,6 +119,7 @@ public class JobSkillHandler {
         }
         chr.getField().broadcastPacket(UserLocal.enterFieldPsychicInfo(chr.getId(), pl, null), chr);
         chr.write(UserPacket.createPsychicLock(chr.getId(), pl));
+        chr.addPsychicLock(pl);
     }
 
     @Handler(op = InHeader.RELEASE_PSYCHIC_LOCK)
@@ -126,13 +132,21 @@ public class JobSkillHandler {
         short count = inPacket.decodeShort();
         int id = inPacket.decodeInt();
         int mobID = inPacket.decodeInt();
-        if (mobID != 0) {
+        if (mobID >= 0) {
             List<Integer> l = new ArrayList<>();
             l.add(mobID);
             chr.write(FieldPacket.releasePsychicLockMob(l));
         } else {
             chr.write(FieldPacket.releasePsychicLock(id));
+            chr.removePsychicLock(id);
         }
+    }
+
+    @Handler(op = InHeader.DO_ACTIVE_PSYCHIC_AREA)
+    public static void handleDoActivePsychicArea(Char chr, InPacket inPacket) {
+        int localPsychicAreaKey = inPacket.decodeInt();
+        PsychicArea pa = chr.getPsychicArea(localPsychicAreaKey);
+        chr.write(UserLocal.doActivePsychicArea(pa));
     }
 
     @Handler(op = InHeader.REQUEST_ARROW_PLATTER_OBJ)
