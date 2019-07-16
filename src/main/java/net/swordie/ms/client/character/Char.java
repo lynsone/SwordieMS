@@ -211,7 +211,7 @@ public class Char {
 	@CollectionTable(name = "itemsbuylimit", joinColumns = @JoinColumn(name = "charID"))
 	@MapKeyColumn(name = "shopitemid")
 	@Column(name = "amountbought")
-	private Map<Long, Integer> itemboughtamounts;
+	private Map<Long, Integer> itemBoughtAmounts;
 
 	@Transient
 	private CharacterPotentialMan potentialMan;
@@ -4740,7 +4740,7 @@ public class Char {
 	}
 
 	public Map<Long, Integer> getItemBoughtAmounts() {
-		return itemboughtamounts;
+		return itemBoughtAmounts;
 	}
 
 	public void addItemBoughtAmount(long itemId, int amount) {
