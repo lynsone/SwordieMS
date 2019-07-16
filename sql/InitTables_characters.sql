@@ -60,6 +60,7 @@ guilds,
 monsterbookcards,
 monsterbookinfos,
 trunks,
+itemsbuylimit,
 cashiteminfos;
 set FOREIGN_KEY_CHECKS = 1;
 
@@ -853,6 +854,14 @@ create table friends (
     nickname varchar(255),
     memo varchar(255),
     primary key (id)
+);
+
+create table itemsbuylimit (
+  id int not null auto_increment,
+  shopitemid bigint,
+  charid int,
+  amountbought int ,
+  primary key(id)
 );
 
 

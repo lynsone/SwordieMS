@@ -207,6 +207,11 @@ public class Char {
 	@MapKeyColumn(name = "skillid")
 	@Column(name = "nextusabletime")
 	private Map<Integer, Long> skillCoolTimes;
+	@ElementCollection
+	@CollectionTable(name = "itemsbuylimit", joinColumns = @JoinColumn(name = "charID"))
+	@MapKeyColumn(name = "shopitemid")
+	@Column(name = "amountbought")
+	private Map<Long, Integer> itemboughtamounts;
 
 	@Transient
 	private CharacterPotentialMan potentialMan;
@@ -4732,5 +4737,13 @@ public class Char {
 
 	public void removePsychicLock(int key) {
 		this.psychicLocks.remove(key);
+	}
+
+	public Map<Long, Integer> getItemBoughtAmounts() {
+		return itemboughtamounts;
+	}
+
+	public void addItemBoughtAmount(long itemId, int amount) {
+		getItemBoughtAmounts().put(itemId, amount);
 	}
 }

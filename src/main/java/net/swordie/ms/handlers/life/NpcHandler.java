@@ -158,6 +158,18 @@ public class NpcHandler {
                     if (chr.getMoney() < cost) {
                         chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
                         return;
+                    } else {
+                        int buyLimit = nsi.getBuyLimit();
+                        if (buyLimit > 0) {
+                            int amountBought = chr.getItemBoughtAmounts().getOrDefault(nsi.getId(), 0);
+                            int amountLeft = buyLimit - amountBought;
+                            if (quantity > amountLeft) {
+                                chr.chatMessage("Can't buy this item more than " + buyLimit + " times.");
+                                return;
+                            }
+                            amountBought += quantity;
+                            chr.addItemBoughtAmount(nsi.getId(), amountBought);
+                        }
                     }
                     chr.deductMoney(cost);
                 }
