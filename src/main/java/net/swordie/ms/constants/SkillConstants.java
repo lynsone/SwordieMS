@@ -7,6 +7,7 @@ import net.swordie.ms.client.jobs.adventurer.Kinesis;
 import net.swordie.ms.client.jobs.adventurer.Magician;
 import net.swordie.ms.client.jobs.adventurer.Warrior;
 import net.swordie.ms.client.jobs.cygnus.DawnWarrior;
+import net.swordie.ms.client.jobs.cygnus.NightWalker;
 import net.swordie.ms.client.jobs.cygnus.ThunderBreaker;
 import net.swordie.ms.client.jobs.legend.Aran;
 import net.swordie.ms.client.jobs.legend.Evan;
@@ -1477,5 +1478,32 @@ public class SkillConstants {
     public static boolean isBeginnerSpAddableSkill(int skillID) {
         return skillID == 1000 || skillID == 1001 || skillID == 1002 || skillID == 140000291 || skillID == 30001000
                 || skillID == 30001001 || skillID == 30001002;
+    }
+
+    public static boolean isKinesisPsychicAreaSkill(int skillId){
+        switch (skillId) {
+            case 142001002:
+            case 142120003:
+            case 142101009:
+            case 142111006:
+            case 142111007:
+            case 142121005:
+            case 142121030:
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean isNoConsumeBullet(int skillID) {
+        switch (skillID) {
+            case 14111023:
+            case 14111022:
+            case 14121052:
+            case NightWalker.SHADOW_BAT_ATOM:
+            case NightWalker.SHADOW_STITCH:
+                return true;
+        }
+        // Tower of Oz skill rings
+        return (skillID >= 80001455 && skillID <= 80001479);
     }
 }

@@ -520,8 +520,8 @@ public class UserLocal {
     public static OutPacket doActivePsychicArea(PsychicArea pa) {
         OutPacket outPacket = new OutPacket(OutHeader.DO_ACTIVE_PSYCHIC_AREA);
 
-        outPacket.encodeInt(pa.psychicAreaKey);
         outPacket.encodeInt(pa.localPsychicAreaKey);
+        outPacket.encodeInt(pa.psychicAreaKey);
 
         return outPacket;
     }

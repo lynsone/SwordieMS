@@ -55,6 +55,7 @@ import net.swordie.ms.constants.SkillConstants;
 import net.swordie.ms.enums.*;
 import net.swordie.ms.handlers.ClientSocket;
 import net.swordie.ms.handlers.EventManager;
+import net.swordie.ms.handlers.PsychicLock;
 import net.swordie.ms.life.*;
 import net.swordie.ms.life.drop.Drop;
 import net.swordie.ms.life.mob.Mob;
@@ -399,6 +400,13 @@ public class Char {
 	private List<Integer> quickslotKeys;
 	@Transient
 	private Android android;
+	@Transient
+	private Map<Integer, PsychicArea> psychicAreas;
+	@Transient
+	private Map<Integer, PsychicLock> psychicLocks;
+	@Transient
+	private Map<Integer, PsychicLockBall> psychicLockBalls;
+
 
 	public Char() {
 		this(0, "", 0, 0, 0, (short) 0, (byte) -1, (byte) -1, 0, 0, new int[]{});
@@ -477,6 +485,9 @@ public class Char {
 //        monsterBattleMobInfos = new ArrayList<>();
 //        monsterBattleLadder = new MonsterBattleLadder();
 //        monsterBattleRankInfo = new MonsterBattleRankInfo();
+		psychicAreas = new HashMap<>();
+		psychicLocks = new HashMap<>();
+		psychicLockBalls = new HashMap<>();
 
 	}
 
@@ -4700,5 +4711,25 @@ public class Char {
 			}
 		}
 		return sp;
+	}
+	public PsychicArea addPsychicArea(PsychicArea pa) {
+		psychicAreas.put(pa.localPsychicAreaKey, pa);
+		return pa;
+	}
+
+	public void removePsychicArea(int psychicAreaKey) {
+		this.psychicAreas.remove(psychicAreaKey);
+	}
+
+	public PsychicArea getPsychicArea(int psychicAreaKey) {
+		return psychicAreas.getOrDefault(psychicAreaKey, null);
+	}
+
+	public void addPsychicLock(PsychicLock pl) {
+		psychicLocks.put(pl.key, pl);
+	}
+
+	public void removePsychicLock(int key) {
+		this.psychicLocks.remove(key);
 	}
 }

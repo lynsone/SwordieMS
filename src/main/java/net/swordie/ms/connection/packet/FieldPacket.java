@@ -217,10 +217,10 @@ public class FieldPacket {
         outPacket.encodeByte(pa.success);
         outPacket.encodeInt(pa.action);
         outPacket.encodeInt(pa.actionSpeed);
-        outPacket.encodeInt(pa.localPsychicAreaKey);
+        outPacket.encodeInt(pa.psychicAreaKey);
         outPacket.encodeInt(pa.skillID);
         outPacket.encodeShort(pa.slv);
-        outPacket.encodeInt(pa.psychicAreaKey);
+        outPacket.encodeInt(pa.localPsychicAreaKey);
         outPacket.encodeInt(pa.duration);
         outPacket.encodeByte(pa.isLeft);
         outPacket.encodeShort(pa.skeletonFilePathIdx);
@@ -231,9 +231,10 @@ public class FieldPacket {
         return outPacket;
     }
 
-    public static OutPacket releasePsychicArea(int localAreaKey) {
+    public static OutPacket releasePsychicArea(int charID, int localAreaKey) {
         OutPacket outPacket = new OutPacket(OutHeader.RELEASE_PSYCHIC_AREA);
 
+        outPacket.encodeInt(charID);
         outPacket.encodeInt(localAreaKey);
 
         return outPacket;
