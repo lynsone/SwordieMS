@@ -145,6 +145,17 @@ public class NpcHandler {
                     chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.FullInvMsg)));
                     return;
                 }
+                int buyLimit = nsi.getBuyLimit();
+                if (buyLimit > 0) {
+                    int amountBought = chr.getItemBoughtAmounts().getOrDefault(nsi.getId(), 0);
+                    int amountLeft = buyLimit - amountBought;
+                    if (quantity > amountLeft) {
+                        chr.chatMessage("Can't buy this item more than " + buyLimit + " times.");
+                        return;
+                    }
+                    amountBought += quantity;
+                    chr.addItemBoughtAmount(nsi.getId(), amountBought);
+                }
                 if (nsi.getTokenItemID() != 0) {
                     int cost = nsi.getTokenPrice() * quantity;
                     if (chr.hasItemCount(nsi.getTokenItemID(), cost)) {
@@ -158,18 +169,6 @@ public class NpcHandler {
                     if (chr.getMoney() < cost) {
                         chr.write(ShopDlg.shopResult(new MsgShopResult(ShopResultType.NotEnoughMesosMsg)));
                         return;
-                    } else {
-                        int buyLimit = nsi.getBuyLimit();
-                        if (buyLimit > 0) {
-                            int amountBought = chr.getItemBoughtAmounts().getOrDefault(nsi.getId(), 0);
-                            int amountLeft = buyLimit - amountBought;
-                            if (quantity > amountLeft) {
-                                chr.chatMessage("Can't buy this item more than " + buyLimit + " times.");
-                                return;
-                            }
-                            amountBought += quantity;
-                            chr.addItemBoughtAmount(nsi.getId(), amountBought);
-                        }
                     }
                     chr.deductMoney(cost);
                 }
