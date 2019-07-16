@@ -60,7 +60,6 @@ guilds,
 monsterbookcards,
 monsterbookinfos,
 trunks,
-itemsbuylimit,
 cashiteminfos;
 set FOREIGN_KEY_CHECKS = 1;
 
