@@ -1,25 +1,25 @@
 package net.swordie.ms.handlers.social;
 
+import net.swordie.ms.Server;
 import net.swordie.ms.client.Client;
 import net.swordie.ms.client.character.Char;
 import net.swordie.ms.client.character.commands.AdminCommand;
 import net.swordie.ms.client.character.commands.AdminCommands;
 import net.swordie.ms.client.character.commands.Command;
-import net.swordie.ms.client.character.items.Item;
-import net.swordie.ms.client.friend.Friend;
 import net.swordie.ms.connection.InPacket;
+import net.swordie.ms.connection.packet.ChatSocket;
 import net.swordie.ms.connection.packet.FieldPacket;
 import net.swordie.ms.connection.packet.UserPacket;
 import net.swordie.ms.enums.BaseStat;
 import net.swordie.ms.enums.ChatUserType;
 import net.swordie.ms.enums.GroupMessageType;
-import net.swordie.ms.enums.InvType;
 import net.swordie.ms.handlers.Handler;
 import net.swordie.ms.handlers.header.InHeader;
 import net.swordie.ms.loaders.StringData;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
 import net.swordie.ms.util.Util;
+import net.swordie.ms.world.World;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static net.swordie.ms.enums.ChatType.*;
-import static net.swordie.ms.enums.InvType.EQUIP;
-import static net.swordie.ms.enums.InvType.EQUIPPED;
 
 public class ChatHandler {
 
@@ -164,6 +162,55 @@ public class ChatHandler {
                 break;
             default:
                 log.error("Unhandled group message type " + type);
+        }
+    }
+
+    @Handler(op = InHeader.CONNECT_CHAT)
+    public static void handleConnect(Client c, InPacket inPacket) {
+        int accID = inPacket.decodeInt();
+        int idk = inPacket.decodeInt(); // always 1?
+        long idk2 = inPacket.decodeLong();
+        boolean idk3 = inPacket.decodeByte() != 0;
+        int charID = inPacket.decodeInt();
+        String charName = inPacket.decodeString();
+        int level = inPacket.decodeInt();
+        int job = inPacket.decodeInt();
+        Char chr = null;
+        for (World w : Server.getInstance().getWorlds()) {
+            chr = w.getCharByID(charID);
+            if (chr != null) {
+                break;
+            }
+        }
+        if (chr != null) {
+            chr.setChatClient(c);
+            c.setChr(chr);
+            chr.getWorld().getConnectedChatClients().put(accID, c);
+        }
+        c.write(ChatSocket.loginResult(chr != null));
+    }
+
+    @Handler(op = InHeader.FRIEND_CHAT)
+    public static void handleFriendChat(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int accID = inPacket.decodeInt();
+        String msg = inPacket.decodeString();
+        int size = inPacket.decodeInt();
+        for (int i = 0; i < size; i++) {
+            if (chr.getWorld().getConnectedChatClients().containsKey(i)) {
+                chr.getWorld().getConnectedChatClients().get(i).write(ChatSocket.friendChatMessage(accID, chr.getId(), null, msg, false));
+            }
+        }
+    }
+
+    @Handler(op = InHeader.GUILD_CHAT)
+    public static void handleGuildChat(Client c, InPacket inPacket) {
+        Char chr = c.getChr();
+        int charID = inPacket.decodeInt();
+        int guildID = inPacket.decodeInt();
+        String msg = inPacket.decodeString();
+        if (chr.getGuild() != null) {
+            chr.getGuild().broadcast(FieldPacket.groupMessage(GroupMessageType.Guild, chr.getName(), msg));
         }
     }
 
