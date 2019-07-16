@@ -856,15 +856,6 @@ create table friends (
     primary key (id)
 );
 
-create table itemsbuylimit (
-  id int not null auto_increment,
-  shopitemid bigint,
-  charid int,
-  amountbought int ,
-  primary key(id)
-);
-
-
 insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('admin', 'admin', '4', '0', '111111', '40');
 insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('admin1', 'admin', '4', '0', '111111', '40');
 insert into `users` (`name`, `password`, `accounttype`, `chatunblockdate`, `pic`, `characterslots`) values ('asura', 'admin', '4', '0', '111111', '40');
