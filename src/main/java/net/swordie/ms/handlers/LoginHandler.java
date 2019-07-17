@@ -376,4 +376,12 @@ public class LoginHandler {
         String str = inPacket.decodeString();
         log.error("Exception log: " + str);
     }
+
+    @Handler(op = InHeader.WVS_CRASH_CALLBACK)
+    public static void handleWvsCrashCallback(Client c, InPacket inPacket){
+        if (c != null && c.getChr() != null) {
+            c.getChr().setChangingChannel(false);
+            c.getChr().logout();
+        }
+    }
 }

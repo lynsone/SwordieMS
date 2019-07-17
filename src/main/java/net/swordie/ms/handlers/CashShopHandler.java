@@ -1,4 +1,4 @@
-package net.swordie.ms.world.shop.cashshop;
+package net.swordie.ms.handlers;
 
 import net.swordie.ms.Server;
 import net.swordie.ms.client.Account;
@@ -15,18 +15,25 @@ import net.swordie.ms.enums.CashItemType;
 import net.swordie.ms.connection.packet.CCashShop;
 import net.swordie.ms.enums.CashShopActionType;
 import net.swordie.ms.enums.InvType;
+import net.swordie.ms.handlers.header.InHeader;
+import net.swordie.ms.world.shop.cashshop.CashItemInfo;
+import net.swordie.ms.world.shop.cashshop.CashShop;
+import net.swordie.ms.world.shop.cashshop.CashShopItem;
 import org.apache.log4j.Logger;
 
 /**
  * Created on 4/23/2018.
  */
 public class CashShopHandler {
+
     private static final Logger log = Logger.getLogger(CashShopHandler.class);
 
+    @Handler(op = InHeader.CASH_SHOP_QUERY_CASH_REQUEST)
     public static void handleCashShopQueryCashRequest(Client c, InPacket inPacket) {
         c.write(CCashShop.queryCashResult(c.getChr()));
     }
 
+    @Handler(op = InHeader.CASH_SHOP_CASH_ITEM_REQUEST)
     public static void handleCashShopCashItemRequest(Client c, InPacket inPacket) {
         Char chr = c.getChr();
         User user = chr.getUser();
@@ -140,6 +147,7 @@ public class CashShopHandler {
         }
     }
 
+    @Handler(op = InHeader.CASH_SHOP_ACTION)
     public static void handleCashShopAction(Char chr, InPacket inPacket) {
         CashShop cashShop = Server.getInstance().getCashShop();
         byte type = inPacket.decodeByte();
