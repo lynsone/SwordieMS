@@ -31,6 +31,16 @@ create table shopitems(
     primary key (id)
 );
 
+create table itemsbuylimit (
+  id int not null auto_increment,
+  shopitemid bigint,
+  charid int,
+  amountbought int ,
+  primary key(id),
+  foreign key (charid) references characters(id),
+  foreign key (shopitemid) references shopitems(id)
+);
+
 insert into `shopitems` (`shopid`, `itemid`, `price`, `tokenitemid`, `tokenprice`, `pointquestid`, `pointprice`, `starcoin`, `questexid`, `questexkey`, `questexvalue`, `itemperiod`, `levellimited`, `showlevmin`, `showlevmax`, `questid`, `sellstart`, `sellend`,`tabindex`, `worldblock`, `potentialgrade`, `buylimit`, `quantity`, `unitprice`, `maxperslot`, `discountperc`) values 
 ('9201060', '2002022', '2100', '0', '0', '0', '0', '0', '0', '', '0', '0', '0', '0', '0', '0', '1970-01-01 00:00:01.000', '9999-01-01 00:00:01.000', '1', '0', '0', '0', '0', '0', '1000', '0'),
 ('9201060', '2002019', '5000', '0', '0', '0', '0', '0', '0', '', '0', '0', '0', '0', '0', '0', '1970-01-01 00:00:01.000', '9999-01-01 00:00:01.000', '1', '0', '0', '0', '0', '0', '1000', '0'),
