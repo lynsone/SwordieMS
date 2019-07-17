@@ -8,7 +8,6 @@ import net.swordie.ms.client.character.skills.TownPortal;
 import net.swordie.ms.client.character.skills.info.SkillInfo;
 import net.swordie.ms.client.character.skills.temp.TemporaryStatManager;
 import net.swordie.ms.client.jobs.adventurer.Archer;
-import net.swordie.ms.client.jobs.legend.Evan;
 import net.swordie.ms.client.jobs.resistance.OpenGate;
 import net.swordie.ms.client.party.Party;
 import net.swordie.ms.client.party.PartyMember;
@@ -24,9 +23,9 @@ import net.swordie.ms.life.drop.DropInfo;
 import net.swordie.ms.life.mob.Mob;
 import net.swordie.ms.life.npc.Npc;
 import net.swordie.ms.loaders.ItemData;
-import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.loaders.MobData;
 import net.swordie.ms.loaders.SkillData;
+import net.swordie.ms.loaders.containerclasses.ItemInfo;
 import net.swordie.ms.scripts.ScriptManager;
 import net.swordie.ms.scripts.ScriptManagerImpl;
 import net.swordie.ms.scripts.ScriptType;
@@ -87,6 +86,7 @@ public class Field {
     private Map<Integer, List<String>> directionInfo;
     private Clock clock;
     private int channel;
+    private Map<String, Object> properties;
 
     public Field(int fieldID) {
         this.id = fieldID;
@@ -99,6 +99,7 @@ public class Field {
         this.lifeSchedules = new HashMap<>();
         this.directionInfo = new HashMap<>();
         this.fixedMobCapacity = GameConstants.DEFAULT_FIELD_MOB_CAPACITY; // default
+        this.properties = new HashMap<>();
     }
 
     public void startFieldScript() {
@@ -1387,5 +1388,25 @@ public class Field {
 
     public void setChannel(int channel) {
         this.channel = channel;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public boolean hasProperty(String key) {
+        return getProperties().containsKey(key);
+    }
+
+    public Object getProperty(String key) {
+        return getProperties().get(key);
+    }
+
+    public void setProperty(String key, Object value) {
+        getProperties().put(key, value);
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 }
