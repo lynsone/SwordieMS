@@ -133,6 +133,12 @@ public class NpcHandler {
                     log.warn(String.format("Possible hack: expected shop itemID %d, got %d (chr %d)", nsi.getItemID(), itemID, chr.getId()));
                     return;
                 }
+                if (quantity < 0) {
+                    chr.getOffenseManager().addOffense(Offense.Type.Editing,
+                            "User tried buying negative quantity from NPC shop");
+                    chr.dispose();
+                    return;
+                }
                 if (nsi.getMaxPerSlot() == 0 ? quantity != 1 : quantity > nsi.getMaxPerSlot()) {
                     chr.getOffenseManager().addOffense(Offense.Type.Editing,
                             String.format("Possible hack: max slot for shop itemID %d is %d, got %d",
@@ -207,6 +213,12 @@ public class NpcHandler {
                 item = chr.getInventoryByType(it).getItemBySlot(slot);
                 if (item == null || item.getItemId() != itemID) {
                     chr.chatMessage("Could not find that item.");
+                    return;
+                }
+                if (quantity < 0) {
+                    chr.getOffenseManager().addOffense(Offense.Type.Editing,
+                            "User tried selling negative quantity to NPC shop");
+                    chr.dispose();
                     return;
                 }
                 if (!chr.hasItemCount(itemID, quantity)) {
