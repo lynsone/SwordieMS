@@ -4,7 +4,7 @@ darkMarble = 4031013
 job = "Cleric"
 monster = "Zombie Lupin"
 
-sm.setSpeakerID(9000025) # Grendel the Really Old
+sm.setSpeakerID(1032001) # Grendel the Really Old
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
                 "A #b"+ job +"#k is specialised in supporting spells and use #bholy magic#k to defeat their enemies. "
                  "There are many useful skills you can acquire.")
