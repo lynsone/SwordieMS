@@ -14,6 +14,6 @@ else:
 
 sm.consumeItem(blackCharm, 1)
 sm.completeQuestNoRewards(parentID)
-sm.sendSayOkay("You are now a #b"+ job +"#k.")
 sm.jobAdvance(221) # Mage IL
+sm.sendSayOkay("You are now a #b"+ job +"#k.")
 sm.dispose()
