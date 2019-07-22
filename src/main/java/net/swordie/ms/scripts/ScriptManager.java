@@ -297,6 +297,15 @@ public interface ScriptManager extends Observer {
 	void setAP(int amount);
 
 	/**
+	 * Resets {@Link Char}'s base stats and returns the AP.
+	 * Example: "sm.resetAP()"
+	 *
+	 * @param hpmp
+	 * 		Whether or not to reset HP/MP also.
+	 */
+	void resetAP(boolean hpmp);
+
+	/**
 	 * Sets the STR of {@link Char} to the specified amount.
 	 * Example: "sm.setSTR(15)"
 	 *

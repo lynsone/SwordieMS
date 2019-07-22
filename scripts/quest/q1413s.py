@@ -3,6 +3,8 @@
 darkMarble = 4031013
 job = "Spearman"
 
+sm.setSpeakerID(1022000)
+
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
             "A #b"+ job +"#k is specialised in long weapons such as #bSpears#k and #bPolearms#k. "
             "There are many useful skills you can acquire with both weapons, but I strongly recommend that you focus on one and stick to it.")

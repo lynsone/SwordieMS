@@ -4,6 +4,7 @@ darkMarble = 4031013
 job = "Brawler"
 monster = "OctoPirate"
 
+sm.setSpeakerID(1090000)
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
                                                 "a #b"+ job +"#k is specialised in short range attacks and use #bdaggers#k to defeat their enemies. "
                                                              "There are many useful skills you can acquire.")

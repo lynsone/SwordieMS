@@ -667,6 +667,30 @@ public class ScriptManagerImpl implements ScriptManager {
 	}
 
 	@Override
+	public void resetAP(boolean hpmp) {
+		int addSTR = chr.getAvatarData().getCharacterStat().getStr() - 4;
+		int addDEX = chr.getAvatarData().getCharacterStat().getDex() - 4;
+		int addLUK = chr.getAvatarData().getCharacterStat().getLuk() - 4;
+		int addINT = chr.getAvatarData().getCharacterStat().getInt() - 4;
+		int currentAP = chr.getAvatarData().getCharacterStat().getAp();
+		int goalAP = currentAP + addSTR + addDEX + addLUK + addINT;
+
+		chr.setStat(Stat.str, 4);
+		chr.setStat(Stat.dex, 4);
+		chr.setStat(Stat.luk, 4);
+		chr.setStat(Stat.inte, 4);
+		chr.setStat(Stat.ap, goalAP);
+
+		Map<Stat, Object> stats = new HashMap<>();
+		stats.put(Stat.str, (short) 4);
+		stats.put(Stat.dex, (short) 4);
+		stats.put(Stat.luk, (short) 4);
+		stats.put(Stat.inte, (short) 4);
+		stats.put(Stat.ap, (short) goalAP);
+		chr.getClient().write(WvsContext.statChanged(stats));
+	}
+
+	@Override
 	public void setSTR(short amount) {
 		chr.setStat(Stat.str, amount);
 		Map<Stat, Object> stats = new HashMap<>();

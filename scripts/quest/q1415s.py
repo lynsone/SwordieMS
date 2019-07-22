@@ -4,7 +4,7 @@ darkMarble = 4031013
 job = "Mage (Fire, Poison)"
 monster = "Zombie Lupin"
 
-sm.setSpeakerID(9000025)
+sm.setSpeakerID(1032001)
 sm.sendNext("You wish to become a #b"+ job +"#k?\r\n"
                 "A #b"+ job +"#k is specialised in long ranged magic attacks and use #bfire and poison magic#k to defeat their enemies. "
                 "There are many useful skills you can acquire.")
